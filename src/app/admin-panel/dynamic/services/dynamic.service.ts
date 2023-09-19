@@ -103,7 +103,6 @@ export class DynamicService {
             //     duration: 2000, horizontalPosition: 'right', verticalPosition: 'top'
             //   });
             // })
-            debugger
             const url = this.interpolate(button.deletePath, { ...control.getRawValue(), path});
             this.http.request('Ydelete', url).subscribe((res: string) => {
               const data = JSON.parse(res);

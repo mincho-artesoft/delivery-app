@@ -34,6 +34,9 @@ export class DynamicRouteGuard {
     if (settings) {
       if (route.params['primary'] && !route.params['id'] && !route.params['secondary']) {
         this.dynamicService.formArrayProvider.set(null);
+        this.http.request('Yget', settings.yGet).subscribe((res: any) => {
+          console.log(res)
+        })
         this.formArray = new BaseExtendedFormArray(settings, this.http, null);
         this.dynamicService.formArrayProvider.set(this.formArray);
         return true;

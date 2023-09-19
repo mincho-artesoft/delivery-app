@@ -43,55 +43,21 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.settings = this.formArray.htmlSettings;
     if (this.settings) {
-       const body = {
-        "_id": "64d743027cee91fc292ba47d",
-        "name": [
-          {
-            "key": "name_k1ey1",
-            "value": "n3231121am1334234213123122424e_312v1al2u23133e1"
-          },
-          {
-            "key": "name_key2",
-            "value": "name_value2"
-          }
-        ],
-        "brand_name": "brand_name_here",
-        "description": [
-          {
-            "key": "description_key1",
-            "value": "desc123ription_value1"
-          },
-          {
-            "key": "description_key2",
-            "value": "description_value2"
-          }
-        ],
-        "organizationId": "64d4bd75227bd3a0fdcca700",
-        "unit": "unit_value_here",
-        "quantity": 0,
-        "tags": null,
-        "price": 499999999999.99,
-        "currentProducts": [],
-        "ingredients": null,
-        "createdAt": "2023-08-12T08:29:54.822Z",
-        "updatedAt": "2023-08-12T08:36:46.667Z"
-      }
-      debugger
-      // this.table = this.http.request('Yget', this.settings.get.Yget).pipe(map((res: any) => {
-      //   const data = JSON.parse(res);
-      //   console.log(data);
-      //   this.formArray.fillFormWithResponse(data.structure)
-      //   this.dataSource = new MatTableDataSource((this.formArray as FormArray).controls);
-      //   this.dataSource.data.map((ctrl: any) => {
-      //     ctrl.addControl('uid', new FormControl(this.generateRandomId(10)), { emitEvent: false });
-      //   });
-      //   this.dataHolder.next(this.dataSource.data);
+      this.table = this.http.request('Yget', this.settings.get.Yget).pipe(map((res: any) => {
+        const data = JSON.parse(res);
+        console.log(data);
+        // this.formArray.fillFormWithResponse(data.structure)
+        // this.dataSource = new MatTableDataSource((this.formArray as FormArray).controls);
+        // this.dataSource.data.map((ctrl: any) => {
+        //   ctrl.addControl('uid', new FormControl(this.generateRandomId(10)), { emitEvent: false });
+        // });
+        // this.dataHolder.next(this.dataSource.data);
         
-      //   return {
-      //     displayedColumns: this.settings.columns,
-      //     dataHolder: [...this.dataSource.data]
-      //   }
-      // }))
+        return {
+          displayedColumns: this.settings.columns,
+          dataHolder: [...this.dataSource.data]
+        }
+      }))
 
       this.dataHolder = this.formArray.controls;
     };

@@ -10,6 +10,7 @@ import { AuthService } from './auth/services/auth.service';
 import { JwtModule } from '@auth0/angular-jwt';
 import { HttpWebWorkerClientModule } from './http-web-worker-client/http-web-worker-client.module';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
+import { AuthModule } from './auth/auth.module';
 
 export function tokenGetter() {
   return localStorage.getItem("jwt_token");
@@ -30,6 +31,7 @@ export function tokenGetter() {
       }
     }),
     HttpWebWorkerClientModule.forRoot({baseUrl:'ws://localhost:3001',ignorePath:'/assets'}),
+    AuthModule
   ],
   providers: [
     {

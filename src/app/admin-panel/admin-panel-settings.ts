@@ -5,8 +5,7 @@ export const ADMIN_PANEL_SETTINGS = {
       title: 'Warehouses',
       className: 'col-2xl-2 col-md-6 col-xs-11',
       get: { url: 'https://06hbbmv516.execute-api.eu-central-1.amazonaws.com/api/warehouse/warehouse' },
-      formArray: 'list-warehouses',
-      data: 'warehouses',
+      yGet: '/warehouses?orgID=uuid',
       separator: null,
       showHeaders: true,
       menuView: {
@@ -266,15 +265,14 @@ export const ADMIN_PANEL_SETTINGS = {
     },
 
     {
-      path: 'restaurants',
+      path: 'organizations',
       title: 'Restaurants',
       className: 'col-2xl-2 col-md-6 col-xs-11',
       get: { 
         url: 'https://fhj079vapc.execute-api.eu-central-1.amazonaws.com/api/auth/organization', 
         Yget: "organizations"
       },
-      formArray: 'list-restaurants',
-      data: 'restaurants',
+      yGet: '/organizations',
       separator: null,
       showHeaders: false,
       menuView: {
@@ -282,7 +280,7 @@ export const ADMIN_PANEL_SETTINGS = {
         'icon': 'restaurant',
         'tooltip': 'Restaurants',
         'label': 'Restaurants',
-        'path': '/restaurants',
+        'path': '/organizations',
       },
       multilanguage: {
         data: 'language',

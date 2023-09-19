@@ -4,7 +4,6 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { EMPTY, Observable, throwError } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 
-import { IAccount } from 'src/app/shared/interfaces/account.interface';
 import { environment } from 'src/environments/environment';
 const httpOptions = {
   headers: new HttpHeaders({
@@ -23,8 +22,8 @@ export class UserService {
     private snackbar: MatSnackBar
   ) { }
 
-  findByUsername(username: string): Observable<IAccount[]> {
-    return this.http.get<IAccount[]>(`${environment.basePath}/api/users/find-by-username?username=${username}`);
+  findByUsername(username: string): Observable<any[]> {
+    return this.http.get<any[]>(`${environment.basePath}/api/users/find-by-username?username=${username}`);
   }
 
   create(user: any): Observable<any> {
