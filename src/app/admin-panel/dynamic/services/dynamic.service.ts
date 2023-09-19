@@ -48,6 +48,15 @@ export class DynamicService {
     });
   }
 
+  generateRandomId(length: number): string {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let result = '';
+    for (let i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    return result;
+  }
+
   toggleSidenav(): void {
     this.isSidenavOpen = !this.isSidenavOpen;
     if (!this.isSidenavOpen) {
@@ -126,7 +135,7 @@ export class DynamicService {
       } else if (button.action === 'save'){
         const id = control ? control.getRawValue()._id : this.lastSelectedRow?._id;
         //                   random id
-        const path = id || `${uuidv4()}.{userID}.organization`;
+        const path = id || `${this.generateRandomId(10)}.{userID}.organization`;
 
         this.http.request('Ypost', `?path=${path}`, { body: { data: control.getRawValue() } }).subscribe((res: string) => {
           const data = JSON.parse(res);
