@@ -42,13 +42,17 @@ export class DynamicComponent implements OnInit, OnDestroy {
     //       this.settings = this.formGroup.htmlSettings
     //     }
     //     if (this.id) {
-    //       let url = this.dynamicService.interpolate(this.settings.get.url, { _id: this.id });
+    //       const path = this.id;
+    //       const url = this.settings.get.Yget.replace("${path}", path); "/organization?path="
     //       this.http.request('Yget', url).pipe(takeUntil(this.unsubscriber)).subscribe((res: any) => {
-    //         this.formGroup.fillFormWithResponse(res[1])
+    //         const data = JSON.parse(res);
+    //         console.log(data.structure);
+            
+    //         this.formGroup.fillFormWithResponse(data.structure)
     //       })
     //     }
     //   });
-    // }
+    }
     
   }
 

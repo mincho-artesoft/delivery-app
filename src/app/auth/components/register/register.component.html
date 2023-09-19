@@ -1,0 +1,75 @@
+ <section class="main-section">
+  <form [formGroup]="formRegister" (ngSubmit)="register()">
+    <div class="container">
+      <img src="../../../../assets/images/Logo.png" alt="logo" class="logo">
+      <div><span class="primary-text bold fs18px">Login</span> <span class="grey-light fs18px"> to your Account to
+          manage all the
+          service and explore our tools</span> </div>
+      <div class="content-login">
+        <mat-form-field appearance="outline" class="w100">
+          <input type="email" matInput placeholder="Email" formControlName="email">
+           </mat-form-field>
+        <mat-form-field appearance="outline" class="w100">
+          <input type="text" matInput placeholder="name" formControlName="name">
+       
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="w100">
+          <input type="text" matInput placeholder="surName" formControlName="surName">         
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w100">
+          <input type="text" matInput placeholder="lastName" formControlName="lastName">
+        </mat-form-field>       
+        <mat-form-field appearance="outline" class="w100">
+          <input type="password" matInput placeholder="password" formControlName="password">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="w100">
+          <input type="text" matInput placeholder="roles" formControlName="roles">
+        </mat-form-field>  
+        <ng-container formArrayName="addresses" *ngFor="let address of addressForm.controls; let i = index">
+          <ng-container [formGroupName]="i">
+            <div class="w100">
+              <div class="w100 gap20 space-between">
+              <mat-form-field appearance="outline">
+                <input matInput formControlName="street" placeholder="street">
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <input matInput formControlName="city" placeholder="city">
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <input matInput formControlName="state" placeholder="state">
+              </mat-form-field>
+            </div>
+              <div class="w100 space-between">
+
+              <mat-form-field appearance="outline">
+                <input matInput type="number" formControlName="zipCode" placeholder="zipCode">
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <input matInput formControlName="country" placeholder="country">
+              </mat-form-field>
+            </div>
+            </div>
+          </ng-container>
+        </ng-container>
+        <mat-form-field appearance="outline" class="w100">
+          <input type="text" matInput placeholder="phoneNumber" formControlName="phoneNumber">
+        </mat-form-field>        
+          <div class="container-row w100 space-between">
+            <!-- <div class="w60">
+              <mat-checkbox formControlName="iAgree"><span class="grey-link">I agree   <a routerLink="#" class="grey-link">Terms</a></span></mat-checkbox>
+            </div> -->
+          </div>
+          <div class="button">
+            <button mat-raised-button type="submit" class="btn" [disabled]="this.isLoading">
+              <span *ngIf="!isLoading">Register Now</span>
+              <mat-spinner *ngIf="isLoading" diameter="25"></mat-spinner>
+            </button>
+          </div>
+      </div>
+      <span class="register">Already have an account? Click here <a routerLink="/auth/login" class="primary-text bold">
+        Login</a></span>
+    </div>
+  </form>
+</section>
+<!-- <app-dynamic></app-dynamic> -->

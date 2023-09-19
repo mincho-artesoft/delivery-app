@@ -1,10 +1,19 @@
-import { NgModule } from '@angular/core';
+import { APP_INITIALIZER, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { AdminPanelModule } from './admin-panel/admin-panel.module';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { HttpClient, HTTP_INTERCEPTORS } from '@angular/common/http';
+import { AuthService } from './auth/services/auth.service';
+import { JwtModule } from '@auth0/angular-jwt';
+import { HttpWebWorkerClientModule } from './http-web-worker-client/http-web-worker-client.module';
+import { AuthInterceptor } from './interceptors/auth.interceptor';
+
+export function tokenGetter() {
+  return localStorage.getItem("jwt_token");
+}
 
 @NgModule({
   declarations: [
@@ -15,8 +24,39 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
     BrowserAnimationsModule,
     AppRoutingModule,
     AdminPanelModule,
+    JwtModule.forRoot({
+      config: {
+        tokenGetter: tokenGetter
+      }
+    }),
+    HttpWebWorkerClientModule.forRoot({baseUrl:'ws://localhost:3001',ignorePath:'/assets'}),
   ],
-  providers: [],
+  providers: [
+    {
+      provide: APP_INITIALIZER,
+      useFactory: (authService: AuthService, httpClient: HttpClient) => {
+        return () => {
+
+          httpClient.request('Yget', `?initial=true`).subscribe((res: string) => {
+            const structure = JSON.parse(res);
+            console.log(structure);
+            
+            console.log("APP MODULE");
+    
+          });
+
+        
+        }
+      },
+      deps: [AuthService, HttpClient],
+      multi: true,
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true,
+    },
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

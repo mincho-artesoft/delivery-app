@@ -76,39 +76,24 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
         "createdAt": "2023-08-12T08:29:54.822Z",
         "updatedAt": "2023-08-12T08:36:46.667Z"
       }
+      debugger
+      // this.table = this.http.request('Yget', this.settings.get.Yget).pipe(map((res: any) => {
+      //   const data = JSON.parse(res);
+      //   console.log(data);
+      //   this.formArray.fillFormWithResponse(data.structure)
+      //   this.dataSource = new MatTableDataSource((this.formArray as FormArray).controls);
+      //   this.dataSource.data.map((ctrl: any) => {
+      //     ctrl.addControl('uid', new FormControl(this.generateRandomId(10)), { emitEvent: false });
+      //   });
+      //   this.dataHolder.next(this.dataSource.data);
+        
+      //   return {
+      //     displayedColumns: this.settings.columns,
+      //     dataHolder: [...this.dataSource.data]
+      //   }
+      // }))
 
-      this.table = this.http.request('Yget', this.settings.get.url).pipe(map((res: any) => {
-        this.formArray.fillFormWithResponse(res)
-        this.dataSource = new MatTableDataSource((this.formArray as FormArray).controls);
-        this.dataSource.data.map((ctrl: any) => {
-          ctrl.addControl('uid', new FormControl(this.generateRandomId(10)), { emitEvent: false });
-        });
-        this.dataHolder.next(this.dataSource.data);
-        return {
-          displayedColumns: this.settings.columns,
-          dataHolder: this.dataSource.data
-        }
-      }))
-
-      this.dataHolder = this.formArray.controls
-
-     
-      setTimeout(() =>{
-      this.http.request('Ypost', this.settings.get.url, {body: body}).subscribe(res =>{
-        // console.log(res)
-      })
-      }, 2000)
-
-      setTimeout(() =>{
-        this.http.request('Ydelete', this.settings.get.url, {body: body}).subscribe(res =>{
-          // console.log(res)
-        })
-        }, 6000)
-      // this.count.subscribe((res:any) => {
-      //  console.log(res)
-      // });
-      // });
-
+      this.dataHolder = this.formArray.controls;
     };
   }
   generateRandomId(length: number): string {

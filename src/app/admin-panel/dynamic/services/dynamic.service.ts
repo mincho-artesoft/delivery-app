@@ -81,11 +81,26 @@ export class DynamicService {
         });
         dialogRef.afterClosed().subscribe(result => {
           if (result) {
-            let url = this.interpolate(button.deletePath, control?.getRawValue() || this.lastSelectedRow)
-            this.http.delete(url).subscribe(res => {
-              this.snackbar.open(message, 'Close', {
+            // let url = this.interpolate(button.deletePath, control?.getRawValue() || this.lastSelectedRow)
+            // this.http.delete(url).subscribe(res => {
+            //   this.snackbar.open(message, 'Close', {
+            //     duration: 2000, horizontalPosition: 'right', verticalPosition: 'top'
+            //   });
+            // })
+
+            const path = control?.getRawValue()._id;
+            // this.http.delete(url).subscribe(res => {
+            //   this.snackbar.open(message, 'Close', {
+            //     duration: 2000, horizontalPosition: 'right', verticalPosition: 'top'
+            //   });
+            // })
+            debugger
+            const url = this.interpolate(button.deletePath, { ...control.getRawValue(), path});
+            this.http.request('Ydelete', url).subscribe((res: string) => {
+              const data = JSON.parse(res);
+              this.snackbar.open(data.message || "Deleted", 'Close', {
                 duration: 2000, horizontalPosition: 'right', verticalPosition: 'top'
-              });
+              })
             })
           }
         });
@@ -97,7 +112,8 @@ export class DynamicService {
         let urlSegments = [params[0]];
 
         if (button.action === 'edit' && id) {
-          urlSegments.push('edit', id);
+          const [param, b, c] = id.split(".");
+          urlSegments.push(param, 'edit');
         } else if (button.action === 'create') {
           urlSegments.push('edit');
         }
@@ -108,7 +124,18 @@ export class DynamicService {
       if (button.action === 'close') {
         this.toggleSidenav()
       } else if (button.action === 'save'){
-        console.log(control.getRawValue())
+        const id = control ? control.getRawValue()._id : this.lastSelectedRow?._id;
+        //                   random id
+        const path = id || `${uuidv4()}.{userID}.organization`;
+
+        this.http.request('Ypost', `?path=${path}`, { body: { data: control.getRawValue() } }).subscribe((res: string) => {
+          const data = JSON.parse(res);
+            this.snackbar.open(data.message, 'Close', {
+              duration: 2000, horizontalPosition: 'right', verticalPosition: 'top'
+            });
+            this.toggleSidenav()
+            // this.currentRoute.set("");
+        })
       }
     }
   }

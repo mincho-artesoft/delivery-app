@@ -1,20 +1,23 @@
-export const ADMIN_PANEL_SETTINGS = {
+export const SETTINGS = {
   pages: [
     {
-      path: 'warehouses',
+      path: 'warehouse',
       title: 'Warehouses',
       className: 'col-2xl-2 col-md-6 col-xs-11',
-      get: { url: 'https://06hbbmv516.execute-api.eu-central-1.amazonaws.com/api/warehouse/warehouse' },
+      get: { 
+        url: 'https://06hbbmv516.execute-api.eu-central-1.amazonaws.com/api/warehouse/warehouse',
+        Yget: "/warehouses?path=${path}"
+      },
       formArray: 'list-warehouses',
       data: 'warehouses',
       separator: null,
       showHeaders: true,
       menuView: {
-        'name': 'Warehouses',
+        'name': 'Warehouse',
         'icon': 'storage',
-        'tooltip': 'Warehouses',
-        'label': 'Warehouses',
-        'path': '/warehouses',
+        'tooltip': 'Warehouse',
+        'label': 'Warehouse',
+        'path': '/warehouse',
       },
       navbar: {
         buttons: [
@@ -149,7 +152,7 @@ export const ADMIN_PANEL_SETTINGS = {
         columns: [{
           title: 'Title',
           data: 'titles.${organization.languages[${index}]}',
-          validators: { required: true }, // custom validator for default lang
+          validators: {required: true}, // custom validator for default lang
         }, {
           title: 'Description',
           data: 'description.${organization.languages[${index}]}',
@@ -264,14 +267,17 @@ export const ADMIN_PANEL_SETTINGS = {
 
       ]
     },
-
+   
     {
       path: 'restaurants',
       title: 'Restaurants',
       className: 'col-2xl-2 col-md-6 col-xs-11',
       get: { 
         url: 'https://fhj079vapc.execute-api.eu-central-1.amazonaws.com/api/auth/organization', 
-        Yget: "organizations"
+        Yget: "organizations" 
+      },
+      delete: {
+        Ydelete: "?path=${path}"
       },
       formArray: 'list-restaurants',
       data: 'restaurants',
@@ -286,18 +292,18 @@ export const ADMIN_PANEL_SETTINGS = {
       },
       multilanguage: {
         data: 'language',
-        tabs: '${organization.languages}',
-        editor: 'MultiLanguage',
-        showTabs: true,
-        columns: [{
-          title: 'Title',
-          data: 'titles.${organization.languages[${index}]}',
-          validators: { required: true }, // custom validator for default lang
-        }, {
-          title: 'Description',
-          data: 'description.${organization.languages[${index}]}',
-        }]
-
+          tabs: '${organization.languages}',
+          editor: 'MultiLanguage',
+          showTabs: true,
+          columns: [{
+            title: 'Title',
+            data: 'titles.${organization.languages[${index}]}',
+            validators: {required: true}, // custom validator for default lang
+          }, {
+            title: 'Description',
+            data: 'description.${organization.languages[${index}]}',
+          }]
+        
       },
       navbar: {
         buttons: [
@@ -326,14 +332,14 @@ export const ADMIN_PANEL_SETTINGS = {
             active: true,
             icon: 'delete',
             color: 'warn',
-            deletePath: 'https://fhj079vapc.execute-api.eu-central-1.amazonaws.com/api/organization/${_id}',
+            deletePath: "?path=${path}",
             message: 'Restaurant with ${_id} was successfully deleted'
           }
         ],
       },
       update: {
         post: 'https://fhj079vapc.execute-api.eu-central-1.amazonaws.com/api/organization',
-        put: 'https://fhj079vapc.execute-api.eu-central-1.amazonaws.com/api/organization${_id}'
+        put: 'https://fhj079vapc.execute-api.eu-central-1.amazonaws.com/api/organization${_id}',
       },
       columns: [
         {
@@ -406,10 +412,24 @@ export const ADMIN_PANEL_SETTINGS = {
 
       ]
     },
-
+    
     {
       path: 'restaurants.edit',
       title: 'Restaurants Edit',
+      multilanguage: {
+        data: 'language',
+        tabs: '${organization.languages}',
+        editor: 'MultiLanguage',
+        showTabs: true,
+        columns: [{
+          title: 'Title',
+          data: 'titles.${organization.languages[${index}]}',
+          validators: {required: true}, // custom validator for default lang
+        }, {
+          title: 'Description',
+          data: 'description.${organization.languages[${index}]}',
+        }]
+      },
       navbar: {
         reversed: true,
         buttons: [
@@ -422,6 +442,7 @@ export const ADMIN_PANEL_SETTINGS = {
           },
           {
             label: 'Save',
+            Ypost: "?path=${uuid}",
             action: 'save',
             icon: 'check',
             active: true,
@@ -429,44 +450,37 @@ export const ADMIN_PANEL_SETTINGS = {
         ]
       },
       update: {
+        Ypost: "/organization?path=${uuid}",
+        Yput: "/organization?path=${uuid}",
         post: 'https://fhj079vapc.execute-api.eu-central-1.amazonaws.com/api/auth/organization',
         put: 'https://fhj079vapc.execute-api.eu-central-1.amazonaws.com/api/auth/organization${_id}'
       },
-      get: { url: 'https://fhj079vapc.execute-api.eu-central-1.amazonaws.com/api/auth/organization/${_id}' },
+      get: { 
+        url: 'https://fhj079vapc.execute-api.eu-central-1.amazonaws.com/api/auth/organization/${_id}',
+        Yget: "?path=${path}"
+      },
       columns: [
         {
-          data: 'language',
-          editor: 'hidden'
+          data: 'test',
+          title: 'test',
+          className: 'test',
+         
         },
         {
-          data: 'languages',
+          data: 'titles',
+          tabs: '${collectedData.languages}',
+          controlType: 'MultilangFormGroup',
           showTabs: true,
-          // controlType: 'BaseExtendedFormGroup',
-          editor: 'multiLang',
-          // columns: [{
-          //   title: 'Title',
-          //   data: 'title',
-          //   className: 'col-2xl-12 col-md-12 col-xs-12',
-          //   validators: [{ name: 'required' }],
-          // }, {
-          //   title: 'Description',
-          //   data: 'description',
-          //   className: 'col-2xl-12 col-md-12 col-xs-12',
-          // }]
+          editor: 'multilanguage',
+          columns: [{
+            title: 'Title',
+            data: 'title',
+            validators: [{ name: 'required' }],
+          }, {
+            title: 'Description',
+            data: 'description',
+          }]
         },
-        {
-          data: 'description',
-          title: 'Description',
-          controlType: 'BaseExtendedFormGroup',
-          // columns: [
-          //   {
-          //     title: 'Description',
-          //     data: 'description',
-          //     className: 'col-2xl-12 col-md-12 col-xs-12',
-          //   }],
-          editor: 'langLinked'
-        },
-
         {
           data: '_id',
           title: 'id',
@@ -476,24 +490,11 @@ export const ADMIN_PANEL_SETTINGS = {
         {
           data: 'name',
           title: 'Name',
-          controlType: 'BaseExtendedFormGroup',
+          default: 'name-default',
           className: 'col-2xl-6 col-md-6 col-xs-12',
           validators: [
             { name: 'required' },
-          ],
-          editor: 'langLinked'
-        },
-        {
-          data: 'title',
-          title: 'Title',
-          controlType: 'BaseExtendedFormGroup',
-          // columns: [
-          //   {
-          //     title: 'Description',
-          //     data: 'description',
-          //     className: 'col-2xl-12 col-md-12 col-xs-12',
-          //   }],
-          editor: 'langLinked'
+          ]
         },
         {
           data: 'domain',
@@ -507,15 +508,15 @@ export const ADMIN_PANEL_SETTINGS = {
           data: 'tags',
           className: 'col-2xl-6 col-md-6 col-xs-12',
           title: 'Tags',
-          // validators: [
-          //   {
-          //     name: 'asyncVal',
-          //     arg: {
-          //       interpolate: '"${root.controls.name.value}" === "${root.controls.domain.value}" ',
-          //       props: ['root.controls.domain', 'root.controls.name']
-          //     }
-          //   }
-          // ],
+          validators: [
+            {
+              name: 'asyncVal',
+              arg: {
+                interpolate: '"${root.controls.name.value}" === "${root.controls.domain.value}" ',
+                props: ['root.controls.domain', 'root.controls.name']
+              }
+            }
+          ],
 
         },
         {
@@ -535,16 +536,16 @@ export const ADMIN_PANEL_SETTINGS = {
           size: 50,
           // controlType: 'DropdownControl',
         },
-        {
-          data: 'deliveryTime.seconds',
-          className: 'col-2xl-6 col-md-6 col-xs-12',
-          title: 'Delivery Time'
-        },
-        {
-          data: 'deliveryTime.minutes',
-          className: 'col-2xl-6 col-md-6 col-xs-12',
-          title: 'Delivery Time'
-        },
+        // {
+        //   data: 'deliveryTime.seconds',
+        //   className: 'col-2xl-6 col-md-6 col-xs-12',
+        //   title: 'Delivery Time'
+        // },
+        // {
+        //   data: 'deliveryTime.minutes',
+        //   className: 'col-2xl-6 col-md-6 col-xs-12',
+        //   title: 'Delivery Time'
+        // },
         {
           data: 'freeShipping',
           title: 'Free Shipping',

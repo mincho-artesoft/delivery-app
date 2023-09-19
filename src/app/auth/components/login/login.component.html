@@ -1,0 +1,44 @@
+<section class="main-section">
+  <form [formGroup]="form">
+    <div class="container">
+      <img src="../../../../assets/images/Logo.png" alt="logo" class="logo">
+      <div><span class="primary-text bold fs18px">Login</span> <span class="grey-light fs18px"> to your Account to
+          manage all the
+          service and explore our tools</span> </div>
+      <div class="content-login">
+
+        <mat-form-field appearance="outline" class="w100">
+          <mat-label>Email</mat-label>
+          <input type="email" matInput formControlName="email" autocomplete="email" >
+          <mat-icon matSuffix>mail</mat-icon>
+          <mat-error *ngIf="email.touched && email.hasError('required')">Email is required</mat-error>
+          <mat-error *ngIf="email.touched && email.hasError('email')">Email must be valid</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="w100">
+          <mat-label>Password</mat-label>
+          <input type="password" matInput formControlName="password"
+            [type]="hide ? 'password' : 'text'" autocomplete="password" >
+          <mat-icon matSuffix (click)="hide = !hide">{{hide ? 'visibility_off' : 'visibility'}}</mat-icon>
+          <mat-error *ngIf="password.touched && password.hasError('required')">Password is required</mat-error>
+        </mat-form-field>
+        <div class="container-row w100 space-between">
+          <div class="w60">
+            <mat-checkbox><span class="grey-link">Remember Me</span></mat-checkbox>
+          </div>
+          <div class="end-flex">
+            <a routerLink="/auth/register" class="grey-link">Forget Password?</a>
+          </div>
+        </div>
+        <div class="button">
+          <button mat-raised-button type="submit" class="btn" [disabled]="!form.valid || this.isLoading" (click)="login()">
+            <span *ngIf="!isLoading">Login</span>
+            <mat-spinner *ngIf="isLoading" diameter="25"></mat-spinner>
+          </button>
+        </div>
+      </div>
+      <span class="register">Don't have an account yet? <a routerLink="/auth/register" class="primary-text bold">
+          Register Now</a></span>
+    </div>
+  </form>
+</section>
