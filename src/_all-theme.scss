@@ -1,0 +1,37 @@
+
+@mixin all-component-themes($theme-or-color-config) {
+  $dedupe-key: 'angular-material-theme';
+  @include theming.private-check-duplicate-theme-styles($theme-or-color-config, $dedupe-key) {
+    @include core-theme.theme($theme-or-color-config);
+    @include autocomplete-theme.theme($theme-or-color-config);
+    @include badge-theme.theme($theme-or-color-config);
+    @include bottom-sheet-theme.theme($theme-or-color-config);
+    @include button-theme.theme($theme-or-color-config);
+    // other material components' themes...
+  }
+}
+
+
+@mixin all-component-colors($config-or-theme) {
+  $config: if(theming.private-is-theme-object($config-or-theme),
+      theming.get-color-config($config-or-theme), $config-or-theme);
+
+  @include all-theme.all-component-themes((
+    color: $config,
+    typography: null,
+    density: null,
+  ));
+}
+
+
+@mixin all-component-typographies($config-or-theme: null) {
+  $config: if(theming.private-is-theme-object($config-or-theme),
+      theming.get-typography-config($config-or-theme), $config-or-theme);
+
+  @include badge-theme.typography($config);
+  @include typography.typography-hierarchy($config);
+  @include autocomplete-theme.typography($config);
+  @include bottom-sheet-theme.typography($config);
+  @include button-theme.typography($config);
+  // other components' typographies
+}

@@ -1,0 +1,48 @@
+.mat-mdc-tooltip-trigger.ng-star-inserted {
+    cursor: pointer;
+}
+.selected-row {
+    background-color: #4f4b4b;
+}
+.example-custom-placeholder {
+    /* Style similar to row-dynamic-table */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #f0f0f0;
+    /* light grey, you can change it */
+    // border-radius: 4px;
+    // box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    width: 100vw;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.slot {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    height: 50px;
+}
+
+.cell-dynamic-table {
+    text-align: center;
+     box-sizing: border-box;
+     overflow: hidden;
+     // border-right: 1px solid #000;
+    border-bottom: 10px solid #FCFCFC;
+     color: #1E3A56;
+     font-size: 16px !important;
+     font-weight: 600 !important;
+ }
+
+ .cell-dynamic-table.flex-width {
+     flex: 1;
+ }
+
+ .cell-dynamic-table:last-child {
+     border-right: none;
+ }

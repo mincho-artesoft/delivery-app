@@ -1,0 +1,19 @@
+.dynamic-navbar-container {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    padding-left: 20px;
+    height: 70px;
+}
+.dynamic-navbar-buttons-container {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+    gap: 20px;
+    padding: 10px 30px 10px 20px;
+    &.reversed {
+        flex-direction: row-reverse;
+    }
+}
+

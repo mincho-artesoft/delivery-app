@@ -1,0 +1,21 @@
+<div class="menu-holder" [ngClass]="{ 'active hover': hoverMenu }" (mouseenter)="hoverMenu = true"
+    (mouseleave)="hoverMenu = false">
+    <div *ngFor="let item of menuItems">
+        <ng-container *ngIf="item.subMenus">
+            <button mat-button [matMenuTriggerFor]="menu" (mouseenter)="hoverMenu = true"
+                (mouseleave)="hoverMenu = false"><mat-icon>{{item.icon}}</mat-icon> <span
+                    *ngIf="hoverMenu">{{item.label}}</span></button>
+            <mat-menu #menu="matMenu">
+                <button mat-menu-item *ngFor="let subItem of item.subMenus"
+                    [routerLink]="[subItem.path]">{{subItem.label}}</button>
+            </mat-menu>
+        </ng-container>
+        <ng-container *ngIf="!item.subMenus">
+            <button mat-button (mouseenter)="hoverMenu = true"
+                (mouseleave)="hoverMenu = false" [routerLink]="[item.path]"><mat-icon>{{item.icon}}</mat-icon> <span
+                    *ngIf="hoverMenu">{{item.label}}</span></button>
+        </ng-container>
+
+    </div>
+    <div class="flex-spacer" (mouseenter)="hoverMenu = true" (mouseleave)="hoverMenu = false"></div>
+</div>

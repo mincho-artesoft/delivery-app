@@ -1,0 +1,18 @@
+<div class="container">
+  <mat-form-field appearance="outline" class="w100">
+    <!-- <mat-label>Select</mat-label> -->
+    <mat-select #matSelectElement  (openedChange)="onOpenedChange($event)"
+      (selectionChange)="onSelectionChange($event)" [(value)]="selectedOptions">
+      <mat-option>
+        <ngx-mat-select-search [ngModel]="searchInput()" (ngModelChange)="changeQuery($event)" placeholderLabel="Search..." noEntriesFoundLabel="Not found" >        
+        </ngx-mat-select-search>
+      </mat-option>
+      <ng-container *ngIf="viewModel() as vm">
+      <mat-option *ngFor="let option of vm.filteredOptions"
+        [value]="option">
+        <span>{{option.name}}</span>
+        </mat-option>
+      </ng-container>
+    </mat-select>
+  </mat-form-field>
+</div>

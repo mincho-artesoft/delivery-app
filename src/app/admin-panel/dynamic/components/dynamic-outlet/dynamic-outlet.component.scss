@@ -1,0 +1,18 @@
+.dynamic-outlet {
+    width: 100%;
+
+    .custom-mat-drawer {
+        width: 600px;
+    }
+}
+
+.table-menu-wrapper {
+    position: relative;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+
+    app-dynamic-menu {
+        height: 70%;
+    }
+}

@@ -1,0 +1,15 @@
+<div class="dynamic-outlet">
+    <mat-drawer-container autosize>
+        <mat-drawer [opened]="dynamicService.isSidenavOpened()" hasBackdrop="false" class="custom-mat-drawer"
+            [ngClass]="{'open': dynamicService.isSidenavOpen}" position="end">
+            <app-dynamic *ngIf="dynamicService.formGroupProvider()?.htmlSettings" [settings]="dynamicService.formGroupProvider()?.htmlSettings" [formGroup]="dynamicService.formGroupProvider()"></app-dynamic>
+        </mat-drawer>
+        <mat-drawer-content>
+            <app-dynamic-navbar *ngIf="dynamicService.formArrayProvider()?.htmlSettings?.navbar" [settings]="dynamicService.formArrayProvider()?.htmlSettings"></app-dynamic-navbar>
+            <div class="table-menu-wrapper">
+                <app-dynamic-menu></app-dynamic-menu>
+                <app-dynamic-table [settings]="dynamicService.formArrayProvider()?.htmlSettings" style="margin-left: 70px;" [formGroup]="dynamicService.formArrayProvider()"></app-dynamic-table>
+            </div>
+        </mat-drawer-content>
+    </mat-drawer-container>
+</div>

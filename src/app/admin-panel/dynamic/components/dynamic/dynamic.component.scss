@@ -1,0 +1,162 @@
+.content-holder {
+    flex-wrap: wrap;
+    display: flex;
+    align-items: flex-end;
+    width: 96%;
+    min-width: 0;
+    max-height: fit-content;
+    gap: 10px;
+}
+
+.button-group {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    position: relative;
+}
+
+.mat-button-toggle.button-item {
+    flex: 1;
+    text-align: center;
+
+}
+
+
+.lang-input-holder {
+    width: 100%;
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+}
+
+.inner-toggle-wrapper {
+    position: absolute;
+    right: -30px;
+    top: 0;
+}
+
+
+
+.hidden {
+    display: none !important;
+}
+
+// @supports (-moz-appearance: none) {
+//     flex: 0 1 auto;
+// }
+
+// .half-width {
+//     flex: 0 1 calc(50% - 17px);
+
+//     &.last-in-group {
+//         margin-right: 50% !important;
+//     }
+// }
+
+// .use-remaining-space {
+//     flex: 1;
+// }
+
+// .thirds-width {
+//     flex: 0 1 calc(33% - 17px);
+// }
+
+// .quarter-width {
+//     flex: 0 1 calc(25% - 17px);
+// }
+
+// .fifth-width {
+//     flex: 0 1 calc(20% - 17px);
+// }
+
+// .sixth-width {
+//     flex: 0 1 calc(16% - 17px);
+// }
+
+// .full-width {
+//     width: 100%;
+// }
+
+// :last-child {
+// margin-right: 12px;
+//     }
+// }
+
+// mat-form-field {
+//     width: 100%;
+//     line-height: 1.55 !important;
+// }
+
+.restaurant-profile {
+    padding: 20px;
+}
+
+
+.checkbox-padding {
+    height: 100%;
+    width: 100%;
+    margin-bottom: 22.5px;
+    position: relative;
+
+    mat-button-toggle-group {
+        height: 40px;
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+
+        mat-button-toggle {
+            flex: 1;
+            font-size: 15px;
+        }
+
+    }
+
+    .checkbox-title {
+        position: absolute;
+        top: -30%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: rgba(0, 0, 0, 0.6);
+    }
+
+
+}
+
+.selected-green {
+    background-color: rgb(155, 219, 155);
+}
+
+
+mat-button-toggle-group {
+    position: relative;
+    overflow: visible;
+}
+
+
+.dynamic-class {
+    position: absolute;
+    top: -42px;
+    right: -25px;
+    z-index: 2;
+    margin: 0;
+    padding: 0;
+    border-radius: 90px;
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    transition-property: all;
+    transition-timing-function: cubic-bezier(.4, 0, .2, 1);
+    transition-duration: .15s;
+    transition-duration: .2s;
+    border-width: 1px;
+    border-radius: 0.375rem;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.dynamic-class mat-icon {
+    font-size: 16px;
+    &.default-lang{
+        color: white;
+    }
+}
