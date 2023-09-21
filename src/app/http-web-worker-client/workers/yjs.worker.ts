@@ -140,7 +140,7 @@ addEventListener('message', (req) => {
   if(params?.[0]?.includes("initial")) {
     initialUUID = data.uuid;
   }
-  console.log(data.url, userID);
+  console.log(data.url, userID, data.method, pathParts);
   switch (data.method) {
     case 'YGET': {
       init(pathParts[0], userID, (ydoc: Y.Doc) => {
@@ -158,7 +158,6 @@ addEventListener('message', (req) => {
           const setListener = () => {
             subdocsMap.forEach((doc: Y.Doc, _: string) => docUpdateObserver(doc, () => getSubdocsData(subdocsMap, shouldGetWarehouse, data, (response: any) => postMessage({ type: 'yjs', response }))));
           }
-
           if(shouldBuildArray) {
             setListener();
             getSubdocsData(subdocsMap, shouldGetWarehouse, data, (response: any) => postMessage({ type: 'yjs', response }));
@@ -229,7 +228,7 @@ addEventListener('message', (req) => {
         const [docGuidPart, id, suffix] = params.find((param) => param.includes("path")).split('=')[1].split('.');
 
         if(suffix == "organization") {
-          const guid = docGuidPart + '.' + id + '.' + suffix;
+          const guid = docGuidPart + '.' + userID + '.' + suffix;
           createOrEditOrganization(guid, data);
         } else {
           const guid = Array.from(provider.subdocs.keys()).find((id: string) => id.includes(docGuidPart)) as string;

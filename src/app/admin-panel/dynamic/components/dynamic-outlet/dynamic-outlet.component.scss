@@ -2,7 +2,8 @@
     width: 100%;
 
     .custom-mat-drawer {
-        width: 600px;
+        width: 700px;
+        height: 100%;
     }
 }
 
@@ -13,6 +14,6 @@
     flex-direction: row;
 
     app-dynamic-menu {
-        height: 70%;
+        height: calc(100vh - 70px);
     }
 }

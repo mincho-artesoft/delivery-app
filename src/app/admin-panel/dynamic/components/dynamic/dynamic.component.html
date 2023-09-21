@@ -20,6 +20,33 @@
                         </mat-button-toggle-group>
                     </div>
 
+                    <div *ngSwitchCase="'chipListEditor'"
+                        [ngStyle]="{'flex': '0 0 ' + ((+column.width + 'px') || '100%') }"
+                        [className]="column.className">
+                        <mat-form-field class="example-chip-list">
+                            <mat-label>{{column.title}}</mat-label>
+                            <mat-chip-grid #chipGrid class="horizontal-chip-list" [ngStyle]="{'flex-flow': 'nowrap'}">
+                              <mat-chip-row *ngFor="let chip of column.control.value"
+                                            (removed)="remove(chip, column.control)"
+                                            [editable]="true"
+                                            (edited)="edit(chip, $event, column.control)"
+                                            [aria-description]="'press enter to edit ' + chip.name">
+                                {{chip}}
+                                <button matChipRemove [attr.aria-label]="'remove ' + chip.name">
+                                  <mat-icon>cancel</mat-icon>
+                                </button>
+                              </mat-chip-row>
+                              <input [placeholder]="column.placeholder || 'Add...'"
+                                     [matChipInputFor]="chipGrid"
+                                     [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                                     [matChipInputAddOnBlur]="addOnBlur"
+                                     (matChipInputTokenEnd)="add($event, column.control)"
+                                     [style.background]=" 'transparent' "/>
+                            </mat-chip-grid>
+                          </mat-form-field>
+                    </div>
+
+
                     <div *ngSwitchCase="'dropdownEditor'"
                         [ngStyle]="{'flex': '0 0 ' + ((+column.width + 'px') || '100%') }"
                         [className]="column.className">

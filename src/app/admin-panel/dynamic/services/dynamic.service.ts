@@ -1,7 +1,7 @@
 import { CdkDropList } from '@angular/cdk/drag-drop';
 import { Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { Location } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -13,11 +13,8 @@ import { ADMIN_PANEL_SETTINGS } from '../../admin-panel-settings';
   providedIn: 'root'
 })
 export class DynamicService {
-  pathCreateForm = new BehaviorSubject<any>('');
   itemToDrop: any;
   dropLists: any = [];
-  setRowId = signal('');
-  currentRouteSignal = signal<any>('');
   formGroupProvider = signal<any>(ADMIN_PANEL_SETTINGS.pages[2]);
   formArrayProvider = signal<any>(ADMIN_PANEL_SETTINGS.pages[3]);
   lastSelectedRow: any;
@@ -25,13 +22,25 @@ export class DynamicService {
   isSidenavOpen: boolean = false;
   private dataSource = new BehaviorSubject<any>({mainMenu: []});
   data = this.dataSource.asObservable();
+  private cellWidths: number[] = [];
+  public cellWidthsChanged = new Subject<number[]>();
 
   constructor(
-    private location: Location,
     public dialog: MatDialog,
     private snackbar: MatSnackBar,
     private router: Router,
     private http: HttpClient) {
+  }
+
+  
+
+  setCellWidths(widths: number[]) {
+    this.cellWidths = widths;
+    this.cellWidthsChanged.next(this.cellWidths);
+  }
+
+  getCellWidths() {
+    return [...this.cellWidths];
   }
 
 
@@ -90,20 +99,7 @@ export class DynamicService {
         });
         dialogRef.afterClosed().subscribe(result => {
           if (result) {
-            // let url = this.interpolate(button.deletePath, control?.getRawValue() || this.lastSelectedRow)
-            // this.http.delete(url).subscribe(res => {
-            //   this.snackbar.open(message, 'Close', {
-            //     duration: 2000, horizontalPosition: 'right', verticalPosition: 'top'
-            //   });
-            // })
-
-            const path = control?.getRawValue()._id;
-            // this.http.delete(url).subscribe(res => {
-            //   this.snackbar.open(message, 'Close', {
-            //     duration: 2000, horizontalPosition: 'right', verticalPosition: 'top'
-            //   });
-            // })
-            const url = this.interpolate(button.deletePath, { ...control.getRawValue(), path});
+            const url = this.interpolate(button.deletePath, { ...control?.getRawValue() || this.lastSelectedRow});
             this.http.request('Ydelete', url).subscribe((res: string) => {
               const data = JSON.parse(res);
               this.snackbar.open(data.message || "Deleted", 'Close', {
@@ -121,7 +117,8 @@ export class DynamicService {
 
         if (button.action === 'edit' && id) {
           const [param, b, c] = id.split(".");
-          urlSegments.push(param, 'edit');
+          console.log(param)
+          urlSegments.push( 'edit', param);
         } else if (button.action === 'create') {
           urlSegments.push('edit');
         }
@@ -141,7 +138,7 @@ export class DynamicService {
             this.snackbar.open(data.message, 'Close', {
               duration: 2000, horizontalPosition: 'right', verticalPosition: 'top'
             });
-            this.toggleSidenav()
+            // this.toggleSidenav()
             // this.currentRoute.set("");
         })
       }

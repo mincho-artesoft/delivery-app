@@ -1,6 +1,6 @@
-import {ChangeDetectorRef, Injectable} from "@angular/core";
-import {InterpolateService} from "../../services/interpolate.service";
-import {AbstractControl, AsyncValidatorFn} from "@angular/forms";
+import { ChangeDetectorRef, Injectable } from "@angular/core";
+import { InterpolateService } from "../../services/interpolate.service";
+import { AbstractControl, AsyncValidatorFn } from "@angular/forms";
 import {
   combineLatest, debounceTime, distinctUntilChanged,
   Observable,
@@ -11,6 +11,19 @@ import {
 @Injectable({
   providedIn: 'root',
 })
+
+
+// VALIDATOR EXAMPLE FOR THE CELL
+
+// validators: [
+//   {
+//     name: 'asyncVal',
+//     arg: {
+//       interpolate: '"${root.controls.name.value}" === "${root.controls.domain.value}" ',
+//       props: ['root.controls.domain', 'root.controls.name']
+//     }
+//   }
+// ],
 
 export class InterpolateValidator {
 
@@ -31,10 +44,10 @@ export class InterpolateValidator {
         combineLatest(
           targets.map((item: any) => item.valueChanges.pipe(startWith(null)))
         ).pipe(
-          debounceTime(1),distinctUntilChanged(),
+          debounceTime(1), distinctUntilChanged(),
         ).subscribe(() => {
-          if(control){
-            control.updateValueAndValidity({emitEvent: true, onlySelf: true});
+          if (control) {
+            control.updateValueAndValidity({ emitEvent: true, onlySelf: true });
           }
         });
       }
@@ -55,7 +68,7 @@ export class InterpolateValidator {
                   observer.next(null)
                   observer.complete();
                 } else {
-                  control.setErrors({invalid: true})
+                  control.setErrors({ invalid: true })
                 }
               })
             }

@@ -1,24 +1,17 @@
-<ng-container class="dynamic-table-virtual-scroll-container" *ngIf="(table | async) as t">
-  <div class="elements-dynamic-table">
-    <div class="headers-dynamic-table" *ngIf="settings.showHeaders">
-      <div *ngFor="let column of t['displayedColumns']"
-        [style.width.px]="column.width ? column.width : null">
-        {{ column.title }}
-      </div>
+<div class="wrapper" style="position:relative" *ngIf="(table | async) as t">
+  <div class="header-container" matSort (matSortChange)="sortData($event)">
+    <div *ngFor="let column of t['displayedColumns']; let i = index; let last = last" class="cell-header"
+      [style.width.px]="column.width ? column.width : 250" [attr.data-cell-id]="i"
+      [ngClass]="{ 'fixed-column': i < settings.fixedColumnsLeft}">
+      <span [disabled]="!column.sortable" mat-sort-header="{{ column.data }}">{{ column.title }}</span>
+      <div class="resize-handle" (mousedown)="startResizing($event, i, column)"></div>
     </div>
-    <cdk-virtual-scroll-viewport itemSize="50" #viewport class="scrolling-viewport" cdkScrollable>
-      <div *cdkVirtualFor="let element of t['dataHolder']; let i = index; trackBy: trackById"
-        (click)="selectRow(element)">
-        <div class="row-dynamic-table">
-          <app-ultimate-slot [settings]="settings" [dataHolder]="dataHolder" [dataSource]="dataSource"
-            [control]="element"
-            [ngClass]="{'selected-row': dynamicService.lastSelectedRow?._id === element.controls._id?.value}">
-          </app-ultimate-slot>
-        </div>
-        <div *ngIf="settings.separator && settings.separator === i" class="separator-row"></div>
-
-      </div>
+  </div>
+  <div class="elements-container">
+    <cdk-virtual-scroll-viewport itemSize="50" #viewport>
+      <app-ultimate-slot  *cdkVirtualFor="let element of t['dataHolder']; let i = index; let last = last;"
+        [settings]="settings" [dataHolder]="dataHolder" [dataSource]="dataSource" [control]="element" (click)="selectRow(element)" >
+      </app-ultimate-slot>
     </cdk-virtual-scroll-viewport>
   </div>
-  <div *ngIf="count">{{(count|async)|json}}</div>
-</ng-container>
+</div>

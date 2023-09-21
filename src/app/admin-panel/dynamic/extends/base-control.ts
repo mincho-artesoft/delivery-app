@@ -26,7 +26,7 @@ export class BaseControl extends FormControl {
         }
       });
     }
-    super({ value: value || (cell.default || ''), disabled: isReadOnly }, validators);
+    super({ value: value || (cell?.hasOwnProperty('default') ? cell.default : ''), disabled: isReadOnly }, validators);
   }
 
   setupAutopopulate(path: string, rootFormGroup: BaseExtendedFormGroup): void {

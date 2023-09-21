@@ -1,12 +1,13 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, Input, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatTableDataSource } from '@angular/material/table';
-import { FormArray, FormControl, FormGroup } from '@angular/forms';
+import { FormArray, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { BehaviorSubject, Observable, Observer, Operator, Subject, Subscription, map, takeUntil } from 'rxjs';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { DynamicService } from '../../services/dynamic.service';
 import { BaseExtendedFormArray } from '../../extends/base-extended-form-array';
+import { MatSort } from '@angular/material/sort';
 
 interface TableData {
   displayedColumns: any[];
@@ -19,23 +20,24 @@ interface TableData {
   templateUrl: './dynamic-table.component.html',
   styleUrls: ['./dynamic-table.component.scss']
 })
-export class DynamicTableComponent implements OnInit, OnDestroy {
+export class DynamicTableComponent implements OnInit, OnDestroy, AfterViewInit {
   @Input('settings') settings: any;
   @Input('formGroup') formArray!: BaseExtendedFormArray;
-  currentRoute: any;
   dataSource: any;
-  displayedColumns: string[] = [];
   dataHolder: any = new BehaviorSubject([])
   private destroy$ = new Subject<void>();
-  getCurrentUrl: any;
-  modifiedCurrentRoute: any;
-  count: any
   table!: Observable<TableData>;
 
+  public totalOverlayWidth = 0;
+  public isResizing = false;
+  @ViewChild(MatSort, { static: true }) sort: MatSort;
+  
   constructor(
     public router: Router,
     private http: HttpClient,
-    public dynamicService: DynamicService
+    public dynamicService: DynamicService,
+    private renderer: Renderer2,
+    private elementRef: ElementRef,
   ) {
   }
 
@@ -43,24 +45,36 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.settings = this.formArray.htmlSettings;
     if (this.settings) {
-      this.table = this.http.request('Yget', this.settings.get.Yget).pipe(map((res: any) => {
+      this.table = this.http.request('Yget', this.settings.yGet).pipe(map((res: any) => {
         const data = JSON.parse(res);
-        console.log(data);
-        // this.formArray.fillFormWithResponse(data.structure)
-        // this.dataSource = new MatTableDataSource((this.formArray as FormArray).controls);
-        // this.dataSource.data.map((ctrl: any) => {
-        //   ctrl.addControl('uid', new FormControl(this.generateRandomId(10)), { emitEvent: false });
-        // });
-        // this.dataHolder.next(this.dataSource.data);
-        
+        this.formArray.fillFormWithResponse(data.structure)
+        this.dataSource = new MatTableDataSource((this.formArray as FormArray).controls);
+        this.dataSource.data.map((ctrl: any) => {
+          ctrl.addControl('uid', new FormControl(this.generateRandomId(10)), { emitEvent: false });
+        });
+        // this.dataHolder = this.formArray.controls;
+        this.syncCellWidths();
         return {
           displayedColumns: this.settings.columns,
           dataHolder: [...this.dataSource.data]
         }
       }))
-
-      this.dataHolder = this.formArray.controls;
     };
+  }
+
+  sortData(event: any) {
+    const sortField = event.active;  
+    const sortDirection = event.direction; 
+  
+    console.log(sortField, sortDirection)
+  }
+
+  ngAfterViewInit(): void {
+    setTimeout(() => {
+      const tableWidth = this.getTableWidth();
+      this.renderer.setStyle(this.elementRef.nativeElement.querySelector('.elements-container'), 'width', `${tableWidth}px`);
+      this.syncCellWidths();
+    })
   }
   generateRandomId(length: number): string {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -88,5 +102,69 @@ export class DynamicTableComponent implements OnInit, OnDestroy {
   selectRow(row: any) {
     this.dynamicService.lastSelectedRow = row?.getRawValue();
   }
+
+  public startResizing(event: MouseEvent, index: number, cell: any) {
+    this.isResizing = true;
+    let start = event.clientX;
+    let initialWidth;
+
+    // Find the element by data attribute
+    const cellElement: any = document.querySelector(`[data-cell-id="${index}"]`);
+
+    if (!cellElement) {
+      console.error('Cell element not found');
+      return;
+    }
+
+    if (cell.width) {
+      initialWidth = cell.width;
+    } else {
+      initialWidth = cellElement.offsetWidth;
+    }
+
+    const mouseMove = (moveEvent: MouseEvent) => {
+      const offset = moveEvent.clientX - start;
+      const newWidth = initialWidth + offset;
+      cell.width = newWidth;
+      cellElement.style.width = `${newWidth}px`;
+    };
+
+    const mouseUp = () => {
+      const finalWidth = cell.width; // get the final width after resizing
+      this.totalOverlayWidth += (finalWidth - initialWidth); // only change by the difference between final and initial width
+
+      // Update the overlay container width
+      const overlayContainer = document.querySelector('.fixed-columns-overlay');
+      if (overlayContainer) {
+        overlayContainer['style'].width = `${this.totalOverlayWidth}px`;
+      }
+
+      document.removeEventListener('mousemove', mouseMove);
+      document.removeEventListener('mouseup', mouseUp);
+      this.isResizing = false;
+    };
+
+    document.addEventListener('mousemove', mouseMove);
+    document.addEventListener('mouseup', mouseUp);
+  }
+
+  getTableWidth() {
+    let totalWidth = 0;
+    const cells = this.elementRef.nativeElement.querySelectorAll('.cell-header');
+    cells.forEach((cell: HTMLElement) => {
+      totalWidth += cell.offsetWidth;
+    });
+    return totalWidth;
+  }
+
+
+  syncCellWidths() {
+    const headerCells = this.elementRef.nativeElement.querySelectorAll('.cell-header');
+
+    const fetchedWidths = Array.from(headerCells).map((cell: HTMLElement) => cell.offsetWidth);
+
+    this.dynamicService.setCellWidths(fetchedWidths);
+  }
+
 
 }

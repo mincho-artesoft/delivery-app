@@ -268,13 +268,10 @@ export const ADMIN_PANEL_SETTINGS = {
       path: 'organizations',
       title: 'Restaurants',
       className: 'col-2xl-2 col-md-6 col-xs-11',
-      get: { 
-        url: 'https://fhj079vapc.execute-api.eu-central-1.amazonaws.com/api/auth/organization', 
-        Yget: "organizations"
-      },
       yGet: '/organizations',
+      yPost: '',
       separator: null,
-      showHeaders: false,
+      showHeaders: true,
       menuView: {
         'name': 'Restaurants',
         'icon': 'restaurant',
@@ -282,27 +279,12 @@ export const ADMIN_PANEL_SETTINGS = {
         'label': 'Restaurants',
         'path': '/organizations',
       },
-      multilanguage: {
-        data: 'language',
-        tabs: '${organization.languages}',
-        editor: 'MultiLanguage',
-        showTabs: true,
-        columns: [{
-          title: 'Title',
-          data: 'titles.${organization.languages[${index}]}',
-          validators: { required: true }, // custom validator for default lang
-        }, {
-          title: 'Description',
-          data: 'description.${organization.languages[${index}]}',
-        }]
-
-      },
       navbar: {
         buttons: [
           {
             label: 'Add new',
             action: 'create',
-            path: 'restaurants.edit',
+            path: 'organizations.edit',
             openSidenav: true,
             color: 'accent',
             active: true,
@@ -311,7 +293,7 @@ export const ADMIN_PANEL_SETTINGS = {
           {
             label: 'Edit',
             action: 'edit',
-            path: 'restaurants.edit',
+            path: 'organizations.edit',
             color: 'primary',
             openSidenav: true,
             icon: 'create',
@@ -324,45 +306,41 @@ export const ADMIN_PANEL_SETTINGS = {
             active: true,
             icon: 'delete',
             color: 'warn',
-            deletePath: 'https://fhj079vapc.execute-api.eu-central-1.amazonaws.com/api/organization/${_id}',
+            deletePath: '/organization?path=${_id}',
             message: 'Restaurant with ${_id} was successfully deleted'
           }
         ],
       },
-      update: {
-        post: 'https://fhj079vapc.execute-api.eu-central-1.amazonaws.com/api/organization',
-        put: 'https://fhj079vapc.execute-api.eu-central-1.amazonaws.com/api/organization${_id}'
-      },
       columns: [
+        {
+          data: '_id',
+          title: 'ID',
+          sortable: true,
+          width: 80,
+        },
         {
           data: 'img',
           title: 'Picture',
-          className: 'circle-small'
         },
         {
           data: 'name',
           title: 'Name restaurant',
-          className: 'nameRestaurant'
         },
         {
           data: 'deliveryTime',
           title: 'Delivery time',
-          className: 'deliveryTime'
         },
         {
           data: 'domain',
           title: 'Domain',
-          className: 'domain'
         },
         {
           data: 'eik',
           title: 'EIK',
-          className: 'eik'
         },
         {
           data: 'phoneNumber',
           title: 'Phone number',
-          className: '',
           editor: {
             editorIcon: 'edit',
             editorColor: 'primary',
@@ -376,37 +354,32 @@ export const ADMIN_PANEL_SETTINGS = {
         {
           data: 'freeShipping',
           title: 'Free shipping',
-          className: ''
         },
         {
           data: 'addresses',
           title: 'Addresses',
-          className: ''
         },
         {
           data: 'tags',
           title: 'tags',
           width: 160,
-          className: ''
         }
         ,
         {
           data: 'workingDays',
           title: 'Working days',
-          className: ''
         }
         ,
         {
           data: 'workingHours',
           title: 'Working hours',
-          className: ''
         }
 
       ]
     },
 
     {
-      path: 'restaurants.edit',
+      path: 'organizations.edit',
       title: 'Restaurants Edit',
       navbar: {
         reversed: true,
@@ -426,50 +399,23 @@ export const ADMIN_PANEL_SETTINGS = {
           },
         ]
       },
-      update: {
-        post: 'https://fhj079vapc.execute-api.eu-central-1.amazonaws.com/api/auth/organization',
-        put: 'https://fhj079vapc.execute-api.eu-central-1.amazonaws.com/api/auth/organization${_id}'
-      },
-      get: { url: 'https://fhj079vapc.execute-api.eu-central-1.amazonaws.com/api/auth/organization/${_id}' },
+      yGet: '/organization?path=${_id}',
+      yPost: '/organization?path=${_id}',
       columns: [
         {
           data: 'language',
           editor: 'hidden'
         },
         {
-          data: 'languages',
-          showTabs: true,
-          // controlType: 'BaseExtendedFormGroup',
-          editor: 'multiLang',
-          // columns: [{
-          //   title: 'Title',
-          //   data: 'title',
-          //   className: 'col-2xl-12 col-md-12 col-xs-12',
-          //   validators: [{ name: 'required' }],
-          // }, {
-          //   title: 'Description',
-          //   data: 'description',
-          //   className: 'col-2xl-12 col-md-12 col-xs-12',
-          // }]
-        },
-        {
-          data: 'description',
-          title: 'Description',
-          controlType: 'BaseExtendedFormGroup',
-          // columns: [
-          //   {
-          //     title: 'Description',
-          //     data: 'description',
-          //     className: 'col-2xl-12 col-md-12 col-xs-12',
-          //   }],
-          editor: 'langLinked'
-        },
-
-        {
           data: '_id',
           title: 'id',
           readOnly: true,
           className: 'col-2xl-12 col-md-12 col-xs-12',
+        },
+        {
+          data: 'languages',
+          showTabs: true,
+          editor: 'multiLang',
         },
         {
           data: 'name',
@@ -479,18 +425,6 @@ export const ADMIN_PANEL_SETTINGS = {
           validators: [
             { name: 'required' },
           ],
-          editor: 'langLinked'
-        },
-        {
-          data: 'title',
-          title: 'Title',
-          controlType: 'BaseExtendedFormGroup',
-          // columns: [
-          //   {
-          //     title: 'Description',
-          //     data: 'description',
-          //     className: 'col-2xl-12 col-md-12 col-xs-12',
-          //   }],
           editor: 'langLinked'
         },
         {
@@ -505,152 +439,149 @@ export const ADMIN_PANEL_SETTINGS = {
           data: 'tags',
           className: 'col-2xl-6 col-md-6 col-xs-12',
           title: 'Tags',
-          // validators: [
-          //   {
-          //     name: 'asyncVal',
-          //     arg: {
-          //       interpolate: '"${root.controls.name.value}" === "${root.controls.domain.value}" ',
-          //       props: ['root.controls.domain', 'root.controls.name']
-          //     }
-          //   }
-          // ],
-
+          default: [],
+          editor: 'chipListEditor'
         },
         {
           data: 'workingHours',
           className: 'col-2xl-6 col-md-6 col-xs-12',
-          autopopulate: 'workingDays',
+          validators: [
+            { name: 'required' },
+            { name: 'number' }
+          ],
           title: 'Working Hours',
 
         },
         {
           data: 'workingDays',
           className: 'col-2xl-6 col-md-6 col-xs-12',
-          autopopulate: 'workingHours',
+          validators: [
+            { name: 'required' },
+            { name: 'number' }
+          ],
           title: 'Working Days',
-          baseUrl: 'http://localhost:3000/options',
-          page: 1,
-          size: 50,
-          // controlType: 'DropdownControl',
         },
         {
-          data: 'deliveryTime.seconds',
+          data: 'deliveryTime',
           className: 'col-2xl-6 col-md-6 col-xs-12',
-          title: 'Delivery Time'
-        },
-        {
-          data: 'deliveryTime.minutes',
-          className: 'col-2xl-6 col-md-6 col-xs-12',
-          title: 'Delivery Time'
+          title: 'Delivery Time',
+          validators: [
+            { name: 'number' }
+          ]
         },
         {
           data: 'freeShipping',
           title: 'Free Shipping',
           className: 'col-2xl-6 col-md-6 col-xs-12',
+          default: false,
           editor: 'toggleButton'
         },
         {
           data: 'eik',
           className: 'col-2xl-6 col-md-6 col-xs-12',
           title: 'EIK',
-          number: true,
-          validators:
-            [
-              { name: 'number' }
-            ]
+          validators: [
+            { name: 'number' },
+            { name: 'required' }
+          ]
         },
         {
           data: 'langRequired',
           className: 'col-2xl-6 col-md-6 col-xs-12',
-          title: 'Language required'
+          title: 'Language required',
+          validators: [
+            { name: 'required' },
+
+          ]
         },
         {
           data: 'langOptional',
           className: 'col-2xl-6 col-md-6 col-xs-12',
           title: 'Language Optional',
         },
-
-        // {
-        //   data: 'address',
-        //   className: '',
-        //   title: 'Addresses',
-        //   editor: 'addressesEditor',
-        //   cells: [
-        //     {
-        //       data: 'street',
-        //       title: 'Street',
-        //       className: 'nested-input',
-        //       validators: [
-        //         { name: 'required' }
-        //       ]
-        //     },
-        //     {
-        //       data: 'city',
-        //       title: 'City',
-        //       className: 'nested-input',
-        //       validators: [
-        //         { name: 'required' }
-        //       ]
-        //     },
-        //     {
-        //       data: 'state',
-        //       title: 'State',
-        //       className: 'nested-input',
-        //       validators: [
-        //         { name: 'required' },
-        //       ]
-        //     },
-        //     {
-        //       data: 'zipCode',
-        //       title: 'ZIP Code',
-        //       className: 'nested-input',
-        //       validators: [
-        //         { name: 'required' },
-        //         { name: 'number' }
-        //       ]
-        //     },
-        //     {
-        //       data: 'location.latitude',
-        //       title: 'Latitude',
-        //       className: 'nested-input',
-        //       validators: [
-        //         { name: 'required' }
-        //       ]
-        //     },
-        //     {
-        //       data: 'location.longitude',
-        //       title: 'Longtitude',
-        //       className: 'nested-input',
-        //       validators: [
-        //         { name: 'required' }
-        //       ]
-        //     },
-        //     {
-        //       data: 'country',
-        //       title: 'Country',
-        //       className: 'nested-input',
-        //       validators: [
-        //         { name: 'required' }
-        //       ]
-        //     }
-        //   ]
-        // },
+        {
+          data: 'address.country',
+          title: 'Country',
+          className: 'col-2xl-6 col-md-6 col-xs-12',
+          validators: [
+            { name: 'required' }
+          ]
+        },
+        {
+          data: 'address.state',
+          title: 'State',
+          className: 'col-2xl-6 col-md-6 col-xs-12',
+          validators: [
+            { name: 'required' },
+          ]
+        },
+        {
+          data: 'address.city',
+          title: 'City',
+          className: 'col-2xl-6 col-md-6 col-xs-12',
+          validators: [
+            { name: 'required' }
+          ]
+        },
+        {
+          data: 'address.street',
+          title: 'Street',
+          className: 'col-2xl-6 col-md-6 col-xs-12',
+          validators: [
+            { name: 'required' }
+          ]
+        },
+        {
+          data: 'address.zipCode',
+          title: 'ZIP Code',
+          className: 'col-2xl-6 col-md-6 col-xs-12',
+          validators: [
+            { name: 'required' },
+            { name: 'number' }
+          ]
+        },
+        {
+          data: 'address.location.latitude',
+          title: 'Latitude',
+          className: 'col-2xl-6 col-md-6 col-xs-12',
+          validators: [
+            { name: 'required' },
+            {
+              name: 'pattern', arg: "-?(90(\\.0{1,6})?|[1-8]?\\d(\\.\\d{1,6})?|\\d(\\.\\d{1,6})?)"
+            }
+          ]
+        },
+        {
+          data: 'address.location.longitude',
+          title: 'Longtitude',
+          className: 'col-2xl-6 col-md-6 col-xs-12',
+          validators: [
+            { name: 'required' },
+            {
+              name: 'pattern', arg: "-?((\\d{1,2}|1[0-7]\\d)(\\.\\d{1,6})?|180(\\.0{1,6})?)"
+            }
+          ]
+        },
         {
           data: 'phoneNumber',
           className: 'col-2xl-6 col-md-6 col-xs-12',
-          title: 'Phone Number'
+          title: 'Phone Number',
+          validators: [
+            { name: 'number' },
+            { validator: 'required' }
+          ]
         },
         {
           data: 'created_at',
           className: 'col-2xl-6 col-md-6 col-xs-12',
-          title: 'created at',
-          editor: 'dataPicker'
+          title: 'Created on',
+          readOnly: true,
         },
         {
           data: 'updated_at',
           className: 'col-2xl-6 col-md-6 col-xs-12',
-          title: 'updated at',
-          editor: 'dataPicker'
+          title: 'Last Updated at',
+          readOnly: true
         }
       ]
     }

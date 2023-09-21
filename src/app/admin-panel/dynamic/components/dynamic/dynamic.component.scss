@@ -6,6 +6,8 @@
     min-width: 0;
     max-height: fit-content;
     gap: 10px;
+    height: calc(100vh - 100px);
+    overflow-x: hidden;
 }
 
 .button-group {
@@ -41,60 +43,12 @@
     display: none !important;
 }
 
-// @supports (-moz-appearance: none) {
-//     flex: 0 1 auto;
-// }
-
-// .half-width {
-//     flex: 0 1 calc(50% - 17px);
-
-//     &.last-in-group {
-//         margin-right: 50% !important;
-//     }
-// }
-
-// .use-remaining-space {
-//     flex: 1;
-// }
-
-// .thirds-width {
-//     flex: 0 1 calc(33% - 17px);
-// }
-
-// .quarter-width {
-//     flex: 0 1 calc(25% - 17px);
-// }
-
-// .fifth-width {
-//     flex: 0 1 calc(20% - 17px);
-// }
-
-// .sixth-width {
-//     flex: 0 1 calc(16% - 17px);
-// }
-
-// .full-width {
-//     width: 100%;
-// }
-
-// :last-child {
-// margin-right: 12px;
-//     }
-// }
-
-// mat-form-field {
-//     width: 100%;
-//     line-height: 1.55 !important;
-// }
-
 .restaurant-profile {
     padding: 20px;
 }
 
 
 .checkbox-padding {
-    height: 100%;
-    width: 100%;
     margin-bottom: 22.5px;
     position: relative;
 
@@ -108,7 +62,6 @@
             flex: 1;
             font-size: 15px;
         }
-
     }
 
     .checkbox-title {
@@ -123,7 +76,7 @@
 }
 
 .selected-green {
-    background-color: rgb(155, 219, 155);
+    background-color: rgb(155, 219, 155) !important;
 }
 
 
@@ -156,7 +109,24 @@ mat-button-toggle-group {
 
 .dynamic-class mat-icon {
     font-size: 16px;
-    &.default-lang{
+
+    &.default-lang {
         color: white;
     }
 }
+
+.horizontal-chip-list {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* Enable smooth scrolling on iOS */
+  }
+  
+  mat-chip-row {
+    flex-shrink: 0;  /* Prevent shrinking */
+  }
+
+  :host ::ng-deep .mdc-evolution-chip-set__chips {
+    flex-flow: nowrap !important;
+  }

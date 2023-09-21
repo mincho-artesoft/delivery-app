@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { Router, ActivatedRouteSnapshot, UrlTree } from "@angular/router";
-import { Observable, forkJoin, of } from "rxjs";
+import { Observable, firstValueFrom, forkJoin, of } from "rxjs";
 import { catchError, map } from "rxjs/operators";
 import { ADMIN_PANEL_SETTINGS } from "../admin-panel-settings";
 import { DynamicService } from "../dynamic/services/dynamic.service";
@@ -29,17 +29,18 @@ export class DynamicRouteGuard {
     } else {
       searchPath = `${route.parent?.params['primary']}.${route.params['secondary'] || route.params['id']}`;
     }
-
     let settings: any = this.getSettingsBasedOnRoute(searchPath);
     if (settings) {
       if (route.params['primary'] && !route.params['id'] && !route.params['secondary']) {
         this.dynamicService.formArrayProvider.set(null);
-        this.http.request('Yget', settings.yGet).subscribe((res: any) => {
-          console.log(res)
-        })
-        this.formArray = new BaseExtendedFormArray(settings, this.http, null);
-        this.dynamicService.formArrayProvider.set(this.formArray);
-        return true;
+        try {
+          const res: any = await firstValueFrom(this.http.request('Yget', settings.yGet));
+          this.formArray = new BaseExtendedFormArray(settings, this.http, null, JSON.parse(res).structure);
+          this.dynamicService.formArrayProvider.set(this.formArray);
+        } catch (error) {
+          console.error("Failed to fetch data:", error);
+          return false; // or handle error appropriately
+        }
       } else {
         const { id, secondary } = route.params;
         const primary = route.parent?.params['primary'];
@@ -49,9 +50,22 @@ export class DynamicRouteGuard {
         }
 
         if (id || secondary === 'edit') {
-          // TODO request and get the record create a form with value for edit
-          const collectedData = await this.extractAndManipulateData(settings?.options);
-          this.updateFormGroup(settings, collectedData);
+          if (id) {
+            try {
+              let url = this.dynamicService.interpolate(settings.yGet, { _id: id });
+              const res: any = await firstValueFrom(this.http.request('Yget', url));
+              const collectedData = await this.extractAndManipulateData(settings?.options);
+              this.updateFormGroup(settings, collectedData, JSON.parse(res).structure || null);
+              this.dynamicService.formGroupProvider.set(this.formGroup);
+            } catch (error) {
+              console.error("Failed to fetch data:", error);
+              return false; // or handle error appropriately
+            }
+          } else {
+            const collectedData = await this.extractAndManipulateData(settings?.options);
+            this.updateFormGroup(settings, collectedData);
+          }
+          
         }
       }
     }
@@ -127,7 +141,7 @@ export class DynamicRouteGuard {
     ];
   }
 
-  private updateFormGroup(settings: any, collectedData: any) {
+  private updateFormGroup(settings: any, collectedData: any, value?: any) {
     let deepCopy = JSON.parse(JSON.stringify(settings))
     deepCopy.columns.forEach((cell: any) => {
       if (cell.editor && ['langLinked', 'multiLang'].indexOf(cell.editor) > -1) {
@@ -154,7 +168,7 @@ export class DynamicRouteGuard {
         }
       }
     });
-    this.formGroup = new BaseExtendedFormGroup(deepCopy, this.http, collectedData, null, true);
+    this.formGroup = new BaseExtendedFormGroup(deepCopy, this.http, collectedData, value || null, true);
     this.dynamicService.formGroupProvider.set(this.formGroup);
     this.dynamicService.toggleSidenav();
   }

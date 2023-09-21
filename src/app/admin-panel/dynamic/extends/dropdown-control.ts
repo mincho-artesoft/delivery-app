@@ -1,9 +1,12 @@
-import { AsyncValidatorFn } from "@angular/forms";
 import { BaseControl } from "./base-control";
 import { HttpClient, HttpParams } from '@angular/common/http';
 
+//EXAMPLE FOR SETING URL, PAGE, SIZE AND TYPE IN THE CELL
 
-
+// baseUrl: 'http://localhost:3000/options',
+// page: 1,
+// size: 50,
+// controlType: 'DropdownControl',
 
 export class DropdownControl extends BaseControl {
   options: any[] = [];
@@ -26,25 +29,25 @@ export class DropdownControl extends BaseControl {
   }
 
   private loadOptions(url: string, page?: number, size?: number): void {
-  
+
     let params: any;
-  
+
     if (page !== undefined && page !== null) {
       params = new HttpParams();
       params = params.set('page', page.toString());
     }
-  
+
     if (size !== undefined && size !== null) {
       params = params || new HttpParams();
       params = params.set('size', size.toString());
     }
-    
-    if(params) {
+
+    if (params) {
       url = `${url}?${params.toString()}`
     }
     this.http.get(url).subscribe(
       (response: any) => {
-        if(page){
+        if (page) {
           this.options = this.currentPage === 1 ? response : [...this.options, ...response];
         } else {
           this.options = response;
@@ -57,8 +60,8 @@ export class DropdownControl extends BaseControl {
   }
 
   loadNextPage(): void {
-    if(this.currentPage){
-      this.currentPage++; 
+    if (this.currentPage) {
+      this.currentPage++;
 
     }
     this.loadOptions(this.baseUrl, this.currentPage, this.size);

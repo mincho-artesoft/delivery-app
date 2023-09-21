@@ -4,6 +4,9 @@ import { HttpClient } from '@angular/common/http';
 import { DynamicService } from '../../services/dynamic.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BaseExtendedFormGroup } from '../../extends/base-extended-form-group';
+import { MatChipEditedEvent, MatChipInputEvent } from '@angular/material/chips';
+import { COMMA, ENTER } from '@angular/cdk/keycodes';
+
 
 
 @Component({
@@ -15,7 +18,9 @@ export class DynamicComponent implements OnInit, OnDestroy {
   @Input('settings') settings: any;
   @Input('formGroup') formGroup!: BaseExtendedFormGroup;
   id: any;
-
+  readonly separatorKeysCodes = [ENTER, COMMA] as const;
+  addOnBlur = true;
+  matChipList: any;
   constructor(
     private router: Router,
     private http: HttpClient,
@@ -47,13 +52,13 @@ export class DynamicComponent implements OnInit, OnDestroy {
     //       this.http.request('Yget', url).pipe(takeUntil(this.unsubscriber)).subscribe((res: any) => {
     //         const data = JSON.parse(res);
     //         console.log(data.structure);
-            
+
     //         this.formGroup.fillFormWithResponse(data.structure)
     //       })
     //     }
     //   });
-    }
-    
+  }
+
 
   ngOnDestroy(): void {
     console.log('Dynamic component is destroyed!');
@@ -83,14 +88,14 @@ export class DynamicComponent implements OnInit, OnDestroy {
     });
   }
 
-  
+
   getBaseExtendedFormGroup(parent: string, lang: string): BaseExtendedFormGroup {
     return this.formGroup.get(parent)?.get(lang) as BaseExtendedFormGroup;
   }
 
 
   toggleLang(lang: any, cell: any) {
-   this.formGroup.toggleLang(lang)
+    this.formGroup.toggleLang(lang)
   }
 
 
@@ -101,12 +106,51 @@ export class DynamicComponent implements OnInit, OnDestroy {
   getColumns(column: any, lang: any) {
     let arr: any = []
     column.columns.map((cell: any) => {
-      if(cell.data.indexOf(lang) > -1){
+      if (cell.data.indexOf(lang) > -1) {
         arr.push(cell)
       }
     })
-    let returnValue = {...column};
+    let returnValue = { ...column };
     returnValue.columns = arr
     return returnValue;
   }
+
+  
+
+  add(event: MatChipInputEvent, control): void {
+    const input = event.input;
+    const value = event.value;
+    console.log(value);
+    // Add chip
+    if ((value || '').trim()) {
+      let ctrlValue = control.value || [];
+      ctrlValue.push(`#${value.trim()}`);
+      control.patchValue(ctrlValue);
+    }
+    // Reset the input value
+    if (input) {
+      input.value = '';
+    }
+  }
+  
+  remove(chip: string, control): void {
+    const ctrlValue = control.value || [];
+    const index = ctrlValue.indexOf(chip);
+  
+    if (index >= 0) {
+      ctrlValue.splice(index, 1);
+      control.patchValue(ctrlValue);
+    }
+  }
+  
+  edit(chip: string, event: MatChipEditedEvent, control): void {
+    const ctrlValue = control.value || [];
+    const index = ctrlValue.indexOf(chip);
+  
+    if (index >= 0 && event.value.trim() !== '') {
+      ctrlValue[index] = `#${event.value.trim()}`;
+      control.patchValue(ctrlValue);
+    }
+  }
+  
 }

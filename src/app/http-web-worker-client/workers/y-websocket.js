@@ -72,7 +72,7 @@ messageHandlers[messageSubDocSync] = (encoder, decoder, provider, emitSynced, me
     const syncMessageType = syncProtocol.readSyncMessage(decoder, encoder, subDoc, provider)
     
     if (emitSynced && syncMessageType === syncProtocol.messageYjsSyncStep2) {
-      provider.allSubdocumentsGuids = provider.allSubdocumentsGuids.filter((id) => id != subDocID);
+      provider.allSubdocumentsGuids = (provider.allSubdocumentsGuids || []).filter((id) => id != subDocID);
       const [prefix, parentID, suffix] = subDocID.split(".");
       console.log(suffix, subDoc);
       if(suffix == "organization") {

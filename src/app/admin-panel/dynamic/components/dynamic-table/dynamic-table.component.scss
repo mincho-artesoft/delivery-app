@@ -1,56 +1,137 @@
-.dynamic-table-virtual-scroll-container {
-    display: flex;
-    flex-direction: column;
+.wrapper {
+    position: relative;
+    overflow-x: auto;
     width: 100%;
-    padding-left: 70px;
 }
 
-.elements-dynamic-table {
-    display: flex;
-    flex-direction: column;
-    // width: 100%;
-    justify-content: center;
-}
-
-.headers-dynamic-table {
-    display: flex;
-    justify-content: space-between;
+.elements-container {
+    height: calc(100vh - 70px);
+    position: relative;
     width: 100%;
-    // border-bottom: 1px solid #000;
 }
 
-.header-dynamic-table {
-    text-align: center;
+.header-container {
+    position: relative
+}
+
+
+.row {
+    height: 42px;
+}
+
+.header-container,
+.row {
+    display: flex;
+    flex-direction: row;
+    margin: 0;
+    padding: 0;
+    min-width: min-content; // Add this
+}
+
+.cell-header,
+.cell-row {
     box-sizing: border-box;
+    margin: 0;
+    padding: 10px;
+    text-align: center;
     overflow: hidden;
-    // border-right: 1px solid #000;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+
+    &:not([style*="width"]) {
+        flex: 1;
+    }
+
 }
 
-.header-dynamic-table.flex-width {
-    flex: 1;
+
+.cell-header {
+    border: 1px solid rgb(204, 204, 204);
+    line-height: 38px;
+    background-color: rgb(255, 255, 255);
+    color: rgb(34, 34, 34);
+    position: relative; // Make sure this does not conflict with the sticky position
 }
 
-.header-dynamic-table:last-child {
-    border-right: none;
-}
+.cell-row {
+    text-align: left;
+    color: #777;
 
-.row-dynamic-table {
-    width: 100%;
-    .selected-row {
-        background-color: #4f4b4b !important;
+    img {
+        height: 100%;
+        width: 100%;
+        object-fit: contain;
     }
 }
 
-.scrolling-viewport {
-    height: calc(100vh - 70px);
-    width: 100%;
-    overflow: auto;
+
+
+.cell-header:last-child,
+.cell-row:last-child {
+    border-right: 0;
 }
 
-.separator-row {
-    height: 13px;
-    /* adjust as needed */
-    background-color: #b44838;
-    /* adjust color as needed */
+.row:nth-child(2n) {
+    background-color: #e4e6f1;
+}
+
+cdk-virtual-scroll-viewport {
+    height: 100%;
+    overflow: auto;
     width: 100%;
 }
+
+.resize-handle {
+    cursor: ew-resize;
+    width: 20px;
+    height: 100%;
+    background-color: transparent;
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+
+
+.cell-row.last-sticky {
+    border-right: 1px solid rgb(204, 204, 204)
+}
+
+
+.selected {
+    background-color: rgba(75, 137, 255, .5) !important;
+}
+
+.fixed-columns-overlay {
+    background-color: rgb(255, 255, 255);
+    position: fixed;
+    top: 124px;
+    left: 47.5px;
+    z-index: 10; // or a higher value if you have other layers
+    overflow: hidden;
+    pointer-events: none; // makes it non-interactive
+    border-right: 1px solid rgb(204, 204, 204);
+    height: calc(100% - 124px);
+
+    cdk-virtual-scroll-viewport {
+        height: 100%;
+        overflow: hidden;
+        width: 100%;
+    }
+}
+
+.fixed-columns-overlay::-webkit-scrollbar {
+    display: none !important;
+}
+
+.fixed-columns-overlay {
+    -ms-overflow-style: none !important;
+    /* IE and Edge */
+    scrollbar-width: none !important;
+    /* Firefox */
+}
+
+.fixed-columns-overlay {
+    transition: top 0.2s ease-out;
+}
+

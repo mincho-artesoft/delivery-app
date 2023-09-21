@@ -23,7 +23,7 @@ export class BaseExtendedFormGroup extends FormGroup {
     }
 
     const columns = settings.columns ? JSON.parse(JSON.stringify(settings.columns)) : settings;
-
+    console.log(columns)
     const controls: { [key: string]: any } = {};
 
     const typeMapping: { [key: string]: any } = {
@@ -60,9 +60,7 @@ export class BaseExtendedFormGroup extends FormGroup {
 
     super(controls);
 
-    if (rootLevel) {
-      this.activeLang = new BehaviorSubject<string>('');
-    }
+
 
     columns.map((cell: any) => {
       if (cell.autopopulate) {
@@ -77,6 +75,10 @@ export class BaseExtendedFormGroup extends FormGroup {
     }
     if (collectedData) {
       this.resources = collectedData;
+    }
+
+    if (rootLevel) {
+      this.activeLang = new BehaviorSubject<string>(this.resources.languages[0].code);
     }
 
     if (deepCopiedSettings) {
