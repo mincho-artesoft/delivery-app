@@ -35,6 +35,7 @@ export class DynamicRouteGuard {
         this.dynamicService.formArrayProvider.set(null);
         try {
           const res: any = await firstValueFrom(this.http.request('Yget', settings.yGet));
+          console.log(JSON.parse(res).structure, 'response');
           this.formArray = new BaseExtendedFormArray(settings, this.http, null, JSON.parse(res).structure);
           this.dynamicService.formArrayProvider.set(this.formArray);
         } catch (error) {
@@ -55,6 +56,7 @@ export class DynamicRouteGuard {
               let url = this.dynamicService.interpolate(settings.yGet, { _id: id });
               const res: any = await firstValueFrom(this.http.request('Yget', url));
               const collectedData = await this.extractAndManipulateData(settings?.options);
+              console.log(JSON.parse(res).structure)
               this.updateFormGroup(settings, collectedData, JSON.parse(res).structure || null);
               this.dynamicService.formGroupProvider.set(this.formGroup);
             } catch (error) {

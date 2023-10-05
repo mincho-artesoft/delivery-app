@@ -350,9 +350,10 @@ function createOrEditOrganization(guid: string, data: any) {
 
   if(subdoc) {
     subdoc.getMap("data").set('organizationData', JSON.parse(data.body));
+    const restaurantData = { ...JSON.parse(data.body).data, _id: guid };
     postMessage({
       type: 'yjs',
-      response: JSON.stringify({ uuid: data.uuid, message: "Succesfully edited organization!" }),
+      response: JSON.stringify({ uuid: data.uuid, data: restaurantData, message: "Succesfully edited organization!" }),
     });
   } else {
     subdoc = new Y.Doc({ guid, meta: {} });
@@ -366,9 +367,10 @@ function createOrEditOrganization(guid: string, data: any) {
     const struct = documentStructureMap.get("structure");
     struct["organizations"][guid] = {[warehouseDoc.guid]: {}};
     documentStructureMap.set("structure", struct);
+    const restaurantData = { ...JSON.parse(data.body).data, _id: guid };
     postMessage({
       type: 'yjs',
-      response: JSON.stringify({ uuid: data.uuid, message: "Succesfully created organization!" }),
+      response: JSON.stringify({ uuid: data.uuid, data: restaurantData, message: "Succesfully edited organization!" }),
     });
   }
 }

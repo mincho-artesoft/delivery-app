@@ -20,7 +20,7 @@ export class DynamicService {
   lastSelectedRow: any;
   openSidenav = new BehaviorSubject(false);
   isSidenavOpen: boolean = false;
-  private dataSource = new BehaviorSubject<any>({mainMenu: []});
+  private dataSource = new BehaviorSubject<any>({ mainMenu: [] });
   data = this.dataSource.asObservable();
   private cellWidths: number[] = [];
   public cellWidthsChanged = new Subject<number[]>();
@@ -32,7 +32,7 @@ export class DynamicService {
     private http: HttpClient) {
   }
 
-  
+
 
   setCellWidths(widths: number[]) {
     this.cellWidths = widths;
@@ -99,7 +99,7 @@ export class DynamicService {
         });
         dialogRef.afterClosed().subscribe(result => {
           if (result) {
-            const url = this.interpolate(button.deletePath, { ...control?.getRawValue() || this.lastSelectedRow});
+            const url = this.interpolate(button.deletePath, { ...control?.getRawValue() || this.lastSelectedRow });
             this.http.request('Ydelete', url).subscribe((res: string) => {
               const data = JSON.parse(res);
               this.snackbar.open(data.message || "Deleted", 'Close', {
@@ -118,7 +118,7 @@ export class DynamicService {
         if (button.action === 'edit' && id) {
           const [param, b, c] = id.split(".");
           console.log(param)
-          urlSegments.push( 'edit', param);
+          urlSegments.push('edit', param);
         } else if (button.action === 'create') {
           urlSegments.push('edit');
         }
@@ -128,18 +128,20 @@ export class DynamicService {
     } else {
       if (button.action === 'close') {
         this.toggleSidenav()
-      } else if (button.action === 'save'){
+      } else if (button.action === 'save') {
         const id = control ? control.getRawValue()._id : this.lastSelectedRow?._id;
         //                   random id
         const path = id || `${this.generateRandomId(10)}.{userID}.organization`;
 
         this.http.request('Ypost', `?path=${path}`, { body: { data: control.getRawValue() } }).subscribe((res: string) => {
           const data = JSON.parse(res);
-            this.snackbar.open(data.message, 'Close', {
-              duration: 2000, horizontalPosition: 'right', verticalPosition: 'top'
-            });
-            // this.toggleSidenav()
-            // this.currentRoute.set("");
+          console.log(data)
+          control.patchValue(data.data);
+          this.snackbar.open(data.message, 'Close', {
+            duration: 2000, horizontalPosition: 'right', verticalPosition: 'top'
+          });
+          // this.toggleSidenav()
+          // this.currentRoute.set("");
         })
       }
     }

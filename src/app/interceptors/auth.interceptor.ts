@@ -23,7 +23,8 @@ export class AuthInterceptor implements HttpInterceptor {
   ): Observable<HttpEvent<unknown>> {
     // Get the token from the AuthService
     const token = this.authService.getToken();
-    const userID = this.authService.extractUserIdFromToken(token);
+    // const userID = this.authService.extractUserIdFromToken(token);
+    const userID = '123sdas12312adasdda2'
     
     // If the token exists, clone the request and set the Authorization header
     if (token) {
