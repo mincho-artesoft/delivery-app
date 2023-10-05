@@ -56,7 +56,6 @@ export class DynamicRouteGuard {
               let url = this.dynamicService.interpolate(settings.yGet, { _id: id });
               const res: any = await firstValueFrom(this.http.request('Yget', url));
               const collectedData = await this.extractAndManipulateData(settings?.options);
-              console.log(JSON.parse(res).structure)
               this.updateFormGroup(settings, collectedData, JSON.parse(res).structure || null);
               this.dynamicService.formGroupProvider.set(this.formGroup);
             } catch (error) {

@@ -1,13 +1,17 @@
-import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, OnInit, Output, ViewChild } from '@angular/core';
 import { CdkDragStart, CdkDropList, moveItemInArray } from '@angular/cdk/drag-drop';
 import { DynamicService } from '../../services/dynamic.service';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { InterpolateService } from '../../services/interpolate.service';
+import { AbstractControl } from '@angular/forms';
+import { Observable, combineLatest, debounceTime, distinctUntilChanged, map, of, startWith, switchMap, tap } from 'rxjs';
 
 @Component({
   selector: 'app-ultimate-slot',
   templateUrl: './ultimate-slot.component.html',
   styleUrls: ['./ultimate-slot.component.scss'],
+  // changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UltimateSlotComponent implements AfterViewInit, OnInit {
   @Input('settings') settings: any;
@@ -28,12 +32,12 @@ export class UltimateSlotComponent implements AfterViewInit, OnInit {
     public dialog: MatDialog,
     private snackbar: MatSnackBar,
     private elementRef: ElementRef) {
-      this.dynamicService.cellWidthsChanged.subscribe((newWidths) => {
-        const rowCells = this.elementRef.nativeElement.querySelectorAll('.cell-row');
-        rowCells.forEach((cell, index) => {
-          cell.style.width = `${newWidths[index]}px`;
-        });
+    this.dynamicService.cellWidthsChanged.subscribe((newWidths) => {
+      const rowCells = this.elementRef.nativeElement.querySelectorAll('.cell-row');
+      rowCells.forEach((cell, index) => {
+        cell.style.width = `${newWidths[index]}px`;
       });
+    });
   }
 
   ngOnInit(): void {
@@ -75,35 +79,13 @@ export class UltimateSlotComponent implements AfterViewInit, OnInit {
     }
   }
 
-  processObjectRenderer(column: any, value: any): string {
-    let separator = column.separator || ', ';
-    let label = column.label || '';
-    const replacePlaceholder = (str: any, data: any) => {
-      const placeholders = str.match(/\${.*?}/g) || [];
-      let resultArr = [];
 
-      for (const placeholder of placeholders) {
-        const prop = placeholder.slice(2, -1);
-        if (data?.hasOwnProperty(prop) && data[prop]) {
-          resultArr.push(data[prop]);
-        }
-      }
+  processObjectRenderer(column: any, value: any) {
+    return InterpolateService.suplant(column.label, this.rowControl);
 
-      return resultArr.join(separator);
-    };
-
-    if (Array.isArray(value)) {
-      return value.map(item => replacePlaceholder(label, item)).join(separator);
-    } else if (typeof value === 'object') {
-      if (value?.value instanceof Date && value.settings && value.settings?.storage === 'iso') {
-        return value?.value.toISOString();
-      } else {
-        return replacePlaceholder(label, value);
-      }
-    }
-
-    return '';
   }
+
+
 
 
   submitValue(cell: any, control: any) {
@@ -117,6 +99,5 @@ export class UltimateSlotComponent implements AfterViewInit, OnInit {
   open(button: any, control: any) {
     this.dynamicService.handleButtonActions(button, control)
   }
-  
-  
+
 }

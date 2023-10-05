@@ -4,7 +4,28 @@
     overflow: hidden;
 
     .cell-row {
+        height: 100%;
+        text-align: left;
         overflow: hidden;
+        white-space: nowrap;
+        padding-top: 10px;
+        position: relative;
+
+        .fast-editor {
+            width: calc(100% - 40px);
+
+            .send-button {
+                position: absolute;
+                top: 0px;
+                right: 30px;
+            }
+        }
+
+        .editor-button {
+            position: absolute;
+            top: 0px;
+            right: 2.5px
+        }
     }
 }
 

@@ -117,12 +117,10 @@ export class DynamicService {
 
         if (button.action === 'edit' && id) {
           const [param, b, c] = id.split(".");
-          console.log(param)
           urlSegments.push('edit', param);
         } else if (button.action === 'create') {
           urlSegments.push('edit');
         }
-
         this.router.navigate(urlSegments);
       }
     } else {
@@ -135,7 +133,6 @@ export class DynamicService {
 
         this.http.request('Ypost', `?path=${path}`, { body: { data: control.getRawValue() } }).subscribe((res: string) => {
           const data = JSON.parse(res);
-          console.log(data)
           control.patchValue(data.data);
           this.snackbar.open(data.message, 'Close', {
             duration: 2000, horizontalPosition: 'right', verticalPosition: 'top'

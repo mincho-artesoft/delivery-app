@@ -269,7 +269,6 @@ export const ADMIN_PANEL_SETTINGS = {
       title: 'Restaurants',
       className: 'col-2xl-2 col-md-6 col-xs-11',
       yGet: '/organizations',
-      yPost: '',
       separator: null,
       showHeaders: true,
       menuView: {
@@ -325,6 +324,8 @@ export const ADMIN_PANEL_SETTINGS = {
         {
           data: 'name',
           title: 'Name restaurant',
+          renderer: 'objectRenderer',
+          label: '${controls.name.value.${controls.language.value}}',
         },
         {
           data: 'deliveryTime',
@@ -344,8 +345,11 @@ export const ADMIN_PANEL_SETTINGS = {
           editor: {
             editorIcon: 'edit',
             editorColor: 'primary',
-            actionIcon: 'send',
-            actionColor: 'warn',
+            actionButton: {
+              icon: 'send',
+              color: 'warn',
+              action: 'save'
+            },
             name: 'FastEditor',
             url: 'url',
             message: 'Item with ${name} was succesfully updated'

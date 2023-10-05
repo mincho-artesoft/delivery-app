@@ -1,44 +1,48 @@
-<div class="row flex-container" [ngClass]="{ 'selected': rowControl?.value._id === dynamicService.lastSelectedRow?._id}" cdkDropList cdkDropListOrientation="vertical"
-    [cdkDropListConnectedTo]="dynamicService.dropLists" [cdkDropListData]="[rowControl]"
-    (cdkDropListDropped)="dropped($event)">
-    <div 
-        *ngFor="let cell of settings.columns; let i = index" [style.width.px]="cell.width ? cell.width : null" cdkDrag [attr.data-cell-id]="i"
-        (cdkDragStarted)="start($event)" [cdkDragDisabled]="!settings?.draggable" [className]="'cell-row ' + cell.className">
+<div class="row flex-container" [ngClass]="{ 'selected': rowControl?.value._id === dynamicService.lastSelectedRow?._id}"
+    cdkDropList cdkDropListOrientation="vertical" [cdkDropListConnectedTo]="dynamicService.dropLists"
+    [cdkDropListData]="[rowControl]" (cdkDropListDropped)="dropped($event)">
+    <div *ngFor="let cell of settings.columns; let i = index" [style.width.px]="cell.width ? cell.width : null" cdkDrag
+        [attr.data-cell-id]="i" (cdkDragStarted)="start($event)" [cdkDragDisabled]="!settings?.draggable"
+        [className]="'cell-row ' + cell.className">
         <div class="example-custom-placeholder" *cdkDragPlaceholder></div>
         <ng-container [ngSwitch]="cell?.renderer">
-            <div *ngSwitchCase="'objectRenderer'"
-                matTooltip="{{ processObjectRenderer(cell, rowControl.controls[cell.data]?.value) }}" >
+            <div *ngSwitchCase="'objectRenderer'">
                 <ng-container *ngIf="cell?.editor && editorVisible" [ngSwitch]="cell?.editor.name || cell.editor">
-                    <div *ngSwitchCase="'FastEditor'">
-                        <mat-form-field appearance="outline">
+                    <div *ngSwitchCase="'FastEditor'" class="fast-editor">
+                        <mat-form-field appearance="outline" >
                             <input matInput [formControl]="rowControl.controls[cell.data]" placeholder="Enter value" />
                         </mat-form-field>
-                        <button mat-icon-button [color]="cell.editor?.actionColor" (click)="submitValue(cell, rowControl)">
+                        <button mat-icon-button [color]="cell.editor?.actionColor"
+                            (click)="submitValue(cell, rowControl)" class="send-button">
                             <mat-icon>{{cell.editor?.actionIcon}}</mat-icon>
                         </button>
                     </div>
                 </ng-container>
-                <button mat-icon-button [color]="cell.editor?.editorColor" *ngIf="cell.editor?.name === 'FastEditor'" (click)="editorVisible = !editorVisible">
+                <button class="editor-button" mat-icon-button [color]="cell.editor?.editorColor" *ngIf="cell.editor?.name === 'FastEditor'"
+                    (click)="editorVisible = !editorVisible">
                     <mat-icon>{{cell.editor?.editorIcon}}</mat-icon>
-                </button> {{ processObjectRenderer(cell, rowControl.controls[cell.data]?.value) }} 
+                </button>
+                <span>{{processObjectRenderer(cell, rowControl)}}</span>
             </div>
             <div *ngSwitchDefault style="display: flex; flex-direction: row;">
                 <ng-container *ngIf="cell?.editor && editorVisible" [ngSwitch]="cell?.editor.name || cell.editor">
-                    <div *ngSwitchCase="'FastEditor'">
-                        <mat-form-field appearance="outline">
+                    <div *ngSwitchCase="'FastEditor'" class="fast-editor">
+                        <mat-form-field appearance="outline" >
                             <input matInput [formControl]="rowControl.controls[cell.data]" placeholder="Enter value" />
                         </mat-form-field>
-                        <button mat-icon-button [color]="cell.editor?.actionColor" (click)="submitValue(cell, rowControl)">
-                            <mat-icon>{{cell.editor?.actionIcon}}</mat-icon>
+                        <button mat-icon-button [color]="cell.editor?.actionButton.color"
+                            (click)="dynamicService.handleButtonActions(cell.editor?.actionButton, rowControl); editorVisible = !editorVisible" class="send-button">
+                            <mat-icon>{{cell.editor?.actionButton.icon}}</mat-icon>
                         </button>
                     </div>
                 </ng-container>
                 <ng-container *ngIf="!cell.editor">
                 </ng-container>
-                <button mat-icon-button [color]="cell.editor?.editorColor" *ngIf="cell.editor?.name === 'FastEditor'" (click)="editorVisible = !editorVisible">
-                    <mat-icon>{{cell.editor?.editorIcon}}</mat-icon>
-                </button> 
-                <span>{{ rowControl.controls[cell.data]?.value }} </span>
+                <button class="editor-button" mat-icon-button [color]="cell.editor?.editorColor" *ngIf="cell.editor?.name === 'FastEditor'"
+                    (click)="editorVisible = !editorVisible">
+                    <mat-icon >{{cell.editor?.editorIcon}}</mat-icon>
+                </button>
+                <span *ngIf="!cell.editor || cell?.editor && !editorVisible">{{ rowControl.controls[cell.data]?.value }} </span>
             </div>
         </ng-container>
     </div>
