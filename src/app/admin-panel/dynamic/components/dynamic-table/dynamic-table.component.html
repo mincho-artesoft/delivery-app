@@ -1,8 +1,7 @@
 <div class="wrapper" style="position:relative" *ngIf="(table | async) as t">
   <div class="header-container" matSort (matSortChange)="sortData($event)">
     <div *ngFor="let column of t['displayedColumns']; let i = index; let last = last" class="cell-header"
-      [style.width.px]="column.width ? column.width : 250" [attr.data-cell-id]="i"
-      [ngClass]="{ 'fixed-column': i < settings.fixedColumnsLeft}">
+      [style.width.px]="column.width ? column.width : 250" [attr.data-cell-id]="i">
       <span [disabled]="!column.sortable" mat-sort-header="{{ column.data }}">{{ column.title }}</span>
       <div class="resize-handle" (mousedown)="startResizing($event, i, column)"></div>
     </div>

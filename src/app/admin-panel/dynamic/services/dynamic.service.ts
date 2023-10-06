@@ -15,8 +15,8 @@ import { ADMIN_PANEL_SETTINGS } from '../../admin-panel-settings';
 export class DynamicService {
   itemToDrop: any;
   dropLists: any = [];
-  formGroupProvider = signal<any>(ADMIN_PANEL_SETTINGS.pages[2]);
-  formArrayProvider = signal<any>(ADMIN_PANEL_SETTINGS.pages[3]);
+  formGroupProvider = signal<any>('');
+  formArrayProvider = signal<any>('');
   lastSelectedRow: any;
   openSidenav = new BehaviorSubject(false);
   isSidenavOpen: boolean = false;
@@ -127,10 +127,8 @@ export class DynamicService {
       if (button.action === 'close') {
         this.toggleSidenav()
       } else if (button.action === 'save') {
-        const id = control ? control.getRawValue()._id : this.lastSelectedRow?._id;
-        //                   random id
-        const path = id || `${this.generateRandomId(10)}.{userID}.organization`;
-
+        const id = (control ? control.getRawValue()._id : this.lastSelectedRow?._id) || this.generateRandomId(10);
+        const path = this.interpolate(button.yPost, { id: id });
         this.http.request('Ypost', `?path=${path}`, { body: { data: control.getRawValue() } }).subscribe((res: string) => {
           const data = JSON.parse(res);
           control.patchValue(data.data);

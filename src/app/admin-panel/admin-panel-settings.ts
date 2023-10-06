@@ -4,8 +4,7 @@ export const ADMIN_PANEL_SETTINGS = {
       path: 'warehouses',
       title: 'Warehouses',
       className: 'col-2xl-2 col-md-6 col-xs-11',
-      get: { url: 'https://06hbbmv516.execute-api.eu-central-1.amazonaws.com/api/warehouse/warehouse' },
-      yGet: '/warehouses?orgID=uuid',
+      yGet: '/warehouses',
       separator: null,
       showHeaders: true,
       menuView: {
@@ -43,96 +42,75 @@ export const ADMIN_PANEL_SETTINGS = {
             icon: 'delete',
             color: 'warn',
             deletePath: 'https://06hbbmv516.execute-api.eu-central-1.amazonaws.com/api/warehouse/warehouse/${_id}',
-            message: 'Restaurant with ${_id} was successfully deleted'
+            message: 'Warehouse with ${_id} was successfully deleted'
           }
         ],
       },
-      update: {
-        post: 'https://06hbbmv516.execute-api.eu-central-1.amazonaws.com/api/warehouse/warehouse',
-        put: 'https://06hbbmv516.execute-api.eu-central-1.amazonaws.com/api/warehouse/warehouse/${_id}'
-      },
       columns: [
+        {
+          data: '_id',
+          title: 'Id',
+          width: 80,
+        },
         {
           data: 'name',
           title: 'Name',
           renderer: 'objectRenderer',
-          label: '${en}',
-          className: 'name',
+          label: '${controls.name.value.${controls.language.value}}',
           width: 120,
         },
         {
           data: 'brand_name',
           title: 'Brand Name',
-          className: 'nameRestaurant',
-          width: 120,
         },
         {
           data: 'description',
           title: 'Description',
           renderer: 'objectRenderer',
-          label: '${en}',
+          label: '${controls.description.value.${controls.language.value}}',
           className: 'description',
-          width: 120,
         },
         {
           data: 'unit',
           title: 'Unit',
-          className: 'unit',
-          width: 120,
         },
         {
           data: 'quantity',
           title: 'Quantity',
-          className: 'quantity',
-          width: 120,
         },
         {
           data: 'tags',
           title: 'Tags',
-          className: 'tags',
-          width: 120,
         },
         {
           data: 'price',
           title: 'Price',
-          className: 'price',
-          width: 120,
         },
         {
           data: 'currentProducts',
           title: 'Current Products',
           renderer: 'objectRenderer',
-          label: '${quantity}-${expirationDate}',
-          className: 'currentProducts',
-          width: 120,
+          label: '${controls.quantity.value}-${controls.expirationDate.value}',
         },
         {
           data: 'ingredients',
           title: 'Ingredients',
           renderer: 'objectRenderer',
-          label: '${quantity}-${productId}',
-          className: 'ingredients',
-          width: 120,
+          label: '${controls.quantity.value}-${controls.productId.value}',
         },
         {
           data: 'images',
           title: 'Images',
-          className: 'images',
-          width: 120,
         }
         ,
         {
           data: 'createdAt',
           title: 'CreatedAt',
-          className: 'createdAt',
-          width: 120,
         }
         ,
         {
           data: 'updatedAt',
           title: 'UpdatedAt',
-          className: 'updatedAt',
-          width: 120,
         }
 
       ]
@@ -140,20 +118,6 @@ export const ADMIN_PANEL_SETTINGS = {
     {
       path: 'warehouses.edit',
       title: 'Warehouses Edit',
-      multilanguage: {
-        data: 'language',
-        tabs: '${organization.languages}',
-        editor: 'MultiLanguage',
-        showTabs: true,
-        columns: [{
-          title: 'Title',
-          data: 'titles.${organization.languages[${index}]}',
-          validators: { required: true }, // custom validator for default lang
-        }, {
-          title: 'Description',
-          data: 'description.${organization.languages[${index}]}',
-        }]
-      },
       navbar: {
         reversed: true,
         buttons: [
@@ -169,101 +133,111 @@ export const ADMIN_PANEL_SETTINGS = {
             action: 'save',
             icon: 'check',
             active: true,
+            yPost: ''
           },
         ]
       },
-      update: {
-        post: 'https://06hbbmv516.execute-api.eu-central-1.amazonaws.com/api/warehouse/warehouse',
-        put: 'https://06hbbmv516.execute-api.eu-central-1.amazonaws.com/api/warehouse/warehouse/${_id}'
-      },
-      get: { url: 'https://06hbbmv516.execute-api.eu-central-1.amazonaws.com/api/warehouse/warehouse/${_id}' },
+      yGet: '',
       columns: [
+        {
+          data: '_id',
+          title: 'Id',
+          readOnly: true,
+          className: 'col-2xl-12 col-md-12 col-xs-12',
+        },
+        {
+          data: 'language',
+          editor: 'hidden'
+        },
+        {
+          data: 'languages',
+          showTabs: true,
+          className: 'col-2xl-6 col-md-6 col-xs-12',
+          editor: 'multiLang',
+        },
         {
           data: 'name',
           title: 'Name',
-          renderer: 'objectRenderer',
-          label: '${en}',
-          className: 'name',
-          width: 120,
-        },
-        {
-          data: 'brand_name',
-          title: 'Brand Name',
-          className: 'nameRestaurant',
-          width: 120,
+          controlType: 'BaseExtendedFormGroup',
+          className: 'col-2xl-6 col-md-6 col-xs-12',
+          validators: [
+            { name: 'required' },
+          ],
+          editor: 'langLinked'
         },
         {
           data: 'description',
           title: 'Description',
-          renderer: 'objectRenderer',
-          label: '${en}',
-          className: 'description',
-          width: 120,
+          controlType: 'BaseExtendedFormGroup',
+          className: 'col-2xl-6 col-md-6 col-xs-12',
+          validators: [
+            { name: 'required' },
+          ],
+          editor: 'langLinked'
+        },
+        {
+          data: 'brand_name',
+          title: 'Brand Name',
+          className: 'col-2xl-6 col-md-6 col-xs-12',
         },
         {
           data: 'unit',
           title: 'Unit',
-          className: 'unit',
-          width: 120,
+          className: 'col-2xl-6 col-md-6 col-xs-12',
         },
         {
           data: 'quantity',
           title: 'Quantity',
-          className: 'quantity',
-          width: 120,
+          className: 'col-2xl-6 col-md-6 col-xs-12',
         },
         {
           data: 'tags',
+          className: 'col-2xl-6 col-md-6 col-xs-12',
           title: 'Tags',
-          className: 'tags',
-          width: 120,
+          default: [],
+          editor: 'chipListEditor'
         },
         {
           data: 'price',
+          className: 'col-2xl-6 col-md-6 col-xs-12',
           title: 'Price',
-          className: 'price',
-          width: 120,
         },
         {
           data: 'currentProducts',
           title: 'Current Products',
           renderer: 'objectRenderer',
           label: '${quantity}-${expirationDate}',
-          className: 'currentProducts',
-          width: 120,
+          className: 'col-2xl-6 col-md-6 col-xs-12',
         },
         {
           data: 'ingredients',
           title: 'Ingredients',
           renderer: 'objectRenderer',
           label: '${quantity}-${productId}',
-          className: 'ingredients',
-          width: 120,
+          className: 'col-2xl-6 col-md-6 col-xs-12',
         },
         {
           data: 'images',
           title: 'Images',
-          className: 'images',
-          width: 120,
+          className: 'col-2xl-6 col-md-6 col-xs-12',
         }
         ,
         {
           data: 'createdAt',
           title: 'CreatedAt',
-          className: 'createdAt',
-          width: 120,
+          className: 'col-2xl-6 col-md-6 col-xs-12',
+          readOnly: true,
         }
         ,
         {
           data: 'updatedAt',
           title: 'UpdatedAt',
-          className: 'updatedAt',
-          width: 120,
+          className: 'col-2xl-6 col-md-6 col-xs-12',
+          readOnly: true,
         }
 
       ]
     },
-
     {
       path: 'organizations',
       title: 'Restaurants',
@@ -348,10 +322,10 @@ export const ADMIN_PANEL_SETTINGS = {
             actionButton: {
               icon: 'send',
               color: 'warn',
-              action: 'save'
+              action: 'save',
+              yPost: '${id}.{userID}.organization'
             },
             name: 'FastEditor',
-            url: 'url',
             message: 'Item with ${name} was succesfully updated'
           }
         },
@@ -400,11 +374,11 @@ export const ADMIN_PANEL_SETTINGS = {
             action: 'save',
             icon: 'check',
             active: true,
+            yPost: '${id}.{userID}.organization'
           },
         ]
       },
       yGet: '/organization?path=${_id}',
-      yPost: '/organization?path=${_id}',
       columns: [
         {
           data: 'language',

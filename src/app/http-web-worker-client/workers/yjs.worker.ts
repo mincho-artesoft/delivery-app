@@ -147,6 +147,7 @@ addEventListener('message', (req) => {
         let structure: any = {};
 
         if (pathParts.find(path => path.includes("organization")) || pathParts.find(path => path.includes("warehouse"))) {
+          // debugger
           const path = pathParts.find(path => path.includes("organization")) || pathParts.find(path => path.includes("warehouse"))
           const shouldBuildArray = path.endsWith("s");
 
@@ -301,15 +302,14 @@ function getSubdocsData (subdocs: Y.Map, shouldGetWarehouses: boolean, data: { u
   let structure = {};
   subdocs.forEach((doc: Y.Doc, key: string) => {
     if(shouldGetWarehouses) {
-      const map = doc.getMap("warehouses");
-      map.forEach((warehouseDoc: Y.Doc, guid: string) => {
-        const data = warehouseDoc.getMap("data");
-        const serializedMapData = {};
-        data.forEach((value: any, mapKey: string) => {
-          serializedMapData[mapKey] = value?.data;
-        });
-        structure[key] = serializedMapData;
-      })
+      const warehouseKey = Array.from(provider.subdocs.keys()).find((k: string) => k.includes("warehouse") && k.includes(key.split(".")[0])) as string;
+      const warehouse = provider.subdocs.get(warehouseKey);
+      const map = warehouse.getMap("data");
+      const serializedMapData = {};
+      map.forEach((value: any, mapKey: string) => {
+        serializedMapData[mapKey] = value?.data || {};
+      });
+      structure[key] = serializedMapData;
     } else {
       const data = doc.getMap('data');
       const serializedMapData = {};

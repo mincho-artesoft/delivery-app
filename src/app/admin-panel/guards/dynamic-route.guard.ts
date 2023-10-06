@@ -35,7 +35,7 @@ export class DynamicRouteGuard {
         this.dynamicService.formArrayProvider.set(null);
         try {
           const res: any = await firstValueFrom(this.http.request('Yget', settings.yGet));
-          console.log(JSON.parse(res).structure, 'response');
+          console.log(JSON.parse(res).structure, 'response', res);
           this.formArray = new BaseExtendedFormArray(settings, this.http, null, JSON.parse(res).structure);
           this.dynamicService.formArrayProvider.set(this.formArray);
         } catch (error) {

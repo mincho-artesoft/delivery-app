@@ -74,7 +74,7 @@ export class DynamicTableComponent implements OnInit, OnDestroy, AfterViewInit {
       const tableWidth = this.getTableWidth();
       this.renderer.setStyle(this.elementRef.nativeElement.querySelector('.elements-container'), 'width', `${tableWidth}px`);
       this.syncCellWidths();
-    })
+    }, 100)
   }
   generateRandomId(length: number): string {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
