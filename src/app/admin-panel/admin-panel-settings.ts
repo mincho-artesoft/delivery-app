@@ -13,6 +13,9 @@ export const ADMIN_PANEL_SETTINGS = {
         'tooltip': 'Warehouses',
         'label': 'Warehouses',
         'path': '/warehouses',
+        groupItems: {
+          yGet: '/warehouses'
+        }
       },
       navbar: {
         buttons: [
@@ -240,16 +243,16 @@ export const ADMIN_PANEL_SETTINGS = {
     },
     {
       path: 'organizations',
-      title: 'Restaurants',
+      title: 'Organizations',
       className: 'col-2xl-2 col-md-6 col-xs-11',
       yGet: '/organizations',
       separator: null,
       showHeaders: true,
       menuView: {
-        'name': 'Restaurants',
+        'name': 'Organizations',
         'icon': 'restaurant',
-        'tooltip': 'Restaurants',
-        'label': 'Restaurants',
+        'tooltip': 'Organizations',
+        'label': 'Organizations',
         'path': '/organizations',
       },
       navbar: {

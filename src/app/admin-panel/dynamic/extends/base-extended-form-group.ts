@@ -23,7 +23,6 @@ export class BaseExtendedFormGroup extends FormGroup {
     }
 
     const columns = settings.columns ? JSON.parse(JSON.stringify(settings.columns)) : settings;
-    console.log(columns)
     const controls: { [key: string]: any } = {};
 
     const typeMapping: { [key: string]: any } = {

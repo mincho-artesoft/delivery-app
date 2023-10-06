@@ -53,7 +53,14 @@ export class DynamicTableComponent implements OnInit, OnDestroy, AfterViewInit {
           ctrl.addControl('uid', new FormControl(this.generateRandomId(10)), { emitEvent: false });
         });
         // this.dataHolder = this.formArray.controls;
-        this.syncCellWidths();
+        const tableWidth = this.getTableWidth();
+        const elementsContainer = this.elementRef.nativeElement.querySelector('.elements-container');
+        if (elementsContainer) {
+            this.renderer?.setStyle(elementsContainer, 'width', `${tableWidth}px`);
+            this.syncCellWidths();
+        } else {
+            console.warn('Could not find .elements-container');
+        }
         return {
           displayedColumns: this.settings.columns,
           dataHolder: [...this.dataSource.data]
@@ -65,17 +72,12 @@ export class DynamicTableComponent implements OnInit, OnDestroy, AfterViewInit {
   sortData(event: any) {
     const sortField = event.active;  
     const sortDirection = event.direction; 
-  
-    console.log(sortField, sortDirection)
   }
 
   ngAfterViewInit(): void {
-    setTimeout(() => {
-      const tableWidth = this.getTableWidth();
-      this.renderer.setStyle(this.elementRef.nativeElement.querySelector('.elements-container'), 'width', `${tableWidth}px`);
-      this.syncCellWidths();
-    }, 100)
-  }
+    
+}
+
   generateRandomId(length: number): string {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
