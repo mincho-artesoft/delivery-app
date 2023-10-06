@@ -32,15 +32,11 @@ export class UltimateSlotComponent implements AfterViewInit, OnInit {
     public dialog: MatDialog,
     private snackbar: MatSnackBar,
     private elementRef: ElementRef) {
-    this.dynamicService.cellWidthsChanged.subscribe((newWidths) => {
-      const rowCells = this.elementRef.nativeElement.querySelectorAll('.cell-row');
-      rowCells.forEach((cell, index) => {
-        cell.style.width = `${newWidths[index]}px`;
-      });
-    });
+      
   }
 
   ngOnInit(): void {
+    
   }
 
   dropped(event: any) {
@@ -77,6 +73,17 @@ export class UltimateSlotComponent implements AfterViewInit, OnInit {
     if (this.dropList) {
       this.dynamicService.register(this.dropList);
     }
+    const rowCells = this.elementRef.nativeElement.querySelectorAll('.cell-row');
+      rowCells.forEach((cell, index) => {
+        cell.style.width = `${this.dynamicService.cellWidths[index]}px`;
+      });
+    this.dynamicService.cellWidthsChanged.subscribe((newWidths) => {
+      console.log(newWidths)
+      const rowCells = this.elementRef.nativeElement.querySelectorAll('.cell-row');
+      rowCells.forEach((cell, index) => {
+        cell.style.width = `${newWidths[index]}px`;
+      });
+    });
   }
 
 

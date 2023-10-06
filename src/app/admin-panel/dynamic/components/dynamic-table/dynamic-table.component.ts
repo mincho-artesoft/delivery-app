@@ -31,7 +31,7 @@ export class DynamicTableComponent implements OnInit, OnDestroy, AfterViewInit {
   public totalOverlayWidth = 0;
   public isResizing = false;
   @ViewChild(MatSort, { static: true }) sort: MatSort;
-  
+
   constructor(
     public router: Router,
     private http: HttpClient,
@@ -53,14 +53,8 @@ export class DynamicTableComponent implements OnInit, OnDestroy, AfterViewInit {
           ctrl.addControl('uid', new FormControl(this.generateRandomId(10)), { emitEvent: false });
         });
         // this.dataHolder = this.formArray.controls;
-        const tableWidth = this.getTableWidth();
-        const elementsContainer = this.elementRef.nativeElement.querySelector('.elements-container');
-        if (elementsContainer) {
-            this.renderer?.setStyle(elementsContainer, 'width', `${tableWidth}px`);
-            this.syncCellWidths();
-        } else {
-            console.warn('Could not find .elements-container');
-        }
+        this.syncContainerWidths();
+        this.syncCellWidths()
         return {
           displayedColumns: this.settings.columns,
           dataHolder: [...this.dataSource.data]
@@ -70,14 +64,14 @@ export class DynamicTableComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   sortData(event: any) {
-    const sortField = event.active;  
-    const sortDirection = event.direction; 
+    const sortField = event.active;
+    const sortDirection = event.direction;
+
+    console.log(sortField, sortDirection)
   }
 
   ngAfterViewInit(): void {
-    
-}
-
+  }
   generateRandomId(length: number): string {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
@@ -159,6 +153,17 @@ export class DynamicTableComponent implements OnInit, OnDestroy, AfterViewInit {
     return totalWidth;
   }
 
+  syncContainerWidths() {
+    const tableWidth = this.getTableWidth();
+    const elementsContainer = this.elementRef.nativeElement.querySelector('.elements-container');
+
+    if (elementsContainer) {
+      this.renderer?.setStyle(elementsContainer, 'width', `${tableWidth}px`);
+      this.syncCellWidths();
+    } else {
+      console.warn('Could not find .elements-container');
+    }
+  }
 
   syncCellWidths() {
     const headerCells = this.elementRef.nativeElement.querySelectorAll('.cell-header');

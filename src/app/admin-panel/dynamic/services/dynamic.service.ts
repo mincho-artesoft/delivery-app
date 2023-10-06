@@ -22,9 +22,9 @@ export class DynamicService {
   isSidenavOpen: boolean = false;
   private dataSource = new BehaviorSubject<any>({ mainMenu: [] });
   data = this.dataSource.asObservable();
-  private cellWidths: number[] = [];
+  public cellWidths: number[] = [];
   public cellWidthsChanged = new Subject<number[]>();
-
+  unsubscribeOnNavigation = new Subject<any>();
   constructor(
     public dialog: MatDialog,
     private snackbar: MatSnackBar,
@@ -36,6 +36,7 @@ export class DynamicService {
 
   setCellWidths(widths: number[]) {
     this.cellWidths = widths;
+    console.log(this.cellWidths)
     this.cellWidthsChanged.next(this.cellWidths);
   }
 
