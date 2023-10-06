@@ -63,17 +63,16 @@ const init = (
         provider.syncSubdocs(allSubdocumentGuids);
         
         let checkSyncStatus = setInterval(() => {
-          // const notSynced = Array.from(provider.subdocs.values()).filter(
-          //   (s: Y.Doc) => s?.isSynced == false
-          // );
           if (provider.allSubdocumentsGuids.length == 0) {
             subdocsMap = ydoc.getMap("subdocs");
             setTimeout(() => {
               cb(ydoc);
             }, 200);
             clearInterval(checkSyncStatus);
+          } else {
+            provider.syncSubdocs(allSubdocumentGuids);
           }
-        }, 100);
+        }, 200);
       }
     });
   };
@@ -234,7 +233,6 @@ addEventListener('message', (req) => {
         } else {
           const guid = Array.from(provider.subdocs.keys()).find((id: string) => id.includes(docGuidPart)) as string;
 
-          debugger
           editWarehouse(guid, id, data);
         }
       });
