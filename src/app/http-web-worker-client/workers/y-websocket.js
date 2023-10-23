@@ -65,16 +65,16 @@ messageHandlers[messageAuth] = (encoder, decoder, provider, emitSynced, messageT
 }
 
 messageHandlers[messageSubDocSync] = (encoder, decoder, provider, emitSynced, messageType) => {
-  const subDocID = decoding.readVarString(decoder)
+  const subDocID = decoding.readVarString(decoder);
+  console.log(subDocID);
   encoding.writeVarUint(encoder, messageSync)
   const subDoc = provider.getSubDoc(subDocID)
   if (subDoc) {
     const syncMessageType = syncProtocol.readSyncMessage(decoder, encoder, subDoc, provider)
     
     if (emitSynced && syncMessageType === syncProtocol.messageYjsSyncStep2) {
-      provider.allSubdocumentsGuids = (provider.allSubdocumentsGuids || []).filter((id) => id != subDocID);
+      provider.allSubdocumentsGuids = provider.allSubdocumentsGuids.filter((id) => id != subDocID);
       const [prefix, parentID, suffix] = subDocID.split(".");
-      console.log(suffix, subDoc);
       if(suffix == "organization") {
         provider.subscribeToSubdocs(subDoc, "subdocs", suffix);
         subDoc.getMap("subdocs").forEach((s, key) => {
@@ -136,20 +136,18 @@ const setupWS = (provider) => {
     websocket.onmessage = (event) => {
       provider.wsLastMessageReceived = time.getUnixTime()
 
-      if (typeof event.data !== 'string') return
-
       try {
         const encoder = readMessage(
           provider,
-          new Uint8Array(fromBase64(event.data)),
+          new Uint8Array(event.data),
           true
         )
         if (encoding.length(encoder) > 1) {
-          websocket.send(toBase64(encoding.toUint8Array(encoder)))
+          websocket.send(encoding.toUint8Array(encoder));
         }
       } catch (ex) {
-        console.log('Malformed web-server response')
-        console.error(ex)
+        console.error('Malformed web-server response')
+        // console.error(ex)
       }
     }
     websocket.onclose = () => {
@@ -179,7 +177,6 @@ const setupWS = (provider) => {
       // log10(wsUnsuccessfulReconnects).
       // The idea is to increase reconnect timeout slowly and have no reconnect
       // timeout at the beginning (log(1) = 0)
-      console.log(provider);
       setTimeout(
         setupWS,
         math.min(
@@ -204,8 +201,8 @@ const setupWS = (provider) => {
       const encoder = encoding.createEncoder()
       encoding.writeVarUint(encoder, messageSync)
       syncProtocol.writeSyncStep1(encoder, provider.doc)
-      websocket.send(toBase64(encoding.toUint8Array(encoder)))
-      // broadcast local awareness state
+      websocket.send(encoding.toUint8Array(encoder))
+
       if (provider.awareness.getLocalState() !== null) {
         const encoderAwarenessState = encoding.createEncoder()
         encoding.writeVarUint(encoderAwarenessState, messageAwareness)
@@ -215,7 +212,7 @@ const setupWS = (provider) => {
             provider.doc.clientID,
           ])
         )
-        websocket.send(toBase64(encoding.toUint8Array(encoderAwarenessState)))
+        websocket.send(encoding.toUint8Array(encoderAwarenessState))
       }
     }
 
@@ -234,7 +231,7 @@ const setupWS = (provider) => {
 const broadcastMessage = (provider, buf) => {
   if (provider.wsconnected) {
     // @ts-ignore We know that wsconnected = true
-    provider.ws.send(toBase64(buf))
+    provider.ws.send(buf)
   }
   if (provider.bcconnected) {
     provider.mux(() => {
@@ -310,6 +307,11 @@ export class WebsocketProvider extends Observable {
       serverUrl = serverUrl.slice(0, serverUrl.length - 1)
     }
     const encodedParams = url.encodeQueryParams(params)
+    // this.bcChannel = serverUrl + "?docName=" + roomname
+
+    // this.url =
+    //   serverUrl + "/dev" +
+    //   (encodedParams.length === 0 ? '' : '?' + encodedParams)
     this.bcChannel = serverUrl + '/' + roomname
     this.url =
       serverUrl +
@@ -352,7 +354,7 @@ export class WebsocketProvider extends Observable {
           const encoder = encoding.createEncoder()
           encoding.writeVarUint(encoder, messageSync)
           syncProtocol.writeSyncStep1(encoder, doc)
-          this.ws.send(toBase64(encoding.toUint8Array(encoder)))
+          this.ws.send(encoding.toUint8Array(encoder))
         }
       }, resyncInterval)
     }
@@ -378,7 +380,7 @@ export class WebsocketProvider extends Observable {
         const encoder = encoding.createEncoder()
         encoding.writeVarUint(encoder, messageSync)
         syncProtocol.writeUpdate(encoder, update)
-        broadcastMessage(this, encoding.toUint8Array(encoder))
+        broadcastMessage(this, encoding.toUint8Array(encoder));
       }
     }
     this.doc.on('update', this._updateHandler);
@@ -386,10 +388,7 @@ export class WebsocketProvider extends Observable {
     const tryToFindWrongSubdoc = (searched, doc, docs) => {
       Array.from(docs).forEach(subdoc => {
         const [a, b, suffix] = subdoc.guid.split(".");
-        console.log("tryToFindWrongSubdoc", suffix);
         if(!searched.includes(suffix)) {
-          console.log("deleting", subdoc,"||||||||" ,suffix);
-          console.log(doc.getMap("subdocs"));
           doc.getMap("subdocs").delete(subdoc.guid);
         }
       });
@@ -420,18 +419,16 @@ export class WebsocketProvider extends Observable {
             this.subdocs.set(subdoc.guid, subdoc);
           }
   
-          const encoder = encoding.createEncoder()
-          encoding.writeVarUint(encoder, messageSubDocSync)
-          encoding.writeVarString(encoder, subdoc.guid)
-          syncProtocol.writeSyncStep1(encoder, subdoc)
-          if (this.ws) {
-            this.send(encoding.toUint8Array(encoder), () => {
-              subdoc.on('update', this._getSubDocUpdateHandler(subdoc))
-            })
-
-            setTimeout(() => {
-              tryToFindWrongSubdoc(docTypes[docType], doc, loaded);
-            }, 100);
+          if(!subdoc.isSynced) {
+            const encoder = encoding.createEncoder()
+            encoding.writeVarUint(encoder, messageSubDocSync)
+            encoding.writeVarString(encoder, subdoc.guid)
+            syncProtocol.writeSyncStep1(encoder, subdoc)
+            if (this.ws) {
+              this.send(encoding.toUint8Array(encoder), () => {
+                subdoc.on('update', this._getSubDocUpdateHandler(subdoc))
+              })
+            }
           }
         })
       })
@@ -441,7 +438,7 @@ export class WebsocketProvider extends Observable {
       const ws = this.ws
       this.waitForConnection(function () {
         // @ts-ignore
-        ws.send(toBase64(message));
+        ws.send(message);
         if (typeof callback !== 'undefined') {
           callback();
         }
@@ -477,7 +474,7 @@ export class WebsocketProvider extends Observable {
         encoding.writeVarUint(encoder, messageSubDocSync)
         encoding.writeVarString(encoder, subdoc.guid)
         syncProtocol.writeUpdate(encoder, update)
-        broadcastMessage(this, encoding.toUint8Array(encoder))
+        broadcastMessage(this, encoding.toUint8Array(encoder));
       }
       return updateHandler
     }

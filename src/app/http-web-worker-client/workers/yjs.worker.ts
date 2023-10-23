@@ -32,7 +32,7 @@ const init = (
 ) => {
   const connect = () => {
     provider = new WebsocketProvider(websocketUrl, userID, ydoc, {
-      params: { auth: '', readonly: 'true', docName: userID },
+      // params: { auth: '', readonly: 'true', docName: userID },
     });
 
     provider.on('status', async (event) => {
@@ -49,7 +49,7 @@ const init = (
         }
         const struct = documentStructureMap.get("structure").organizations;
         const guids = Object.keys(struct);
-        const allSubdocumentGuids = [];
+        let allSubdocumentGuids = [];
 
         const getAllGuids = (guids: string[], structure: any) => {
           guids.forEach(guid => {
@@ -59,20 +59,29 @@ const init = (
             }
           })
         }
+        console.log(allSubdocumentGuids);
         getAllGuids(guids, struct);
         provider.syncSubdocs(allSubdocumentGuids);
         
         let checkSyncStatus = setInterval(() => {
+          // const notSynced = Array.from(provider.subdocs.values()).filter(
+          //   (s: Y.Doc) => s?.isSynced == false
+          // );
           if (provider.allSubdocumentsGuids.length == 0) {
             subdocsMap = ydoc.getMap("subdocs");
             setTimeout(() => {
+              console.log(ydoc.toJSON());
+              
               cb(ydoc);
             }, 200);
             clearInterval(checkSyncStatus);
           } else {
+            console.log(allSubdocumentGuids);
+            allSubdocumentGuids = []; 
+            getAllGuids(guids, struct);
             provider.syncSubdocs(allSubdocumentGuids);
           }
-        }, 200);
+        }, 1000);
       }
     });
   };
@@ -139,14 +148,12 @@ addEventListener('message', (req) => {
   if(params?.[0]?.includes("initial")) {
     initialUUID = data.uuid;
   }
-  console.log(data.url, userID, data.method, pathParts);
   switch (data.method) {
     case 'YGET': {
       init(pathParts[0], userID, (ydoc: Y.Doc) => {
         let structure: any = {};
 
         if (pathParts.find(path => path.includes("organization")) || pathParts.find(path => path.includes("warehouse"))) {
-          // debugger
           const path = pathParts.find(path => path.includes("organization")) || pathParts.find(path => path.includes("warehouse"))
           const shouldBuildArray = path.endsWith("s");
 
@@ -158,6 +165,7 @@ addEventListener('message', (req) => {
           const setListener = () => {
             subdocsMap.forEach((doc: Y.Doc, _: string) => docUpdateObserver(doc, () => getSubdocsData(subdocsMap, shouldGetWarehouse, data, (response: any) => postMessage({ type: 'yjs', response }))));
           }
+
           if(shouldBuildArray) {
             setListener();
             getSubdocsData(subdocsMap, shouldGetWarehouse, data, (response: any) => postMessage({ type: 'yjs', response }));
@@ -228,11 +236,12 @@ addEventListener('message', (req) => {
         const [docGuidPart, id, suffix] = params.find((param) => param.includes("path")).split('=')[1].split('.');
 
         if(suffix == "organization") {
-          const guid = docGuidPart + '.' + userID + '.' + suffix;
+          const guid = docGuidPart + '.' + id + '.' + suffix;
           createOrEditOrganization(guid, data);
         } else {
           const guid = Array.from(provider.subdocs.keys()).find((id: string) => id.includes(docGuidPart)) as string;
 
+          debugger
           editWarehouse(guid, id, data);
         }
       });
@@ -305,7 +314,7 @@ function getSubdocsData (subdocs: Y.Map, shouldGetWarehouses: boolean, data: { u
       const map = warehouse.getMap("data");
       const serializedMapData = {};
       map.forEach((value: any, mapKey: string) => {
-        serializedMapData[mapKey] = value?.data || {};
+        serializedMapData[mapKey] = value?.data;
       });
       structure[key] = serializedMapData;
     } else {
@@ -348,10 +357,10 @@ function createOrEditOrganization(guid: string, data: any) {
 
   if(subdoc) {
     subdoc.getMap("data").set('organizationData', JSON.parse(data.body));
-    const restaurantData = { ...JSON.parse(data.body).data, _id: guid };
+    const restaurantData = { ...JSON.parse(data.body), _id: guid };
     postMessage({
       type: 'yjs',
-      response: JSON.stringify({ uuid: data.uuid, data: restaurantData, message: "Succesfully edited organization!" }),
+      response: JSON.stringify({ uuid: data.uuid, ...restaurantData, message: "Succesfully edited organization!" }),
     });
   } else {
     subdoc = new Y.Doc({ guid, meta: {} });
@@ -365,10 +374,10 @@ function createOrEditOrganization(guid: string, data: any) {
     const struct = documentStructureMap.get("structure");
     struct["organizations"][guid] = {[warehouseDoc.guid]: {}};
     documentStructureMap.set("structure", struct);
-    const restaurantData = { ...JSON.parse(data.body).data, _id: guid };
+    const restaurantData = { ...JSON.parse(data.body), _id: guid };
     postMessage({
       type: 'yjs',
-      response: JSON.stringify({ uuid: data.uuid, data: restaurantData, message: "Succesfully edited organization!" }),
+      response: JSON.stringify({ uuid: data.uuid, ...restaurantData, message: "Succesfully edited organization!" }),
     });
   }
 }

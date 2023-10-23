@@ -11,6 +11,7 @@ import { JwtModule } from '@auth0/angular-jwt';
 import { HttpWebWorkerClientModule } from './http-web-worker-client/http-web-worker-client.module';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { AuthModule } from './auth/auth.module';
+import { YjsService } from './yjs.service';
 
 export function tokenGetter() {
   return localStorage.getItem("jwt_token");
@@ -30,27 +31,37 @@ export function tokenGetter() {
         tokenGetter: tokenGetter
       }
     }),
-    HttpWebWorkerClientModule.forRoot({baseUrl:'ws://localhost:3001',ignorePath:'/assets'}),
+    HttpWebWorkerClientModule.forRoot({baseUrl:'ws://localhost:9182',ignorePath:'/assets'}),
     AuthModule
   ],
   providers: [
     {
       provide: APP_INITIALIZER,
-      useFactory: (authService: AuthService, httpClient: HttpClient) => {
+      useFactory: (authService: AuthService, httpClient: HttpClient, yjsService: YjsService) => {
         return () => {
 
           httpClient.request('Yget', `?initial=true`).subscribe((res: string) => {
             const structure = JSON.parse(res);
             console.log(structure);
+
+
             
             console.log("APP MODULE");
-    
+            yjsService.documentStructure = structure.structure.subdocs;
+            setTimeout(() => {
+                  yjsService.stopSpinner();
+                  yjsService.connected = true;
+            }, 500);
           });
+          
 
-        
+          // setTimeout(() => {
+          //   yjsService.stopSpinner();
+          //   yjsService.connected = true;
+          // }, 100)
         }
       },
-      deps: [AuthService, HttpClient],
+      deps: [AuthService, HttpClient, YjsService],
       multi: true,
     },
     {

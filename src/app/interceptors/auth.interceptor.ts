@@ -31,7 +31,7 @@ export class AuthInterceptor implements HttpInterceptor {
       request = request.clone({
         setHeaders: {
           Authorization: `Bearer ${token}`,
-          "x-user-id": userID || this.uuid
+          "x-user-id": "123123123jhgjh123456gjhg123123123"
         }
       });
     }
