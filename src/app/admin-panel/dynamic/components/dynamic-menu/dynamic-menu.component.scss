@@ -25,7 +25,7 @@
     }
 
     &.active {
-        width: 180px;
+        width: 200px;
 
         .menu-icon-holder {
             width: 100%;
@@ -46,4 +46,21 @@
 
 .mat-line {
     outline: 0;
+}
+
+.expandable-item {
+    mat-icon {
+        width: 30px;
+    }
+
+    padding-left: 15px;
+    padding-top: 20px;
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    align-items: flex-end;
+}
+
+.link:hover {
+    cursor: pointer;
 }

@@ -9,7 +9,7 @@ import { BaseExtendedFormGroup } from '../../extends/base-extended-form-group';
   templateUrl: './dynamic-outlet.component.html',
   styleUrls: ['./dynamic-outlet.component.scss'],
 })
-export class DynamicOutletComponent{
+export class DynamicOutletComponent implements OnDestroy{
   
 
 
@@ -17,4 +17,7 @@ export class DynamicOutletComponent{
      
   }
 
+  ngOnDestroy(): void {
+    console.log('Outlet is destroyed')
+  }
 }

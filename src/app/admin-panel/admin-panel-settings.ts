@@ -1,247 +1,6 @@
 export const ADMIN_PANEL_SETTINGS = {
   pages: [
     {
-      path: 'warehouses',
-      title: 'Warehouses',
-      className: 'col-2xl-2 col-md-6 col-xs-11',
-      yGet: '/warehouses',
-      separator: null,
-      showHeaders: true,
-      menuView: {
-        'name': 'Warehouses',
-        'icon': 'storage',
-        'tooltip': 'Warehouses',
-        'label': 'Warehouses',
-        'path': '/warehouses',
-        groupItems: {
-          yGet: '/warehouses'
-        }
-      },
-      navbar: {
-        buttons: [
-          {
-            label: 'Add new',
-            action: 'create',
-            path: 'warehouses.edit',
-            openSidenav: true,
-            color: 'accent',
-            active: true,
-            icon: 'add_box'
-          },
-          {
-            label: 'Edit',
-            action: 'edit',
-            path: 'warehouses.edit',
-            color: 'primary',
-            openSidenav: true,
-            icon: 'create',
-            active: true
-          },
-          {
-            label: 'Delete',
-            action: 'delete',
-            isDialog: true,
-            active: true,
-            icon: 'delete',
-            color: 'warn',
-            deletePath: 'https://06hbbmv516.execute-api.eu-central-1.amazonaws.com/api/warehouse/warehouse/${_id}',
-            message: 'Warehouse with ${_id} was successfully deleted'
-          }
-        ],
-      },
-      columns: [
-        {
-          data: '_id',
-          title: 'Id',
-          width: 80,
-        },
-        {
-          data: 'name',
-          title: 'Name',
-          renderer: 'objectRenderer',
-          label: '${controls.name.value.${controls.language.value}}',
-          width: 120,
-        },
-        {
-          data: 'brand_name',
-          title: 'Brand Name',
-        },
-        {
-          data: 'description',
-          title: 'Description',
-          renderer: 'objectRenderer',
-          label: '${controls.description.value.${controls.language.value}}',
-          className: 'description',
-        },
-        {
-          data: 'unit',
-          title: 'Unit',
-        },
-        {
-          data: 'quantity',
-          title: 'Quantity',
-        },
-        {
-          data: 'tags',
-          title: 'Tags',
-        },
-        {
-          data: 'price',
-          title: 'Price',
-        },
-        {
-          data: 'currentProducts',
-          title: 'Current Products',
-          renderer: 'objectRenderer',
-          label: '${controls.quantity.value}-${controls.expirationDate.value}',
-        },
-        {
-          data: 'ingredients',
-          title: 'Ingredients',
-          renderer: 'objectRenderer',
-          label: '${controls.quantity.value}-${controls.productId.value}',
-        },
-        {
-          data: 'images',
-          title: 'Images',
-        }
-        ,
-        {
-          data: 'createdAt',
-          title: 'CreatedAt',
-        }
-        ,
-        {
-          data: 'updatedAt',
-          title: 'UpdatedAt',
-        }
-
-      ]
-    },
-    {
-      path: 'warehouses.edit',
-      title: 'Warehouses Edit',
-      navbar: {
-        reversed: true,
-        buttons: [
-
-          {
-            label: 'Close',
-            action: 'close',
-            icon: 'close',
-            active: true
-          },
-          {
-            label: 'Save',
-            action: 'save',
-            icon: 'check',
-            active: true,
-            yPost: ''
-          },
-        ]
-      },
-      yGet: '',
-      columns: [
-        {
-          data: '_id',
-          title: 'Id',
-          readOnly: true,
-          className: 'col-2xl-12 col-md-12 col-xs-12',
-        },
-        {
-          data: 'language',
-          editor: 'hidden'
-        },
-        {
-          data: 'languages',
-          showTabs: true,
-          className: 'col-2xl-6 col-md-6 col-xs-12',
-          editor: 'multiLang',
-        },
-        {
-          data: 'name',
-          title: 'Name',
-          controlType: 'BaseExtendedFormGroup',
-          className: 'col-2xl-6 col-md-6 col-xs-12',
-          validators: [
-            { name: 'required' },
-          ],
-          editor: 'langLinked'
-        },
-        {
-          data: 'description',
-          title: 'Description',
-          controlType: 'BaseExtendedFormGroup',
-          className: 'col-2xl-6 col-md-6 col-xs-12',
-          validators: [
-            { name: 'required' },
-          ],
-          editor: 'langLinked'
-        },
-        {
-          data: 'brand_name',
-          title: 'Brand Name',
-          className: 'col-2xl-6 col-md-6 col-xs-12',
-        },
-        {
-          data: 'unit',
-          title: 'Unit',
-          className: 'col-2xl-6 col-md-6 col-xs-12',
-        },
-        {
-          data: 'quantity',
-          title: 'Quantity',
-          className: 'col-2xl-6 col-md-6 col-xs-12',
-        },
-        {
-          data: 'tags',
-          className: 'col-2xl-6 col-md-6 col-xs-12',
-          title: 'Tags',
-          default: [],
-          editor: 'chipListEditor'
-        },
-        {
-          data: 'price',
-          className: 'col-2xl-6 col-md-6 col-xs-12',
-          title: 'Price',
-        },
-        {
-          data: 'currentProducts',
-          title: 'Current Products',
-          renderer: 'objectRenderer',
-          label: '${quantity}-${expirationDate}',
-          className: 'col-2xl-6 col-md-6 col-xs-12',
-        },
-        {
-          data: 'ingredients',
-          title: 'Ingredients',
-          renderer: 'objectRenderer',
-          label: '${quantity}-${productId}',
-          className: 'col-2xl-6 col-md-6 col-xs-12',
-        },
-        {
-          data: 'images',
-          title: 'Images',
-          className: 'col-2xl-6 col-md-6 col-xs-12',
-        }
-        ,
-        {
-          data: 'createdAt',
-          title: 'CreatedAt',
-          className: 'col-2xl-6 col-md-6 col-xs-12',
-          readOnly: true,
-        }
-        ,
-        {
-          data: 'updatedAt',
-          title: 'UpdatedAt',
-          className: 'col-2xl-6 col-md-6 col-xs-12',
-          readOnly: true,
-        }
-
-      ]
-    },
-    {
       path: 'organizations',
       title: 'Organizations',
       className: 'col-2xl-2 col-md-6 col-xs-11',
@@ -565,6 +324,246 @@ export const ADMIN_PANEL_SETTINGS = {
           readOnly: true
         }
       ]
-    }
+    },
+    {
+      path: 'warehouse',
+      title: 'Warehouse',
+      className: 'col-2xl-2 col-md-6 col-xs-11',
+      yGet: '/warehouses',
+      separator: null,
+      showHeaders: true,
+      menuView: {
+        'name': 'Warehouse',
+        'icon': 'storage',
+        'tooltip': 'Warehouse',
+        'label': 'Warehouse',
+        'path': '/warehouse',
+        group: '/organizations'
+      },
+      navbar: {
+        buttons: [
+          {
+            label: 'Add new',
+            action: 'create',
+            path: 'warehouse.edit',
+            openSidenav: true,
+            color: 'accent',
+            active: true,
+            icon: 'add_box'
+          },
+          {
+            label: 'Edit',
+            action: 'edit',
+            path: 'warehouse.edit',
+            color: 'primary',
+            openSidenav: true,
+            icon: 'create',
+            active: true
+          },
+          {
+            label: 'Delete',
+            action: 'delete',
+            isDialog: true,
+            active: true,
+            icon: 'delete',
+            color: 'warn',
+            deletePath: 'https://06hbbmv516.execute-api.eu-central-1.amazonaws.com/api/warehouse/warehouse/${_id}',
+            message: 'Warehouse with ${_id} was successfully deleted'
+          }
+        ],
+      },
+      columns: [
+        {
+          data: '_id',
+          title: 'Id',
+          width: 80,
+        },
+        {
+          data: 'name',
+          title: 'Name',
+          renderer: 'objectRenderer',
+          label: '${controls.name.value.${controls.language.value}}',
+          width: 120,
+        },
+        {
+          data: 'brand_name',
+          title: 'Brand Name',
+        },
+        {
+          data: 'description',
+          title: 'Description',
+          renderer: 'objectRenderer',
+          label: '${controls.description.value.${controls.language.value}}',
+          className: 'description',
+        },
+        {
+          data: 'unit',
+          title: 'Unit',
+        },
+        {
+          data: 'quantity',
+          title: 'Quantity',
+        },
+        {
+          data: 'tags',
+          title: 'Tags',
+        },
+        {
+          data: 'price',
+          title: 'Price',
+        },
+        {
+          data: 'currentProducts',
+          title: 'Current Products',
+          renderer: 'objectRenderer',
+          label: '${controls.quantity.value}-${controls.expirationDate.value}',
+        },
+        {
+          data: 'ingredients',
+          title: 'Ingredients',
+          renderer: 'objectRenderer',
+          label: '${controls.quantity.value}-${controls.productId.value}',
+        },
+        {
+          data: 'images',
+          title: 'Images',
+        }
+        ,
+        {
+          data: 'createdAt',
+          title: 'CreatedAt',
+        }
+        ,
+        {
+          data: 'updatedAt',
+          title: 'UpdatedAt',
+        }
+
+      ]
+    },
+    {
+      path: 'warehouses.edit',
+      title: 'Warehouses Edit',
+      navbar: {
+        reversed: true,
+        buttons: [
+
+          {
+            label: 'Close',
+            action: 'close',
+            icon: 'close',
+            active: true
+          },
+          {
+            label: 'Save',
+            action: 'save',
+            icon: 'check',
+            active: true,
+            yPost: ''
+          },
+        ]
+      },
+      yGet: '',
+      columns: [
+        {
+          data: '_id',
+          title: 'Id',
+          readOnly: true,
+          className: 'col-2xl-12 col-md-12 col-xs-12',
+        },
+        {
+          data: 'language',
+          editor: 'hidden'
+        },
+        {
+          data: 'languages',
+          showTabs: true,
+          className: 'col-2xl-6 col-md-6 col-xs-12',
+          editor: 'multiLang',
+        },
+        {
+          data: 'name',
+          title: 'Name',
+          controlType: 'BaseExtendedFormGroup',
+          className: 'col-2xl-6 col-md-6 col-xs-12',
+          validators: [
+            { name: 'required' },
+          ],
+          editor: 'langLinked'
+        },
+        {
+          data: 'description',
+          title: 'Description',
+          controlType: 'BaseExtendedFormGroup',
+          className: 'col-2xl-6 col-md-6 col-xs-12',
+          validators: [
+            { name: 'required' },
+          ],
+          editor: 'langLinked'
+        },
+        {
+          data: 'brand_name',
+          title: 'Brand Name',
+          className: 'col-2xl-6 col-md-6 col-xs-12',
+        },
+        {
+          data: 'unit',
+          title: 'Unit',
+          className: 'col-2xl-6 col-md-6 col-xs-12',
+        },
+        {
+          data: 'quantity',
+          title: 'Quantity',
+          className: 'col-2xl-6 col-md-6 col-xs-12',
+        },
+        {
+          data: 'tags',
+          className: 'col-2xl-6 col-md-6 col-xs-12',
+          title: 'Tags',
+          default: [],
+          editor: 'chipListEditor'
+        },
+        {
+          data: 'price',
+          className: 'col-2xl-6 col-md-6 col-xs-12',
+          title: 'Price',
+        },
+        {
+          data: 'currentProducts',
+          title: 'Current Products',
+          renderer: 'objectRenderer',
+          label: '${quantity}-${expirationDate}',
+          className: 'col-2xl-6 col-md-6 col-xs-12',
+        },
+        {
+          data: 'ingredients',
+          title: 'Ingredients',
+          renderer: 'objectRenderer',
+          label: '${quantity}-${productId}',
+          className: 'col-2xl-6 col-md-6 col-xs-12',
+        },
+        {
+          data: 'images',
+          title: 'Images',
+          className: 'col-2xl-6 col-md-6 col-xs-12',
+        }
+        ,
+        {
+          data: 'createdAt',
+          title: 'CreatedAt',
+          className: 'col-2xl-6 col-md-6 col-xs-12',
+          readOnly: true,
+        }
+        ,
+        {
+          data: 'updatedAt',
+          title: 'UpdatedAt',
+          className: 'col-2xl-6 col-md-6 col-xs-12',
+          readOnly: true,
+        }
+
+      ]
+    },
+
   ]
 }

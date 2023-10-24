@@ -54,11 +54,11 @@ export function tokenGetter() {
       deps: [AuthService, HttpClient, YjsService],
       multi: true,
     },
-    {
-      provide: HTTP_INTERCEPTORS,
-      useClass: TokenIInterceptor,
-      multi: true,
-    },
+    // {
+    //   provide: HTTP_INTERCEPTORS,
+    //   useClass: TokenIInterceptor,
+    //   multi: true,
+    // },
     {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
