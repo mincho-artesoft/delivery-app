@@ -78,7 +78,6 @@ export class UltimateSlotComponent implements AfterViewInit, OnInit {
         cell.style.width = `${this.dynamicService.cellWidths[index]}px`;
       });
     this.dynamicService.cellWidthsChanged.subscribe((newWidths) => {
-      console.log(newWidths)
       const rowCells = this.elementRef.nativeElement.querySelectorAll('.cell-row');
       rowCells.forEach((cell, index) => {
         cell.style.width = `${newWidths[index]}px`;

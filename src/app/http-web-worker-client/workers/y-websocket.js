@@ -31,6 +31,12 @@ function fromBase64(base64) {
   return bytes;
 }
 
+// organization 
+// ( warehouse
+//   menu
+//   profiles )
+
+
 const messageSync = 0
 const messageQueryAwareness = 3
 const messageAwareness = 1
@@ -75,14 +81,14 @@ messageHandlers[messageSubDocSync] = (encoder, decoder, provider, emitSynced, me
     if (emitSynced && syncMessageType === syncProtocol.messageYjsSyncStep2) {
       provider.allSubdocumentsGuids = provider.allSubdocumentsGuids.filter((id) => id != subDocID);
       const [prefix, parentID, suffix] = subDocID.split(".");
-      if(suffix == "organization") {
+      // if(suffix == "organization") {
         provider.subscribeToSubdocs(subDoc, "subdocs", suffix);
         subDoc.getMap("subdocs").forEach((s, key) => {
-          if(s && s.isSynced == false) {
+          if(s && !s.isSynced) {
             s.load();
           }
         });
-      }
+      // }
       subDoc.emit('synced', [true]);
       subDoc.isSynced = true;
     }

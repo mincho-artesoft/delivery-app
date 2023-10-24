@@ -24,14 +24,13 @@ export class AuthInterceptor implements HttpInterceptor {
     // Get the token from the AuthService
     const token = this.authService.getToken();
     // const userID = this.authService.extractUserIdFromToken(token);
-    const userID = 'qdssad12aqqmmm2'
     
     // If the token exists, clone the request and set the Authorization header
     if (token) {
       request = request.clone({
         setHeaders: {
           Authorization: `Bearer ${token}`,
-          "x-user-id": "123123123jhgjh123456gjhg123123123"
+          "x-user-id": "ads456gjh12311231212312jbh1231233323g123123123"
         }
       });
     }

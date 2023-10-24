@@ -12,6 +12,7 @@ import { HttpWebWorkerClientModule } from './http-web-worker-client/http-web-wor
 import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { AuthModule } from './auth/auth.module';
 import { YjsService } from './yjs.service';
+import { TokenIInterceptor } from './interceptors/token.interceptor';
 
 export function tokenGetter() {
   return localStorage.getItem("jwt_token");
@@ -39,29 +40,23 @@ export function tokenGetter() {
       provide: APP_INITIALIZER,
       useFactory: (authService: AuthService, httpClient: HttpClient, yjsService: YjsService) => {
         return () => {
-
           httpClient.request('Yget', `?initial=true`).subscribe((res: string) => {
             const structure = JSON.parse(res);
-            console.log(structure);
-
-
-            
             console.log("APP MODULE");
-            yjsService.documentStructure = structure.structure.subdocs;
+            console.log(structure);
             setTimeout(() => {
                   yjsService.stopSpinner();
                   yjsService.connected = true;
             }, 500);
           });
-          
-
-          // setTimeout(() => {
-          //   yjsService.stopSpinner();
-          //   yjsService.connected = true;
-          // }, 100)
         }
       },
       deps: [AuthService, HttpClient, YjsService],
+      multi: true,
+    },
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: TokenIInterceptor,
       multi: true,
     },
     {

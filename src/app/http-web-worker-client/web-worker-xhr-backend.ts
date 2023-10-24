@@ -11,7 +11,7 @@ import {
   HttpContext,
   HttpParams,
 } from '@angular/common/http';
-import { Observable, Subject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { XhrFactory } from '@angular/common';
 import { WebWorkerPool } from './web-worker-pool';
 import {
@@ -26,14 +26,12 @@ export class WebWorkerHttpBackend extends HttpXhrBackend {
   private baseUrl: string;
   private localUrl: string;
   private ignorePath: string;
-  // private CustomObservable: Observable<any>;
 
   constructor(
     @Inject(HTTP_WEB_WORKER_CLIENT_CONFIG) config: HttpWebWorkerClientConfig,
     xhrFactory: XhrFactory
   ) {
     super(xhrFactory);
-    
     this.workerPool = new WebWorkerPool(
       config.maxWorkers || 10,
       config.webWorkerPath
@@ -284,8 +282,6 @@ export class WebWorkerHttpBackend extends HttpXhrBackend {
       // worker.terminate();
       // };
     });
-
-    // return test as any;
   }
   
 }

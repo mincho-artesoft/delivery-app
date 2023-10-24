@@ -1,1 +1,4 @@
-<router-outlet></router-outlet>
+<mat-spinner class="spinner"></mat-spinner>
+<ng-container *ngIf="yjsService.connected">
+  <router-outlet></router-outlet>
+</ng-container>
