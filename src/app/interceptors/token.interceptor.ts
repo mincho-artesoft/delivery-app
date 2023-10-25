@@ -20,8 +20,8 @@ export class TokenIInterceptor implements HttpInterceptor {
     if (request.url.endsWith("login") || request.url.endsWith("register")) {
       req = next.handle(request);
     } else {
-      const authToken = this.authService.getToken();
-
+      // const authToken = this.authService.getToken();
+      const authToken = 'sdasdasdas'
       const authReq = request.clone({
         headers: request.headers.set('Authorization', `Bearer ${authToken}`)
       });

@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { YjsService } from './yjs.service';
 
 @Component({
   selector: 'app-root',
@@ -7,4 +8,6 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'delivery-project';
+
+  constructor(public yjsService: YjsService) { }
 }

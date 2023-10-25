@@ -36,7 +36,7 @@ export class DynamicService {
 
   setCellWidths(widths: number[]) {
     this.cellWidths = widths;
-    console.log(this.cellWidths)
+    // console.log(this.cellWidths)
     this.cellWidthsChanged.next(this.cellWidths);
   }
 
