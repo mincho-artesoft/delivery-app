@@ -67,10 +67,12 @@ export class DynamicTableComponent implements OnInit, OnDestroy, AfterViewInit {
     const sortField = event.active;
     const sortDirection = event.direction;
 
-    console.log(sortField, sortDirection)
   }
 
   ngAfterViewInit(): void {
+    setTimeout(() => {
+      this.syncContainerWidths();
+    }, 500)
   }
   generateRandomId(length: number): string {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -156,7 +158,7 @@ export class DynamicTableComponent implements OnInit, OnDestroy, AfterViewInit {
   syncContainerWidths() {
     const tableWidth = this.getTableWidth();
     const elementsContainer = this.elementRef.nativeElement.querySelector('.elements-container');
-
+    console.log(elementsContainer)
     if (elementsContainer) {
       this.renderer?.setStyle(elementsContainer, 'width', `${tableWidth}px`);
       this.syncCellWidths();

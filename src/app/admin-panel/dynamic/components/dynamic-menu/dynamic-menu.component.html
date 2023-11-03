@@ -1,17 +1,50 @@
-<div class="menu-holder" [ngClass]="{ 'active hover': hoverMenu }" (mouseenter)="hoverMenu = true"
+<div class="menu-holder" [ngClass]="{ 'active': hoverMenu }" (mouseenter)="hoverMenu = true"
     (mouseleave)="hoverMenu = false">
-    <div *ngFor="let item of menuItems">
-        <div class="expandable-item">
-            <mat-icon>{{item.icon}}</mat-icon>
-            <span *ngIf="hoverMenu" [routerLink]="[item.path]" class="link">{{item.label}}</span>
-            <mat-icon class="arrow-icon" (click)="panelOpenState = !panelOpenState">{{panelOpenState ? 'keyboard_arrow_up' : 'keyboard_arrow_down'}}</mat-icon>
-        </div>
-        <div class="expandable-content" *ngIf="panelOpenState">
-            <div *ngFor="let sub of item.subMenus" class="expandable-item">
-                <mat-icon>{{sub.icon}}</mat-icon> 
-                <span *ngIf="hoverMenu" [routerLink]="[sub.path]" class="link">{{sub.label}}</span>
+    <div class="left-menu-container">
+        <div class="organizations-wrapper" [ngClass]="{ 'active': hoverLeftMenu }" (mouseenter)="hoverLeftMenu = true"
+            (mouseleave)="hoverLeftMenu = false">
+            <div *ngFor="let org of organizations">
+                <div class="organization" (click)="currentOrg = org.name">
+                    <img [src]="org.img" [ngClass]="{ 'active': org.name === currentOrg }">
+                    <div class="org-short-info">
+                        <span class="name"> {{org.name[language]}}</span>
+                        <span class="email"> {{org.domain}}</span>
+                    </div>
+
+                </div>
             </div>
         </div>
+        <div class="another-actions-wrapper">
+            <div class="teams">
+                <img src="https://img.freepik.com/premium-vector/male-female-icon-set-with-flat-vector-illustration_454824-501.jpg">
+                <span>Teams</span>
+            </div>
+            <div class="chats">
+                <img src="https://cdn.pixabay.com/photo/2020/06/29/17/24/chat-5353507_960_720.png">
+                <span>Chats</span>
+            </div>
+
+        </div>
     </div>
-    <div class="flex-spacer" (mouseenter)="hoverMenu = true" (mouseleave)="hoverMenu = false"></div>
+    <div class="right-menu-container">
+        <ng-container *ngFor="let item of menuItems">
+            <div class="non-expandable-menu" *ngIf="!item.subMenus">
+                <span class="link top-label">{{item.label}}</span>
+            </div>
+            <div class="expandable-menu" *ngIf="item.subMenus" [ngClass]="{'active': expandedMenus[item.path]}">
+                <div class="label" (click)="toggleMenu(item.path)">
+                    <span>{{item.label}}</span>
+                    <mat-icon>{{expandedMenus[item.path] ?
+                        'arrow_drop_up' :
+                        'arrow_drop_down'}}</mat-icon>
+                </div>
+                <div class="expandable-content" *ngIf="expandedMenus[item.path]">
+                    <span class="link sub-label" *ngFor="let sub of item.subMenus">
+                        {{sub.label}}
+                    </span>
+                </div>
+            </div>
+        </ng-container>
+
+    </div>
 </div>

@@ -8,7 +8,7 @@
             <app-dynamic-navbar *ngIf="dynamicService.formArrayProvider()?.htmlSettings?.navbar" [settings]="dynamicService.formArrayProvider()?.htmlSettings"></app-dynamic-navbar>
             <div class="table-menu-wrapper">
                 <app-dynamic-menu></app-dynamic-menu>
-                <app-dynamic-table *ngIf="dynamicService.formArrayProvider()" [settings]="dynamicService.formArrayProvider()?.htmlSettings" style="margin-left: 70px;" [formGroup]="dynamicService.formArrayProvider()"></app-dynamic-table>
+                <app-dynamic-table *ngIf="dynamicService.formArrayProvider()" [settings]="dynamicService.formArrayProvider()?.htmlSettings" style="margin-left: 80px;" [formGroup]="dynamicService.formArrayProvider()"></app-dynamic-table>
             </div>
         </mat-drawer-content>
     </mat-drawer-container>

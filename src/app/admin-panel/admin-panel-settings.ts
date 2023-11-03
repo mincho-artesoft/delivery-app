@@ -7,13 +7,6 @@ export const ADMIN_PANEL_SETTINGS = {
       yGet: '/organizations',
       separator: null,
       showHeaders: true,
-      menuView: {
-        'name': 'Organizations',
-        'icon': 'restaurant',
-        'tooltip': 'Organizations',
-        'label': 'Organizations',
-        'path': '/organizations',
-      },
       navbar: {
         buttons: [
           {
@@ -338,7 +331,6 @@ export const ADMIN_PANEL_SETTINGS = {
         'tooltip': 'Warehouse',
         'label': 'Warehouse',
         'path': '/warehouse',
-        group: '/organizations'
       },
       navbar: {
         buttons: [
