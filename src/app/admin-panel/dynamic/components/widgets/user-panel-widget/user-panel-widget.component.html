@@ -1,0 +1,8 @@
+<div class="user-image" (click)="openUserPanel()">
+    <img
+        src="https://e7.pngegg.com/pngimages/178/595/png-clipart-user-profile-computer-icons-login-user-avatars-monochrome-black-thumbnail.png">
+    <div *ngIf="userPanelOpened" class="user-panel">
+        <span class="option" routerLink="/organizations">My organizations</span>
+        <span class="option logout">Logout</span>
+    </div>
+</div>

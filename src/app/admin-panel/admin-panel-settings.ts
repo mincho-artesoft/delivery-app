@@ -112,6 +112,60 @@ export const ADMIN_PANEL_SETTINGS = {
     },
 
     {
+      path: 'teams',
+      title: 'Teams',
+      className: 'col-2xl-2 col-md-6 col-xs-11',
+      yGet: '/organizations',
+      showHeaders: false,
+      notTable: true,
+      navbar: {
+        buttons: [
+          {
+            label: 'Add new member',
+            action: 'create',
+            path: 'organizations.edit',
+            openSidenav: true,
+            color: 'accent',
+            active: true,
+            icon: 'add_box'
+          },
+          {
+            label: 'Join team',
+            action: 'edit',
+            path: 'organizations.edit',
+            color: 'primary',
+            openSidenav: true,
+            icon: 'create',
+            active: true
+          },
+          {
+            label: 'Remove member',
+            action: 'delete',
+            isDialog: true,
+            active: true,
+            icon: 'delete',
+            color: 'warn',
+            deletePath: '/organization?path=${_id}',
+            message: 'Restaurant with ${_id} was successfully deleted'
+          },
+          {
+            label: 'Leave team',
+            action: 'edit',
+            path: 'organizations.edit',
+            color: 'primary',
+            openSidenav: true,
+            icon: 'create',
+            active: true
+          }
+
+        ],
+      },
+      columns: [
+      ],
+      template: 'teamsComponent'
+    },
+
+    {
       path: 'organizations.edit',
       title: 'Restaurants Edit',
       navbar: {
@@ -434,7 +488,7 @@ export const ADMIN_PANEL_SETTINGS = {
       ]
     },
     {
-      path: 'warehouses.edit',
+      path: 'warehouse.edit',
       title: 'Warehouses Edit',
       navbar: {
         reversed: true,

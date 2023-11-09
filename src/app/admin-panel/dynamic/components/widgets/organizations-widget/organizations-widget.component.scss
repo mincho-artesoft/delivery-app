@@ -1,0 +1,73 @@
+.widget-positioner {
+    position: relative;
+}
+.organizations-wrapper {
+    display: flex;
+    flex-direction: column;
+    font-size: 14px;
+    font-weight: 400;
+    overflow: hidden;
+    height: min-content;
+    padding-left: 10px;
+    padding-top: 10px;
+
+    .organization {
+        margin-bottom: 10px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        height: 70px;
+
+        img {
+            width: 60px;
+            height: 60px;
+            border-radius: 10%;
+
+            &.selected {
+                border: 3px solid rgba(113, 192, 68, 255);
+            }
+        }
+
+        img:hover {
+            cursor: pointer;
+        }
+
+        .org-short-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+
+            .name {
+                padding-left: 20px;
+                color: white;
+                overflow: hidden;
+                padding-right: 10px;
+                font-size: 18px;
+                font-weight: 500;
+            }
+
+            .email {
+                width: 100%;
+                padding-left: 20px;
+                text-overflow: ellipsis;
+                font-size: 12px;
+                font-weight: 300;
+            }
+        }
+
+    }
+
+    &.active {
+        position: absolute;
+        border-radius: 5%;
+        width: 280px;
+        z-index: 150;
+        background-color: rgba(27, 29, 33, 255);
+    }
+}
+
+.static-widget {
+    &.hide {
+        visibility: hidden;
+    }
+}

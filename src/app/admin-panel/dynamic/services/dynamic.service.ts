@@ -2,12 +2,10 @@ import { CdkDropList } from '@angular/cdk/drag-drop';
 import { Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { Location } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../components/confirm-dialog/confirm-dialog.component';
-import { ADMIN_PANEL_SETTINGS } from '../../admin-panel-settings';
 
 @Injectable({
   providedIn: 'root'
@@ -115,7 +113,6 @@ export class DynamicService {
         let params = button.path.split('.');
         let id = control ? control.getRawValue()._id : this.lastSelectedRow?._id;
         let urlSegments = [params[0]];
-
         if (button.action === 'edit' && id) {
           const [param, b, c] = id.split(".");
           urlSegments.push('edit', param);

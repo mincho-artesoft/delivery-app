@@ -1,35 +1,29 @@
 <div class="menu-holder" [ngClass]="{ 'active': hoverMenu }" (mouseenter)="hoverMenu = true"
     (mouseleave)="hoverMenu = false">
     <div class="left-menu-container">
-        <div class="organizations-wrapper" [ngClass]="{ 'active': hoverLeftMenu }" (mouseenter)="hoverLeftMenu = true"
-            (mouseleave)="hoverLeftMenu = false">
-            <div *ngFor="let org of organizations">
-                <div class="organization" (click)="currentOrg = org.name">
-                    <img [src]="org.img" [ngClass]="{ 'active': org.name === currentOrg }">
-                    <div class="org-short-info">
-                        <span class="name"> {{org.name[language]}}</span>
-                        <span class="email"> {{org.domain}}</span>
-                    </div>
-
-                </div>
-            </div>
-        </div>
+        <app-organizations-widget></app-organizations-widget>
         <div class="another-actions-wrapper">
-            <div class="teams">
-                <img src="https://img.freepik.com/premium-vector/male-female-icon-set-with-flat-vector-illustration_454824-501.jpg">
+            <div class="action teams" routerLink="/teams">
+                <img
+                    src="https://img.freepik.com/premium-vector/male-female-icon-set-with-flat-vector-illustration_454824-501.jpg">
                 <span>Teams</span>
             </div>
-            <div class="chats">
+            <div class="action chats">
                 <img src="https://cdn.pixabay.com/photo/2020/06/29/17/24/chat-5353507_960_720.png">
                 <span>Chats</span>
             </div>
 
+            <div class="action user">
+                <app-user-panel-widget></app-user-panel-widget>
+            </div>
         </div>
+
+
     </div>
     <div class="right-menu-container">
         <ng-container *ngFor="let item of menuItems">
             <div class="non-expandable-menu" *ngIf="!item.subMenus">
-                <span class="link top-label">{{item.label}}</span>
+                <span class="link top-label" [routerLink]="item.path">{{item.label}}</span>
             </div>
             <div class="expandable-menu" *ngIf="item.subMenus" [ngClass]="{'active': expandedMenus[item.path]}">
                 <div class="label" (click)="toggleMenu(item.path)">

@@ -13,6 +13,8 @@ import { DynamicOutletComponent } from './components/dynamic-outlet/dynamic-outl
 import { DynamicMenuComponent } from './components/dynamic-menu/dynamic-menu.component';
 import { HttpClientModule } from '@angular/common/http';
 import { DynamicComponent } from './components/dynamic/dynamic.component';
+import { OrganizationsWidgetComponent } from './components/widgets/organizations-widget/organizations-widget.component';
+import { UserPanelWidgetComponent } from './components/widgets/user-panel-widget/user-panel-widget.component';
 
 
 
@@ -26,7 +28,9 @@ import { DynamicComponent } from './components/dynamic/dynamic.component';
     ConfirmDialogComponent,
     DynamicNavbarComponent,
     DynamicOutletComponent,
-    DynamicMenuComponent
+    DynamicMenuComponent,
+    OrganizationsWidgetComponent,
+    UserPanelWidgetComponent,
   ],
   exports: [
     DynamicComponent,

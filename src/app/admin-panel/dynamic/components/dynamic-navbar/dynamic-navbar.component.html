@@ -1,11 +1,31 @@
-<div class="dynamic-navbar-container">
-<div>
-    <h2>{{settings.title}}</h2>
-</div>
-<div class="dynamic-navbar-buttons-container" [ngClass]="{'reversed': settings.navbar?.reversed}">
-    <button *ngFor="let button of settings?.navbar.buttons" (click)="onClick(button)" [color]="button.color" [disabled]="button.active === false ? true : null"
-        [matTooltip]="button.label" mat-elevation-z4 mat-mini-fab>
-        <mat-icon>{{button.icon}}</mat-icon>
-    </button>
-</div>
-</div>
+<mat-toolbar class="toolbar">
+    <ng-container *ngIf="!settings.navbar.reversed">
+        <div class="information-wrapper">
+            <h2>{{settings?.title}}</h2>
+        </div>
+        <div class="search-wrapper">
+            <input matInput placeholder="Search">
+            <div class="buttons-wrapper" [ngClass]="{ 'reversed': settings.navbar.reversed }">
+                <button class="settings-btn" *ngFor="let button of settings?.navbar.buttons" [color]="button.color"
+                    [disabled]="button.active === false ? true : null" [matTooltip]="button.label" mat-elevation-z4
+                    mat-mini-fab (click)="onClick(button)">
+                    <mat-icon>{{button.icon}}</mat-icon>
+                    <span>{{button.label}}</span>
+                </button>
+            </div>
+
+        </div>
+    </ng-container>
+    <ng-container *ngIf="settings.navbar.reversed">
+        <div class="buttons-title-wrapper">
+            <h2>{{settings?.title}}</h2>
+            <div class="buttons-wrapper" [ngClass]="{ 'reversed': settings.navbar.reversed }">
+                <button *ngFor="let button of settings?.navbar.buttons" [color]="button.color"
+                    [disabled]="button.active === false ? true : null" [matTooltip]="button.label" mat-elevation-z4
+                    mat-mini-fab (click)="onClick(button)">
+                    <mat-icon>{{button.icon}}</mat-icon>
+                </button>
+            </div>
+        </div>
+    </ng-container>
+</mat-toolbar>

@@ -1,4 +1,4 @@
-<div *ngIf="settings && formGroup">
+<div *ngIf="!settings.notTable && formGroup">
     <app-dynamic-navbar [formGroup]="formGroup" *ngIf="settings.navbar" [settings]="settings"></app-dynamic-navbar>
     <ng-container [formGroup]="formGroup">
         <div class="content-holder flex-container" *ngIf="settings">
@@ -26,24 +26,22 @@
                         <mat-form-field class="example-chip-list">
                             <mat-label>{{column.title}}</mat-label>
                             <mat-chip-grid #chipGrid class="horizontal-chip-list" [ngStyle]="{'flex-flow': 'nowrap'}">
-                              <mat-chip-row *ngFor="let chip of column.control.value"
-                                            (removed)="remove(chip, column.control)"
-                                            [editable]="true"
-                                            (edited)="edit(chip, $event, column.control)"
-                                            [aria-description]="'press enter to edit ' + chip.name">
-                                {{chip}}
-                                <button matChipRemove [attr.aria-label]="'remove ' + chip.name">
-                                  <mat-icon>cancel</mat-icon>
-                                </button>
-                              </mat-chip-row>
-                              <input [placeholder]="column.placeholder || 'Add...'"
-                                     [matChipInputFor]="chipGrid"
-                                     [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
-                                     [matChipInputAddOnBlur]="addOnBlur"
-                                     (matChipInputTokenEnd)="add($event, column.control)"
-                                     [style.background]=" 'transparent' "/>
+                                <mat-chip-row *ngFor="let chip of column.control.value"
+                                    (removed)="remove(chip, column.control)" [editable]="true"
+                                    (edited)="edit(chip, $event, column.control)"
+                                    [aria-description]="'press enter to edit ' + chip.name">
+                                    {{chip}}
+                                    <button matChipRemove [attr.aria-label]="'remove ' + chip.name">
+                                        <mat-icon>cancel</mat-icon>
+                                    </button>
+                                </mat-chip-row>
+                                <input [placeholder]="column.placeholder || 'Add...'" [matChipInputFor]="chipGrid"
+                                    [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+                                    [matChipInputAddOnBlur]="addOnBlur"
+                                    (matChipInputTokenEnd)="add($event, column.control)"
+                                    [style.background]=" 'transparent' " />
                             </mat-chip-grid>
-                          </mat-form-field>
+                        </mat-form-field>
                     </div>
 
 
@@ -148,4 +146,11 @@
             </ng-container>
         </div>
     </ng-container>
+</div>
+<div *ngIf="settings.notTable && formArray">
+    <div *ngFor="let ctrl of formArray.controls" class="teams-wrapper">
+        <mat-card class="team-card">
+            <mat-card-content>{{ctrl.value._id}}</mat-card-content>
+        </mat-card>
+    </div>
 </div>

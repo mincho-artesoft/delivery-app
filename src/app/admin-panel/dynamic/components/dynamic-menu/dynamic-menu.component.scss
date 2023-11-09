@@ -2,7 +2,7 @@
     color: white;
     position: absolute;
     width: 80px;
-    height: calc(100% - 15px);
+    height: 100%;
     top: 0;
     left: 0;
     display: flex;
@@ -15,86 +15,28 @@
     overflow: hidden;
 
     .left-menu-container {
+        display: flex;
+        flex-direction: column;
         position: relative;
         width: 80px;
         padding-top: 10px;
         padding-bottom: 20px;
 
-        .organizations-wrapper {
-            display: flex;
-            flex-direction: column;
-            font-size: 14px;
-            font-weight: 400;
-            overflow: hidden;
-            height: min-content;
-            padding-left: 10px;
-            padding-top: 10px;
-
-            .organization {
-                margin-bottom: 10px;
-                display: flex;
-                flex-direction: row;
-                align-items: center;
-                height: 70px;
-
-                img {
-                    width: 60px;
-                    height: 60px;
-                    border-radius: 10%;
-
-                    &.active {
-                        border: 3px solid rgba(113, 192, 68, 255);
-                    }
-                }
-
-                img:hover {
-                    cursor: pointer;
-                }
-
-                .org-short-info {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: flex-start;
-
-                    .name {
-                        padding-left: 20px;
-                        color: white;
-                        overflow: hidden;
-                        padding-right: 10px;
-                        font-size: 18px;
-                        font-weight: 500;
-                    }
-
-                    .email {
-                        width: 100%;
-                        padding-left: 20px;
-                        text-overflow: ellipsis;
-                        font-size: 12px;
-                        font-weight: 300;
-                    }
-                }
-
-            }
-
-            &.active {
-                border-radius: 5%;
-                width: 280px;
-                z-index: 50;
-                background-color: rgba(27, 29, 33, 255);
-            }
-        }
-
         .another-actions-wrapper {
+            display: flex;
             width: 100%;
+            height: 100%;
             flex-direction: column;
             padding: 15px;
             padding-top: 10px;
-            div {
+
+            .action {
                 width: 100%;
                 display: flex;
                 flex-direction: column;
                 width: 100%;
                 margin-bottom: 20px;
+
                 img {
                     width: 50px;
                     height: 50px;
@@ -104,20 +46,24 @@
                         border: 3px solid rgba(113, 192, 68, 255);
                     }
                 }
+
                 span {
                     text-align: center;
                     margin-top: 5px;
                     width: 50px;
                     font-size: 14px;
                 }
+
                 img:hover {
                     cursor: pointer;
                 }
 
+                &.user {
+                    margin-top: auto;
+                }
+
             }
-
         }
-
     }
 
     .right-menu-container {
@@ -137,11 +83,12 @@
                 width: 100%;
                 text-align: center;
             }
+
+            .link:hover {
+                cursor: pointer;
+                color: rgba(113, 192, 68, 255);
+            }
         }
-
-
-
-
         .expandable-menu {
             padding: 10px;
             padding-bottom: 15px;
