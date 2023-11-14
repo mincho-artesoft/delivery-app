@@ -1,6 +1,7 @@
 .widget-positioner {
     position: relative;
 }
+
 .organizations-wrapper {
     display: flex;
     flex-direction: column;
@@ -55,6 +56,17 @@
             }
         }
 
+    }
+
+    .link {
+        width: 100%;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .link:hover {
+        cursor: pointer;
+        color: rgba(113, 192, 68, 255);
     }
 
     &.active {
