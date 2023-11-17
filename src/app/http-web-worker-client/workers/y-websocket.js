@@ -72,26 +72,29 @@ messageHandlers[messageAuth] = (encoder, decoder, provider, emitSynced, messageT
 
 messageHandlers[messageSubDocSync] = (encoder, decoder, provider, emitSynced, messageType) => {
   const subDocID = decoding.readVarString(decoder);
-  console.log(subDocID);
-  encoding.writeVarUint(encoder, messageSync)
-  const subDoc = provider.getSubDoc(subDocID)
+  encoding.writeVarUint(encoder, messageSync);
+  const subDoc = provider.getSubDoc(subDocID);
   if (subDoc) {
-    const syncMessageType = syncProtocol.readSyncMessage(decoder, encoder, subDoc, provider)
-    
+    const syncMessageType = syncProtocol.readSyncMessage(decoder, encoder, subDoc, provider);
     if (emitSynced && syncMessageType === syncProtocol.messageYjsSyncStep2) {
-      provider.allSubdocumentsGuids = provider.allSubdocumentsGuids.filter((id) => id != subDocID);
-      const [prefix, parentID, suffix] = subDocID.split(".");
-      // if(suffix == "organization") {
-        provider.subscribeToSubdocs(subDoc, "subdocs", suffix);
-        subDoc.getMap("subdocs").forEach((s, key) => {
-          if(s && !s.isSynced) {
-            s.load();
-          }
-        });
-      // }
-      subDoc.emit('synced', [true]);
-      subDoc.isSynced = true;
+      const length = Array.from(subDoc.share.values()).length;
+      if(length > 0 && !subDoc.guid.includes("organization")) {
+        subDoc.emit('synced', [true]);
+        subDoc.isSynced = true;
+      } else if(subDoc.guid.includes("organization")) {
+        subDoc.emit('synced', [true]);
+        subDoc.isSynced = true;
+      }
     }
+    const [prefix, parentID, suffix] = subDocID.split(".");
+      provider.subscribeToSubdocs(subDoc);
+      const subdocs = subDoc.getMap("subdocs");
+      console.log(Array.from(subDoc.subdocs).map(s => s.guid));
+      subdocs.forEach((s, key) => {
+        if(s && !s.isSynced) {
+          s.load();
+        }
+      });
   }
 }
 
@@ -109,7 +112,7 @@ const permissionDeniedHandler = (provider, reason) =>
   console.warn(`Permission denied to access ${provider.url}.\n${reason}`)
 
 /**
- * @param {WebsocketProvider} provider
+ * @param {WebsocketProvider} providerjhbjhbb
  * @param {Uint8Array} buf
  * @param {boolean} emitSynced
  * @return {encoding.Encoder}
@@ -294,7 +297,8 @@ export class WebsocketProvider extends Observable {
     waitForConnection
     _getSubDocUpdateHandler
     subdocs = new Map();
-    subscribeToSubdocs
+    subscribeToSubdocs;
+    iterateFunc;
   constructor(
     serverUrl,
     roomname,
@@ -305,7 +309,8 @@ export class WebsocketProvider extends Observable {
       params = {},
       WebSocketPolyfill = WebSocket,
       resyncInterval = -1,
-    } = {}
+    } = {},
+    iterateFunc
   ) {
     super()
     // ensure that url is always ends with /
@@ -318,6 +323,7 @@ export class WebsocketProvider extends Observable {
     // this.url =
     //   serverUrl + "/dev" +
     //   (encodedParams.length === 0 ? '' : '?' + encodedParams)
+    this.iterateFunc = iterateFunc;
     this.bcChannel = serverUrl + '/' + roomname
     this.url =
       serverUrl +
@@ -391,34 +397,33 @@ export class WebsocketProvider extends Observable {
     }
     this.doc.on('update', this._updateHandler);
 
-    const tryToFindWrongSubdoc = (searched, doc, docs) => {
-      Array.from(docs).forEach(subdoc => {
-        const [a, b, suffix] = subdoc.guid.split(".");
-        if(!searched.includes(suffix)) {
-          doc.getMap("subdocs").delete(subdoc.guid);
-        }
-      });
-    }
-
-    const docTypes = {
-      mainDoc: ["organization"],
-      organization: ["warehouse"],
-      warehouse: []
-    }
-
-    const subscribedDocs = new Set();
-
-    this.subscribeToSubdocs = (doc, typeOfSubsocs, docType) => {
-      if(Array.from(subscribedDocs).includes(doc.guid)) {
-        return;
-      }
-      doc.on(typeOfSubsocs, ({ added, removed, loaded }) => {
+    this.subscribeToSubdocs = (doc) => {
+      doc.on("subdocs", ({ added, removed, loaded }) => {
+        console.log("added", Array.from(added));
+        console.log("removed", Array.from(removed));
+        console.log("loaded", Array.from(loaded));
         added.forEach((subdoc) => {
-          this.subdocs.set(subdoc.guid, subdoc)
+          this.subdocs.set(subdoc.guid, subdoc);
+          setTimeout(() => {
+            if(!subdoc.isSynced) {
+              const encoder = encoding.createEncoder()
+              encoding.writeVarUint(encoder, messageSubDocSync)
+              encoding.writeVarString(encoder, subdoc.guid)
+              syncProtocol.writeSyncStep1(encoder, subdoc)
+              if (this.ws) {
+                this.send(encoding.toUint8Array(encoder), () => {
+                  subdoc.on('update', this._getSubDocUpdateHandler(subdoc))
+                })
+              }
+              this.iterateFunc(subdoc);
+            }
+          }, 500);
+          this.iterateFunc(subdoc);
         })
         removed.forEach((subdoc) => {
           subdoc.off('update', this._getSubDocUpdateHandler(subdoc))
           this.subdocs.delete(subdoc.guid)
+          this.iterateFunc(subdoc, true);
         })
         loaded.forEach((subdoc) => {
           if(!this.subdocs.has(subdoc.guid)) {
@@ -435,6 +440,7 @@ export class WebsocketProvider extends Observable {
                 subdoc.on('update', this._getSubDocUpdateHandler(subdoc))
               })
             }
+            this.iterateFunc(subdoc);
           }
         })
       })
@@ -486,7 +492,7 @@ export class WebsocketProvider extends Observable {
     }
     
       
-    this.subscribeToSubdocs(this.doc, "subdocs", "mainDoc");
+    this.subscribeToSubdocs(this.doc);
 
     /**
      * @param {any} changed
@@ -541,14 +547,11 @@ export class WebsocketProvider extends Observable {
         map.delete(guid);
         return;
       }
-      if(guid.endsWith("organization")) {
+      // if(guid.endsWith("organization")) {
         this.allSubdocumentsGuids = this.allSubdocumentsGuids.filter((id) => id != guid);
-        this.subscribeToSubdocs(subdoc, "subdocs", "organization");
+        this.subscribeToSubdocs(subdoc);
         subdoc.load();
-      } else {
-        map.delete(guid, undefined);
-        this.doc.subdocs.delete(subdoc);
-      }
+      // }
     })
   }
 
@@ -567,7 +570,7 @@ export class WebsocketProvider extends Observable {
     }
   }
   getSubDoc(id) {
-    return this.subdocs.get(id);
+    return this.subdocs.get(id) || new Y.Doc({guid: id});
   }
   _awarenessUpdateHandler
   _checkInterval

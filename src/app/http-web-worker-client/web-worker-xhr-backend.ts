@@ -24,6 +24,7 @@ import { uuidv4 } from '@firebase/util';
 export class WebWorkerHttpBackend extends HttpXhrBackend {
   public workerPool: WebWorkerPool;
   private baseUrl: string;
+  private urlToSend: string;
   private localUrl: string;
   private ignorePath: string;
 
@@ -147,9 +148,10 @@ export class WebWorkerHttpBackend extends HttpXhrBackend {
       }
       (async () => {
         // TODO Not all files will be with key 'file'. Must change the way that we check their type.
+        this.urlToSend = req.urlWithParams.includes("http") ? this.baseUrl.replace("ws://localhost:9182", "") : this.baseUrl;
         if (req.body instanceof FormData && req.body.getAll('file').length > 0) {
           const { arrayBuffer, name, type } = await this.formDataToFileArrayBuffer(req.body);
-          const urlWithParams = this.concatenateUrlParts(this.baseUrl, req.urlWithParams);
+          const urlWithParams = this.concatenateUrlParts(this.urlToSend, req.urlWithParams);
           headers.set('Content-Type', 'multipart/form-data');
           worker.postMessage(
             {
@@ -172,7 +174,7 @@ export class WebWorkerHttpBackend extends HttpXhrBackend {
           req = req.clone({ body: formDataEntries });
           const serializedBody = req.serializeBody();
 
-          const urlWithParams = this.concatenateUrlParts(this.baseUrl, req.urlWithParams);
+          const urlWithParams = this.concatenateUrlParts(this.urlToSend, req.urlWithParams);
           // Post a message to the Web Worker with the request data
           worker.postMessage({
             uuid: uuid,
@@ -185,7 +187,8 @@ export class WebWorkerHttpBackend extends HttpXhrBackend {
 
         } else {
           const serializedBody = req.serializeBody();
-          const urlWithParams = this.concatenateUrlParts(this.baseUrl, req.urlWithParams);
+          let urlWithParams = this.concatenateUrlParts(this.urlToSend, req.urlWithParams);
+          urlWithParams = urlWithParams.startsWith("/") ? urlWithParams.slice(1) : urlWithParams;
           // Post a message to the Web Worker with the request data
           worker.postMessage({
             uuid: uuid,
@@ -217,7 +220,7 @@ export class WebWorkerHttpBackend extends HttpXhrBackend {
                   headers: new HttpHeaders(headersObject),
                   status: status,
                   statusText: statusText,
-                  url: this.baseUrl + req.urlWithParams || undefined,
+                  url: this.urlToSend + req.urlWithParams || undefined,
                 })              
               );
            }
@@ -229,7 +232,7 @@ export class WebWorkerHttpBackend extends HttpXhrBackend {
                 headers: new HttpHeaders(headersObject),
                 status: status,
                 statusText: statusText,
-                url: this.baseUrl + req.urlWithParams || undefined,
+                url: this.urlToSend + req.urlWithParams || undefined,
               })              
             );
             observer.complete();
@@ -257,7 +260,7 @@ export class WebWorkerHttpBackend extends HttpXhrBackend {
                 statusText: error.response.detail || error.response.message || error.statusText,
                 // @ts-ignore
                 headers: new HttpHeaders(Object.fromEntries(error.headers)),
-                url: this.baseUrl + '/' + req.urlWithParams || undefined,
+                url: this.urlToSend + '/' + req.urlWithParams || undefined,
               }),
               );
           }

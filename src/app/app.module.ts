@@ -42,6 +42,7 @@ export function tokenGetter() {
         return () => {
           httpClient.request('Yget', `?initial=true`).subscribe((res: string) => {
             const structure = JSON.parse(res);
+            yjsService.documentStructure = structure.structure;
             console.log("APP MODULE");
             console.log(structure);
             setTimeout(() => {
