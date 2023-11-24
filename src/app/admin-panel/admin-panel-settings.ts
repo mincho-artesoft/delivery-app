@@ -4,7 +4,7 @@ export const ADMIN_PANEL_SETTINGS = {
       path: 'organizations',
       title: 'Organizations',
       className: 'col-2xl-2 col-md-6 col-xs-11',
-      yGet: '/organizations',
+      yGet: { path: '/organizations' },
       separator: null,
       showHeaders: true,
       navbar: {
@@ -110,12 +110,135 @@ export const ADMIN_PANEL_SETTINGS = {
 
       ]
     },
-
+    {
+      path: 'employees',
+      title: 'Employees',
+      className: 'col-2xl-2 col-md-6 col-xs-11',
+      yGet: { path: '/organizations', prop: 'employees' },
+      separator: null,
+      showHeaders: true,
+      navbar: {
+        buttons: [
+          {
+            label: 'Add new',
+            action: 'create',
+            path: 'employees.edit',
+            openSidenav: true,
+            color: 'accent',
+            active: true,
+            icon: 'add_box'
+          },
+          {
+            label: 'Edit',
+            action: 'edit',
+            path: 'employees.edit',
+            color: 'primary',
+            openSidenav: true,
+            icon: 'create',
+            active: true
+          },
+          {
+            label: 'Delete',
+            action: 'delete',
+            isDialog: true,
+            active: true,
+            icon: 'delete',
+            color: 'warn',
+            deletePath: '`/profiles?path=${_id}`',
+            message: 'Employee with ${_id} was successfully deleted'
+          }
+        ],
+      },
+      columns: [
+        {
+          data: '_id',
+          title: 'ID',
+          sortable: true,
+          width: 80,
+        },
+        {
+          data: 'img',
+          title: 'Picture',
+        },
+        {
+          data: 'name',
+          title: 'Name',
+        },
+        {
+          data: 'position',
+          title: 'Position',
+        },
+        {
+          data: 'email',
+          title: 'Email',
+        }
+      ]
+    },
+    {
+      path: 'employees.edit',
+      title: 'Employee Edit',
+      className: 'col-2xl-2 col-md-6 col-xs-11',
+      yGet: { path: '/organizations', prop: 'employees', id: true },
+      separator: null,
+      showHeaders: true,
+      navbar: {
+        reversed: true,
+        buttons: [
+          {
+            label: 'Close',
+            action: 'close',
+            icon: 'close',
+            active: true
+          },
+          {
+            label: 'Save',
+            action: 'save',
+            icon: 'check',
+            active: true,
+            yPost: '${id}.{userID}.organization'
+          }
+        ],
+      },
+      columns: [
+        {
+          data: '_id',
+          title: 'ID',
+          readOnly: true,
+          width: 80,
+        },
+        {
+          data: 'img',
+          title: 'Picture',
+        },
+        {
+          data: 'name',
+          title: 'Name',
+          validators: [
+            { validator: 'required' }
+          ]
+        },
+        {
+          data: 'position',
+          title: 'Position',
+          validators: [
+            { validator: 'required' }
+          ]
+        },
+        {
+          data: 'email',
+          title: 'Email',
+          validators: [
+            { name: 'email' },
+            { validator: 'required' }
+          ]
+        }
+      ]
+    },
     {
       path: 'teams',
       title: 'Teams',
       className: 'col-2xl-2 col-md-6 col-xs-11',
-      yGet: '/organizations',
+      yGet: { path: '/organizations' },
       showHeaders: false,
       notTable: true,
       navbar: {
@@ -187,7 +310,7 @@ export const ADMIN_PANEL_SETTINGS = {
           },
         ]
       },
-      yGet: '/organization?path=${_id}',
+      yGet: { path: '/organization?path=${_id}' },
       columns: [
         {
           data: 'language',
@@ -376,7 +499,7 @@ export const ADMIN_PANEL_SETTINGS = {
       path: 'warehouse',
       title: 'Warehouse',
       className: 'col-2xl-2 col-md-6 col-xs-11',
-      yGet: '/warehouses',
+      yGet: { path: '/warehouses' },
       separator: null,
       showHeaders: true,
       menuView: {
@@ -509,7 +632,6 @@ export const ADMIN_PANEL_SETTINGS = {
           },
         ]
       },
-      yGet: '',
       columns: [
         {
           data: '_id',

@@ -242,7 +242,6 @@ addEventListener('message', (req) => {
         const part = pathParts[pathParts.length - 1];
 
         if(part == "teams") {
-          debugger
           const orgID = params[0].split("=")[1];
           const organization: Y.Doc = Array.from(provider.subdocs.values()).find((s: Y.Doc) => s.guid.includes(orgID));
           const [prefix, userID, suffix] = organization.guid.split(".");
@@ -274,7 +273,6 @@ addEventListener('message', (req) => {
     }
     case 'YDELETE': {
       init(pathParts[0], userID, (ydoc: Y.Doc) => {
-        debugger
         const part = pathParts[pathParts.length - 1];
 
         if(part == "profiles") {

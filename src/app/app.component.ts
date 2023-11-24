@@ -32,9 +32,9 @@ export class AppComponent {
   }
 
   addUser(guid: string) {
-    const email = "test51@gmail.com" //"test2@gmail.com";
+    const email = "test2@gmail.com" //"test2@gmail.com";
 
-    this.httpClient.post("http://localhost:80/api/invite-user", { email, guid }).subscribe({
+    this.httpClient.post("/api/invite-user", { email, guid }).subscribe({
       next: (res) => {
         console.log(res);
         

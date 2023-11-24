@@ -34,7 +34,8 @@ export class DynamicRouteGuard {
       if (route.params['primary'] && !route.params['id'] && !route.params['secondary']) {
         this.dynamicService.formArrayProvider.set(null);
         try {
-          const res: any = await firstValueFrom(this.http.request('Yget', settings.yGet));
+          const res: any = await firstValueFrom(this.http.request('Yget', settings.yGet.path));
+          console.log(JSON.parse(res))
           this.formArray = new BaseExtendedFormArray(settings, this.http, null, JSON.parse(res).structure);
           this.dynamicService.formArrayProvider.set(this.formArray);
         } catch (error) {
@@ -52,7 +53,7 @@ export class DynamicRouteGuard {
         if (id || secondary === 'edit') {
           if (id) {
             try {
-              let url = this.dynamicService.interpolate(settings.yGet, { _id: id });
+              let url = this.dynamicService.interpolate(settings.yGet.path, { _id: id });
               const res: any = await firstValueFrom(this.http.request('Yget', url));
               const collectedData = await this.extractAndManipulateData(settings?.options);
               this.updateFormGroup(settings, collectedData, JSON.parse(res).structure || null);

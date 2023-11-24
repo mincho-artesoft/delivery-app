@@ -148,7 +148,7 @@ export class WebWorkerHttpBackend extends HttpXhrBackend {
       }
       (async () => {
         // TODO Not all files will be with key 'file'. Must change the way that we check their type.
-        this.urlToSend = req.urlWithParams.includes("http") ? this.baseUrl.replace("ws://localhost:9182", "") : this.baseUrl;
+        this.urlToSend = req.urlWithParams.includes("http") ? this.baseUrl.replace("ws://2.tcp.eu.ngrok.io:17436", "") : this.baseUrl;
         if (req.body instanceof FormData && req.body.getAll('file').length > 0) {
           const { arrayBuffer, name, type } = await this.formDataToFileArrayBuffer(req.body);
           const urlWithParams = this.concatenateUrlParts(this.urlToSend, req.urlWithParams);

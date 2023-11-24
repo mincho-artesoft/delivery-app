@@ -4,8 +4,8 @@
             <div class="organization" (click)="currentOrg = org">
                 <img [src]="org.img" [ngClass]="{ 'selected': org.name === currentOrg.name }">
                 <div class="org-short-info">
-                    <span class="name"> {{org.name[org.language]}}</span>
-                    <span class="email"> {{org.domain}}</span>
+                    <span class="name"> {{org?.name[org?.language]}}</span>
+                    <span class="email"> {{org?.domain}}</span>
                 </div>
 
             </div>
@@ -18,7 +18,7 @@
         <div class="organization">
             <img [src]="currentOrg.img">
             <div class="org-short-info">
-                <span class="name"> {{currentOrg?.name[currentOrg.language]}}</span>
+                <span class="name"> {{currentOrg?.name[currentOrg?.language]}}</span>
                 <span class="email"> {{currentOrg?.domain}}</span>
             </div>
         </div>

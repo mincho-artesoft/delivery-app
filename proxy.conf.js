@@ -8,8 +8,8 @@ const PROXY_CONFIG = [
       },
       autoRewrite: true,
       // "target": "https://yjs.grandsportautonft.io",
-      "target": "https://fhj079vapc.execute-api.eu-central-1.amazonaws.com/api",
-      "secure": false,
+      "target": "https://641b-93-123-32-30.ngrok.io",
+      "secure": true,
       "changeOrigin": true,
       "logLevel": "debug"
     }, {

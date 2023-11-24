@@ -45,7 +45,7 @@ export class DynamicTableComponent implements OnInit, OnDestroy, AfterViewInit {
   ngOnInit(): void {
     this.settings = this.formArray.htmlSettings;
     if (this.settings) {
-      this.table = this.http.request('Yget', this.settings.yGet).pipe(map((res: any) => {
+      this.table = this.http.request('Yget', this.settings.yGet.path).pipe(map((res: any) => {
         const data = JSON.parse(res);
         this.formArray.fillFormWithResponse(data.structure)
         this.dataSource = new MatTableDataSource((this.formArray as FormArray).controls);

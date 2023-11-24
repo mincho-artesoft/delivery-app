@@ -26,8 +26,8 @@ export class OrganizationsWidgetComponent implements OnInit {
   ngOnInit(): void {
     let orgJSON = JSON.parse(localStorage.getItem('organizations'));
     this.organizations = Object.keys(orgJSON).map((key: string, index: number) => {
-      orgJSON[key].data.organizationData.img = this.fakeOrg[index].img;
-      return orgJSON[key].data.organizationData
+      orgJSON[key].data.organizationData.data.img = this.fakeOrg[index].img;
+      return orgJSON[key].data.organizationData.data
     });
     this.currentOrg = this.organizations[0]
 
