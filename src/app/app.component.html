@@ -1,4 +1,19 @@
 <mat-spinner class="spinner"></mat-spinner>
-<ng-container *ngIf="yjsService.connected">
+<ng-container *ngIf="yjsService.connected && yjsService.documentStructure">
+  <div class="organizations">
+    <div *ngFor="let orgGuid of getList(); let i = index" style="display: flex; align-items: center;">
+      <div class="data">
+        <div class="organization">
+          <div >{{ orgGuid + " " + (i + 1) }}</div>
+          <button *ngIf="!orgGuid.endsWith('profile')" mat-button color="primary" (click)="addUser(orgGuid)">Invite Employee</button>
+        </div>
+        <div class="team" *ngFor="let subdoc of getSubdocs(orgGuid)">
+          <div >{{ subdoc + " " + (i + 1) }}</div>
+          <button *ngIf="subdoc.endsWith('profile')" mat-button color="warn"  (click)="deleteUser(subdoc)">Delete Team</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <router-outlet></router-outlet>
 </ng-container>

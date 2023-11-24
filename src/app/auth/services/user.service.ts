@@ -27,8 +27,9 @@ export class UserService {
   }
 
   create(user: any): Observable<any> {
-    //  return this.http.post<IUser>(`https://fhj079vapc.execute-api.eu-central-1.amazonaws.com/api/user/register`, user)
-    return this.http.post<any>(`https://fhj079vapc.execute-api.eu-central-1.amazonaws.com/api/user/register`, user, httpOptions).pipe(
+    // http://localhost:3000/api/user/register
+     return this.http.post<any>(`${environment.basePath}/user/register`, user).pipe(
+    // return this.http.post<any>(`http://localhost:3000/api/user/register`, user, httpOptions).pipe(
       tap((createdUser) => this.snackbar.open(`User ${createdUser} created successfully`, 'Close', {
         duration: 2000, horizontalPosition: 'right', verticalPosition: 'top'
       })),
@@ -42,6 +43,8 @@ export class UserService {
   }
 
   getUserById(id: any) {
-    return this.http.get(`https://fhj079vapc.execute-api.eu-central-1.amazonaws.com/api/user/${id}`)
+    // http://localhost:3000/api/
+    // return this.http.get(`https://fhj079vapc.execute-api.eu-central-1.amazonaws.com/api/user/${id}`)\
+    return this.http.get(`http://localhost:3000/api/user/${id}`);
   }
 }

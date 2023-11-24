@@ -14,7 +14,7 @@ export class YjsService {
   
   spinner: HTMLElement;
   connected = false;
-  documentStructure: any;
+  documentStructure: { [key: string]: { [key: string]: { [key: string]: any } } };
 
   constructor(private authService: AuthService, private jwtService: JwtHelperService) { };
   

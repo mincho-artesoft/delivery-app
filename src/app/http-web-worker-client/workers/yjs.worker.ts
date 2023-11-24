@@ -2,13 +2,7 @@
 import * as Y from 'yjs/src/index.js';
 import { WebsocketProvider } from './y-websocket.js';
 import { IndexeddbPersistence } from './y-indexeddb.js';
-
-function generateGuid(a?) {
-  return a
-    ? (a ^ ((Math.random() * 16) >> (a / 4))).toString(16)
-     // @ts-ignore
-    : ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, generateGuid);
-}
+import { generateGuid } from "./utils/utils.js";
 
 interface IData {
   body: any | null;
@@ -25,46 +19,60 @@ let documentStructureMap: Y.Map;
 let provider: WebsocketProvider;
 let providerIndexedDb: any;
 let isPending = false;
+let isDisconnected = false;
 
 const init = (
   websocketUrl: string,
   userID: string,
   cb: (params: any) => any
 ) => {
+  const initFunc = () => {
+    documentStructureMap = ydoc.getMap("documentStructure");
+    if(!documentStructureMap.get("structure")) {
+      documentStructureMap.set("structure", {organizations: []});
+    }
+    const organizationGuids = documentStructureMap.get("structure").organizations as string[];
+    provider.syncSubdocs(organizationGuids);
+    
+    let checkSyncStatus = setInterval(() => {
+      if (provider.allSubdocumentsGuids.length == 0) {
+        subdocsMap = ydoc.getMap("subdocs");
+        setTimeout(() => {
+          console.log(ydoc.toJSON());
+          cb(ydoc);
+        }, 200);
+        clearInterval(checkSyncStatus);
+      } else {
+        provider.syncSubdocs(provider.allSubdocumentsGuids);
+      }
+    }, 300);
+  }
+
   const connect = () => {
     if(!provider) {
       provider = new WebsocketProvider(websocketUrl, userID, ydoc, {
         // params: { auth: '', readonly: 'true', docName: userID },
-      });
+      }, (doc: Y.Doc, shouldOffListener?: boolean) => docUpdateObserver(doc, () => {
+        console.log("from the provideeeeeer 123123123123123");
+        
+        let structure = {};
+        iterateDocument(ydoc, structure);
+        postMessage({ type: 'yjs', response: JSON.stringify({ structure, uuid: initialUUID }) });
+      }, shouldOffListener));
   
       provider.on('status', async (event) => {
         console.log(event.status);
-        if (event.status === 'connected') {
+        if (event.status === 'connected' && isDisconnected) {
+          isDisconnected = false;
+          initFunc();
+        } else if (event.status == "disconnected") {
+          isDisconnected = true;
         }
       });
   
-      provider.on('synced', async (isSynced) => {
+      provider.on('synced', async (isSynced: boolean) => {
         if (isSynced) {
-          documentStructureMap = ydoc.getMap("documentStructure");
-          if(!documentStructureMap.get("structure")) {
-            documentStructureMap.set("structure", {organizations: []});
-          }
-          const organizationGuids = documentStructureMap.get("structure").organizations as string[];
-          provider.syncSubdocs(organizationGuids);
-          
-          let checkSyncStatus = setInterval(() => {
-            if (provider.allSubdocumentsGuids.length == 0) {
-              subdocsMap = ydoc.getMap("subdocs");
-              setTimeout(() => {
-                console.log(ydoc.toJSON());
-                
-                cb(ydoc);
-              }, 200);
-              clearInterval(checkSyncStatus);
-            } else {
-              provider.syncSubdocs(provider.allSubdocumentsGuids);
-            }
-          }, 300);
+          initFunc();
         }
       });
     }
@@ -89,25 +97,7 @@ const init = (
     } else {
       let checkStatus = setInterval(() => {
         if(provider && provider.synced) {
-          documentStructureMap = ydoc.getMap("documentStructure");
-          if(!documentStructureMap.get("structure")) {
-            documentStructureMap.set("structure", {organizations: []});
-          }
-          const organizationGuids = documentStructureMap.get("structure").organizations as string[];
-          provider.syncSubdocs(organizationGuids);
-          
-          let checkSyncStatus = setInterval(() => {
-            if (provider.allSubdocumentsGuids.length == 0) {
-              subdocsMap = ydoc.getMap("subdocs");
-              setTimeout(() => {
-                console.log(ydoc.toJSON());
-                cb(ydoc);
-              }, 200);
-              clearInterval(checkSyncStatus);
-            } else {
-              provider.syncSubdocs(provider.allSubdocumentsGuids);
-            }
-          }, 300);
+          initFunc();
         }
         
         clearInterval(checkStatus);
@@ -121,7 +111,6 @@ addEventListener('message', (req) => {
   const data = req.data as IData;
   const userID = data.headers.find((header) => header.includes("x-user-id"))[1][0];
   const params = data.url.split('?')?.[1]?.split('&');
-  // const websocketUrl = new URL(data.url).pathname.substring(1);
 
   const pattern = /^(.*:\/\/[^\/]+)(\/[^?#]*)?/;
   const match = data.url.match(pattern);
@@ -192,7 +181,7 @@ addEventListener('message', (req) => {
             }
           }
           return;
-        } else if (params?.find((param) => param.includes('path'))) {
+        } else if (params?.find((param) => param.includes('path')) && pathParts[pathParts.length - 1] !== "teams") {
           const [subdocID, parentID, suffix] = params.find((param) => param.includes("path")).split('=')[1].split('.');
           let subdoc: Y.Doc;
           let dataKey: string;
@@ -210,10 +199,34 @@ addEventListener('message', (req) => {
           });
           postMessage({ type: 'yjs', response: JSON.stringify({ structure: structure, uuid: data.uuid }) });
           return;
+        } else if (pathParts[pathParts.length - 1] == "teams") {
+          const organizationID = params[0].split("=")[1];
+
+          const organization: Y.Doc = Array.from(provider.subdocs.values()).find((s: Y.Doc) => s.guid.includes(organizationID));
+          const sendMessage = () => {
+            const teamsData = [];
+            organization.getMap("subdocs").forEach((doc: Y.Doc, guid: string) => {
+              console.log(guid, doc.isSynced);
+              if(guid.includes("team")) {
+                const teamData = doc.getMap("data").get("teamData");
+                teamsData.push({ guid, ...(teamData || {} )})
+              }
+            })
+            const test = { type: 'yjs', response: JSON.stringify({ structure: teamsData, uuid: data.uuid }) };
+            postMessage(test);
+          }
+          if(organization) {
+            organization.getMap("subdocs").observe(() => {
+              sendMessage();
+            })
+            sendMessage();
+          }
         } else {
           iterateDocument(ydoc, structure);
 
           docUpdateObserver(ydoc, () => {
+            console.log("from workerrr!!!!!!!!!!!!!!!!! 123 123 123 123 123 ");
+            
             structure = {};
             iterateDocument(ydoc, structure);
             postMessage({ type: 'yjs', response: JSON.stringify({ structure, uuid: initialUUID }) });
@@ -226,39 +239,70 @@ addEventListener('message', (req) => {
     }
     case 'YPOST': {
       init(pathParts[0], userID, (ydoc: Y.Doc) => {
-        debugger
-        const [docGuidPart, id, suffix] = params.find((param) => param.includes("path")).split('=')[1].split('.');
+        const part = pathParts[pathParts.length - 1];
 
-        if(suffix == "organization") {
-          const guid = docGuidPart + '.' + userID + '.' + suffix;
-          createOrEditOrganization(guid, data);
-        } else {
-          const guid = Array.from(provider.subdocs.keys()).find((id: string) => id.includes(docGuidPart)) as string;
-
+        if(part == "teams") {
           debugger
-          editWarehouse(guid, id, data);
+          const orgID = params[0].split("=")[1];
+          const organization: Y.Doc = Array.from(provider.subdocs.values()).find((s: Y.Doc) => s.guid.includes(orgID));
+          const [prefix, userID, suffix] = organization.guid.split(".");
+
+          const teamSubdoc = new Y.Doc({ guid: `${generateGuid()}.${prefix}.team`});
+          provider.subscribeToSubdocs(organization, "subdocs", "organization");
+          teamSubdoc.getMap("data").set("teamData", { name: "some name"});
+          setTimeout(() => {
+          organization.getMap("subdocs").set(teamSubdoc.guid, teamSubdoc);
+          postMessage({
+            type: 'yjs',
+            response: JSON.stringify({ uuid: data.uuid, action: "Successful creating!" })
+          })
+          }, 100);
+        } else {
+          const [docGuidPart, id, suffix] = params.find((param) => param.includes("path")).split('=')[1].split('.');
+  
+          if(suffix == "organization") {
+            const guid = docGuidPart + '.' + userID + '.' + suffix;
+            createOrEditOrganization(guid, data);
+          } else {
+            const guid = Array.from(provider.subdocs.keys()).find((id: string) => id.includes(docGuidPart)) as string;
+  
+            editWarehouse(guid, id, data);
+          }
         }
       });
       break;
     }
     case 'YDELETE': {
       init(pathParts[0], userID, (ydoc: Y.Doc) => {
-        const [docGuidPart, id, suffix] = params.find((param) => param.includes("path")).split('=')[1].split('.');
+        debugger
+        const part = pathParts[pathParts.length - 1];
 
-        if(suffix == "organization") {
-          const guid = docGuidPart + '.' + id + '.' + suffix;
-          const subdoc = subdocsMap.get(guid);
-          subdoc.destroy();
-          subdocsMap.delete(guid);
+        if(part == "profiles") {
+          const organization: Y.Doc = Array.from(provider.subdocs.values()).find((s: Y.Doc) => s.guid.includes(params[0].split('=')[1].split(".")[1]));
 
+          organization.getMap("subdocs").delete(params[0].split("=")[1]);
           postMessage({
             type: 'yjs',
-            response: JSON.stringify({ uuid: data.uuid, action: "Successful deleting!" }),
-          });
+            response: JSON.stringify({ uuid: data.uuid, action: "Successful deleting!" })
+          })
         } else {
-          const guid = Array.from(provider.subdocs.keys()).find((id: string) => id.includes(docGuidPart)) as string;
-          debugger
-          deleteWarehouse(guid, id, data);
+          const [docGuidPart, id, suffix] = params.find((param) => param.includes("path")).split('=')[1].split('.');
+  
+          if(suffix == "organization") {
+            const guid = docGuidPart + '.' + id + '.' + suffix;
+            const subdoc = subdocsMap.get(guid);
+            subdoc.destroy();
+            subdocsMap.delete(guid);
+  
+            postMessage({
+              type: 'yjs',
+              response: JSON.stringify({ uuid: data.uuid, action: "Successful deleting!" }),
+            });
+          } else {
+            const guid = Array.from(provider.subdocs.keys()).find((id: string) => id.includes(docGuidPart)) as string;
+            
+            deleteWarehouse(guid, id, data);
+          }
         }
       });
     }
@@ -284,15 +328,16 @@ function iterateDocument (doc: Y.Doc, docStructure: any) {
   doc.share.forEach((yMap: Y.Map, key: string) => {
     if(key != "documentStructure") {
       docStructure[key] = {};
-      yMap = doc.getMap(key);
+      const mapContent = doc.getMap(key).toJSON();      
       if (key == 'subdocs') {
-        yMap.forEach((subdoc: Y.Doc, docGuid: string) => {
+        (Object.entries(mapContent) as Array<[string, Y.Doc]>).forEach(([docGuid, subdoc]) => {
+            const [_, _2, suffix] = docGuid.split(".");
             docStructure[key][docGuid] = {};
             iterateDocument(subdoc, docStructure[key][docGuid]);
           });
       } else {
-        yMap.forEach((value: any, mapKey: string) => {
-          docStructure[key][mapKey] = value.data;
+        (Object.entries(mapContent) as Array<[string, any]>).forEach(([mapKey, value]) => {
+          docStructure[key][mapKey] = value;
         });
       }
     }
@@ -334,7 +379,6 @@ function getSubdocsData (subdocs: Y.Map, shouldGetWarehouses: boolean, data: { u
 function getOne(map: Y.Map, guid: string,dataKey: string) {
   if(dataKey == "warehouseData") {
     const data = [];
-    debugger
     map.forEach((value: any, mapKey: string) => {
       data.push({ ...value?.data, _id: value._id });
     });
@@ -380,7 +424,6 @@ function createOrEditOrganization(guid: string, data: any) {
 
 function editWarehouse(guid: string, productID: string,data: any) {
   const subdoc = provider.subdocs.get(guid);
-  debugger
   subdoc.getMap('data').set(productID, { ...JSON.parse(data.body), _id: productID });
 
   postMessage({
@@ -391,7 +434,6 @@ function editWarehouse(guid: string, productID: string,data: any) {
 
 function deleteWarehouse(guid: string, productID: string, data: any) {
   const subdoc = provider.subdocs.get(guid);
-  debugger
   subdoc.getMap('data').delete(productID);
 
   postMessage({
@@ -400,15 +442,68 @@ function deleteWarehouse(guid: string, productID: string, data: any) {
   });
 }
 
-const updateCallback = (callback: any) => (update: Uint8Array) => callback();
+const updateCallback = (callback: any, clog?: string) => (update: Uint8Array) => callback();
 
-function docUpdateObserver(doc: Y.Doc, callback: any) {
+function docUpdateObserver(doc: Y.Doc, callback: any, shouldOffListener?: boolean) {
   try {
     doc.off("update", updateCallback(callback));
   } catch(err) {
     console.error(err);
   }
-  doc.on("update", updateCallback(callback));
+  if(!shouldOffListener) {
+    doc.on("update", updateCallback(callback));
+  }
+}
+
+function createProfile(organizationID: string, data: any) {
+  let profileSubdoc = Array.from(provider.subdocs).find((subdoc: Y.Doc) => subdoc.guid.endsWith("profiles")) as Y.Doc;
+
+  if(profileSubdoc) {
+    provider.subscribeToSubdocs(profileSubdoc, "subdocs", "profiles");
+    const profile = new Y.Doc({ guid: `${generateGuid()}.${organizationID}.profile` });
+    profileSubdoc.getMap('subdocs').set(profile.guid, profile);
+    profile.getMap("data").set("profileData", JSON.parse(data.body));
+  } else {
+    const organization = Array.from(provider.subdocs).find((subdoc: Y.Doc) => subdoc.guid.startsWith(organizationID)) as Y.Doc;
+    provider.subscribeToSubdocs(organization, "subdocs", "organization");
+    profileSubdoc = new Y.Doc({ guid: `${generateGuid()}.${organizationID}.profiles` });
+    organization.getMap('subdocs').set(profileSubdoc.guid, profileSubdoc);
+    provider.subscribeToSubdocs(profileSubdoc, "subdocs", "profiles");
+    const profile = new Y.Doc({ guid: `${generateGuid()}.${organizationID}.profile` });
+    profileSubdoc.getMap('subdocs').set(profile.guid, profile);
+    profile.getMap("data").set("profileData", JSON.parse(data.body));
+  }
+
+  postMessage({
+    type: 'yjs',
+    response: JSON.stringify({ uuid: data.uuid, message: "Succesfull operation!" }),
+  });
+}
+
+function getProfiles(organizationID: string, data: any) {
+  const profiles = Array.from(provider.subdocs).filter((subdoc: Y.doc) => subdoc.guid.endsWith("profile") && subdoc.guid.includes(organizationID));
+
+  const serializeData: any = {};
+  
+  if(profiles.length) {
+    profiles.forEach((profile: Y.Doc) => {
+      const data = profile.getMap("data").get("profileData");
+      serializeData[profile.guid] = data;
+    })
+  }
+  
+  postMessage({
+    type: 'yjs',
+    response: JSON.stringify({ uuid: JSON.parse(data.body).uuid, data: serializeData }),
+  });
+}
+
+function editProfile() {
+
+}
+
+function deleteProfile() {
+
 }
 
 const warehouses = [
