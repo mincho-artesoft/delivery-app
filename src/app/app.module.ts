@@ -32,7 +32,7 @@ export function tokenGetter() {
         tokenGetter: tokenGetter
       }
     }),
-    HttpWebWorkerClientModule.forRoot({baseUrl:'ws://localhost:9182',ignorePath:'/assets'}),
+    HttpWebWorkerClientModule.forRoot({baseUrl:'ws://7.tcp.eu.ngrok.io:15325',ignorePath:'/assets'}),
     AuthModule
   ],
   providers: [
