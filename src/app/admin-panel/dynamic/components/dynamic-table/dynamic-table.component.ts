@@ -8,6 +8,7 @@ import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { DynamicService } from '../../services/dynamic.service';
 import { BaseExtendedFormArray } from '../../extends/base-extended-form-array';
 import { MatSort } from '@angular/material/sort';
+import { YjsService } from 'src/app/yjs.service';
 
 interface TableData {
   displayedColumns: any[];
@@ -38,6 +39,7 @@ export class DynamicTableComponent implements OnInit, OnDestroy, AfterViewInit {
     public dynamicService: DynamicService,
     private renderer: Renderer2,
     private elementRef: ElementRef,
+    private yjsService: YjsService
   ) {
   }
 
@@ -46,18 +48,42 @@ export class DynamicTableComponent implements OnInit, OnDestroy, AfterViewInit {
     this.settings = this.formArray.htmlSettings;
     if (this.settings) {
       this.table = this.http.request('Yget', this.settings.yGet.path).pipe(map((res: any) => {
-        const data = JSON.parse(res);
-        this.formArray.fillFormWithResponse(data.structure)
-        this.dataSource = new MatTableDataSource((this.formArray as FormArray).controls);
-        this.dataSource.data.map((ctrl: any) => {
-          ctrl.addControl('uid', new FormControl(this.generateRandomId(10)), { emitEvent: false });
-        });
-        // this.dataHolder = this.formArray.controls;
-        this.syncContainerWidths();
-        this.syncCellWidths()
-        return {
-          displayedColumns: this.settings.columns,
-          dataHolder: [...this.dataSource.data]
+        if (this.settings.yGet.prop) {
+          const prop = this.settings.yGet.prop;
+          const activeOrganizationId = this.dynamicService.selectedOrganization.orgKey;
+          Object.keys(this.yjsService.documentStructure.subdocs[activeOrganizationId].subdocs).map(key => {
+            if (key.includes(prop)) {
+              const data = [this.yjsService.documentStructure.subdocs[activeOrganizationId].subdocs[key]?.data.employeeData]
+              this.formArray.fillFormWithResponse(data);
+              this.dataSource = new MatTableDataSource((this.formArray as FormArray).controls);
+              this.dataSource.data.map((ctrl: any) => {
+                ctrl.addControl('uid', new FormControl(this.generateRandomId(10)), { emitEvent: false });
+              });
+              this.syncContainerWidths();
+              this.syncCellWidths();
+            }
+          });
+          console.log(this.dataSource.data)
+          return {
+            displayedColumns: this.settings.columns,
+            dataHolder: [...this.dataSource.data]
+          }
+        } else {
+          const data = JSON.parse(res);
+          console.log(data);
+          this.formArray.fillFormWithResponse(data.structure)
+          this.dataSource = new MatTableDataSource((this.formArray as FormArray).controls);
+          this.dataSource.data.map((ctrl: any) => {
+            ctrl.addControl('uid', new FormControl(this.generateRandomId(10)), { emitEvent: false });
+          });
+          // this.dataHolder = this.formArray.controls;
+          this.syncContainerWidths();
+          this.syncCellWidths();
+          console.log(this.dataSource.data)
+          return {
+            displayedColumns: this.settings.columns,
+            dataHolder: [...this.dataSource.data]
+          }
         }
       }))
     };

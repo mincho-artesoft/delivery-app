@@ -1,8 +1,8 @@
 <div *ngIf="hoverOrganizationsWidget" class="widget-positioner">
     <div class="organizations-wrapper" [ngClass]="{ 'active': hoverOrganizationsWidget }" (mouseenter)="cancelHidePopup()" (mouseleave)="scheduleHidePopup()">
         <div *ngFor="let org of organizations">
-            <div class="organization" (click)="currentOrg = org">
-                <img [src]="org.img" [ngClass]="{ 'selected': org.name === currentOrg.name }">
+            <div class="organization" (click)="selectOrganization(org)">
+                <img [src]="org.img" [ngClass]="{ 'selected': org.orgKey === currentOrg.orgKey }">
                 <div class="org-short-info">
                     <span class="name"> {{org?.name[org?.language]}}</span>
                     <span class="email"> {{org?.domain}}</span>

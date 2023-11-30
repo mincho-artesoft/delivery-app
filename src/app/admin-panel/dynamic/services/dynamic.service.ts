@@ -23,6 +23,7 @@ export class DynamicService {
   public cellWidths: number[] = [];
   public cellWidthsChanged = new Subject<number[]>();
   unsubscribeOnNavigation = new Subject<any>();
+  selectedOrganization: any;
   constructor(
     public dialog: MatDialog,
     private snackbar: MatSnackBar,

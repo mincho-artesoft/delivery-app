@@ -8,7 +8,7 @@ const PROXY_CONFIG = [
       },
       autoRewrite: true,
       // "target": "https://yjs.grandsportautonft.io",
-      "target": "https://641b-93-123-32-30.ngrok.io",
+      "target": "http://localhost:80/",
       "secure": true,
       "changeOrigin": true,
       "logLevel": "debug"

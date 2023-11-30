@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { DynamicService } from '../../../services/dynamic.service';
 
 @Component({
   selector: 'app-organizations-widget',
@@ -6,6 +7,9 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./organizations-widget.component.scss']
 })
 export class OrganizationsWidgetComponent implements OnInit {
+  constructor(private dynamicService: DynamicService) {
+
+  }
 
   hoverOrganizationsWidget = false;
   currentOrg: any = {};
@@ -27,10 +31,14 @@ export class OrganizationsWidgetComponent implements OnInit {
     let orgJSON = JSON.parse(localStorage.getItem('organizations'));
     this.organizations = Object.keys(orgJSON).map((key: string, index: number) => {
       orgJSON[key].data.organizationData.data.img = this.fakeOrg[index].img;
-      return orgJSON[key].data.organizationData.data
+      return { ...orgJSON[key].data.organizationData.data, orgKey: key }
     });
-    this.currentOrg = this.organizations[0]
-
+    if (!this.dynamicService.selectedOrganization) {
+      this.selectOrganization(this.organizations[0]);
+    } else {
+      this.currentOrg = this.dynamicService.selectedOrganization;
+      console.log(this.currentOrg)
+    }
   }
 
   // Add a property for the timeout
@@ -55,6 +63,11 @@ export class OrganizationsWidgetComponent implements OnInit {
     if (this.hidePopupTimeout) {
       clearTimeout(this.hidePopupTimeout);
     }
+  }
+
+  selectOrganization(org: any) {
+    this.currentOrg = org;
+    this.dynamicService.selectedOrganization = org
   }
 
 }

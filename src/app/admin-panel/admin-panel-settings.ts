@@ -114,7 +114,7 @@ export const ADMIN_PANEL_SETTINGS = {
       path: 'employees',
       title: 'Employees',
       className: 'col-2xl-2 col-md-6 col-xs-11',
-      yGet: { path: '/organizations', prop: 'employees' },
+      yGet: { path: '/organizations', prop: 'profile', key: 'employeeData'},
       separator: null,
       showHeaders: true,
       navbar: {
@@ -157,6 +157,10 @@ export const ADMIN_PANEL_SETTINGS = {
           width: 80,
         },
         {
+          data: 'email',
+          title: 'Email',
+        },
+        {
           data: 'img',
           title: 'Picture',
         },
@@ -165,13 +169,18 @@ export const ADMIN_PANEL_SETTINGS = {
           title: 'Name',
         },
         {
+          data: 'surName',
+          title: 'Surname',
+        },
+        {
+          data: 'lastName',
+          title: 'Lastname',
+        },
+        {
           data: 'position',
           title: 'Position',
         },
-        {
-          data: 'email',
-          title: 'Email',
-        }
+        
       ]
     },
     {

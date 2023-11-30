@@ -7,6 +7,7 @@ import { DynamicService } from "../dynamic/services/dynamic.service";
 import { BaseExtendedFormGroup } from "../dynamic/extends/base-extended-form-group";
 import { HttpClient } from "@angular/common/http";
 import { BaseExtendedFormArray } from "../dynamic/extends/base-extended-form-array";
+import { YjsService } from "src/app/yjs.service";
 
 @Injectable({
   providedIn: 'root'
@@ -18,7 +19,8 @@ export class DynamicRouteGuard {
   constructor(
     private router: Router,
     public dynamicService: DynamicService,
-    public http: HttpClient
+    public http: HttpClient,
+    private yjsService: YjsService
   ) { }
 
   async canActivate(route: ActivatedRouteSnapshot): Promise<boolean | UrlTree> {
@@ -35,12 +37,24 @@ export class DynamicRouteGuard {
         this.dynamicService.formArrayProvider.set(null);
         try {
           const res: any = await firstValueFrom(this.http.request('Yget', settings.yGet.path));
-          console.log(JSON.parse(res))
-          this.formArray = new BaseExtendedFormArray(settings, this.http, null, JSON.parse(res).structure);
-          this.dynamicService.formArrayProvider.set(this.formArray);
+          const prop = settings.yGet?.prop;
+          if (prop) {
+            const selectedOrg = this.dynamicService.selectedOrganization.orgKey;
+            Object.keys(this.yjsService.documentStructure.subdocs[selectedOrg].subdocs).map(key => {
+              if (key.includes(prop)) {
+                const settingsKey = settings.yGet.key;
+                this.formArray = new BaseExtendedFormArray(settings, this.http, null, [this.yjsService.documentStructure.subdocs[selectedOrg].subdocs[key]?.data[settingsKey]]);
+                this.dynamicService.formArrayProvider.set(this.formArray);
+              }
+            })
+          } else {
+            this.formArray = new BaseExtendedFormArray(settings, this.http, null, JSON.parse(res).structure);
+            this.dynamicService.formArrayProvider.set(this.formArray);
+          }
+
         } catch (error) {
           console.error("Failed to fetch data:", error);
-          return false; // or handle error appropriately
+          return false;
         }
       } else {
         const { id, secondary } = route.params;
@@ -56,17 +70,30 @@ export class DynamicRouteGuard {
               let url = this.dynamicService.interpolate(settings.yGet.path, { _id: id });
               const res: any = await firstValueFrom(this.http.request('Yget', url));
               const collectedData = await this.extractAndManipulateData(settings?.options);
-              this.updateFormGroup(settings, collectedData, JSON.parse(res).structure || null);
-              this.dynamicService.formGroupProvider.set(this.formGroup);
+              const prop = settings.yGet.prop;
+              if (prop) {
+                const selectedOrg = this.dynamicService.selectedOrganization.orgKey;
+                Object.keys(this.yjsService.documentStructure.subdocs[selectedOrg].subdocs).map(key => {
+                  if (key.includes(prop)) {
+                    const settingsKey = settings.yGet.key;
+                    console.log(this.yjsService.documentStructure.subdocs[selectedOrg].subdocs[key]?.data[settingsKey]);
+                    this.updateFormGroup(settings, collectedData, this.yjsService.documentStructure.subdocs[selectedOrg].subdocs[key]?.data[settingsKey] || null);
+                    this.dynamicService.formGroupProvider.set(this.formGroup)
+                  }
+                })
+              } else {
+                this.updateFormGroup(settings, collectedData, JSON.parse(res).structure || null);
+                this.dynamicService.formGroupProvider.set(this.formGroup);
+              }
             } catch (error) {
               console.error("Failed to fetch data:", error);
-              return false; // or handle error appropriately
+              return false;
             }
           } else {
             const collectedData = await this.extractAndManipulateData(settings?.options);
             this.updateFormGroup(settings, collectedData);
           }
-          
+
         }
       }
     }

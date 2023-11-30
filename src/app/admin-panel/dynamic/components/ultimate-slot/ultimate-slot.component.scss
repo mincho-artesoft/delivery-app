@@ -2,6 +2,7 @@
     background-color: transparent;
     height: 42px;
     overflow: hidden;
+    padding: 0;
 
     .cell-row {
         height: 100%;
@@ -10,6 +11,7 @@
         white-space: nowrap;
         padding-top: 10px;
         position: relative;
+        padding: 0px;
 
         .fast-editor {
             width: calc(100% - 40px);
@@ -25,6 +27,11 @@
             position: absolute;
             top: 0px;
             right: 2.5px
+        }
+
+        span {
+            margin-left: 2.5%;
+            width: 97.5%;
         }
     }
 }
