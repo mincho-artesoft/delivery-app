@@ -27,7 +27,7 @@ export class AuthService {
 
     // return this.http.post<any>(`http://localhost:3000/api/user/login`, user).pipe(
     return this.http
-      .post<any>(`${environment.basePath}/auth/user/login`, user)
+      .post<any>(`${environment.basePath}/user/login`, user)
       .pipe(
         tap((res: any) => {
           this.currentUserId = this.jwtService.decodeToken(res.result.token);
