@@ -422,7 +422,7 @@ export class WebsocketProvider extends Observable {
         })
         removed.forEach((subdoc) => {
           subdoc.off('update', this._getSubDocUpdateHandler(subdoc))
-          this.subdocs.delete(subdoc.guid)
+          // this.subdocs.delete(subdoc.guid)
           this.iterateFunc(subdoc, true);
         })
         loaded.forEach((subdoc) => {

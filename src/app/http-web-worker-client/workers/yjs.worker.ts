@@ -20,6 +20,9 @@ let provider: WebsocketProvider;
 let providerIndexedDb: any;
 let isPending = false;
 let isDisconnected = false;
+let wholeStructure = {};
+
+let timeout
 
 const init = (
   websocketUrl: string,
@@ -38,7 +41,6 @@ const init = (
       if (provider.allSubdocumentsGuids.length == 0) {
         subdocsMap = ydoc.getMap("subdocs");
         setTimeout(() => {
-          console.log(ydoc.toJSON());
           cb(ydoc);
         }, 200);
         clearInterval(checkSyncStatus);
@@ -53,11 +55,15 @@ const init = (
       provider = new WebsocketProvider(websocketUrl, userID, ydoc, {
         // params: { auth: '', readonly: 'true', docName: userID },
       }, (doc: Y.Doc, shouldOffListener?: boolean) => docUpdateObserver(doc, () => {
-        console.log("from the provideeeeeer 123123123123123");
-        
-        let structure = {};
-        iterateDocument(ydoc, structure);
-        postMessage({ type: 'yjs', response: JSON.stringify({ structure, uuid: initialUUID }) });
+        clearTimeout(timeout);
+        timeout = setTimeout(() => {
+          console.log("from the provideeeeeer 123123123123123");
+          
+          let structure = {};
+          iterateDocument(ydoc, structure);
+          wholeStructure = structure;
+          postMessage({ type: 'yjs', response: JSON.stringify({ structure, uuid: initialUUID }) });
+        }, 200);
       }, shouldOffListener));
   
       provider.on('status', async (event) => {
@@ -223,13 +229,16 @@ addEventListener('message', (req) => {
           }
         } else {
           iterateDocument(ydoc, structure);
-
-          docUpdateObserver(ydoc, () => {
-            console.log("from workerrr!!!!!!!!!!!!!!!!! 123 123 123 123 123 ");
-            
-            structure = {};
-            iterateDocument(ydoc, structure);
-            postMessage({ type: 'yjs', response: JSON.stringify({ structure, uuid: initialUUID }) });
+          wholeStructure = structure;
+          let timeout;
+          docUpdateObserver(ydoc, () => {    
+            clearTimeout(timeout);
+            timeout = setTimeout(() => {
+              structure = {};
+              iterateDocument(ydoc, structure);
+              wholeStructure = structure;
+              postMessage({ type: 'yjs', response: JSON.stringify({ structure, uuid: initialUUID }) });
+            }, 200);
           });
         }
 
@@ -242,20 +251,52 @@ addEventListener('message', (req) => {
         const part = pathParts[pathParts.length - 1];
 
         if(part == "teams") {
-          const orgID = params[0].split("=")[1];
-          const organization: Y.Doc = Array.from(provider.subdocs.values()).find((s: Y.Doc) => s.guid.includes(orgID));
-          const [prefix, userID, suffix] = organization.guid.split(".");
+          if(params.find(param => param.includes("profile"))) {
+            debugger
+            const teamGuid = params.find((param) => param.includes("path")).split('=')[1];
+            const profileGuid = params.find((param) => param.includes("profile")).split('=')[1];
 
-          const teamSubdoc = new Y.Doc({ guid: `${generateGuid()}.${prefix}.team`});
-          provider.subscribeToSubdocs(organization, "subdocs", "organization");
-          teamSubdoc.getMap("data").set("teamData", { name: "some name"});
-          setTimeout(() => {
-          organization.getMap("subdocs").set(teamSubdoc.guid, teamSubdoc);
+            const team: Y.Doc = Array.from(provider.subdocs.values()).find((doc: Y.Doc) => doc.guid == teamGuid);
+            const profile: Y.Doc = Array.from(provider.subdocs.values()).find((doc: Y.Doc) => doc.guid == profileGuid);
+            
+            team.getMap("subdocs").set(profile.guid, profile);
+            setTimeout(() => {
+              profile.getMap("subdocs").set(team.guid, team);
+            }, 300);
+
+            postMessage({
+              type: 'yjs',
+              response: JSON.stringify({ uuid: data.uuid, action: "Successful added employee to team!" })
+            })
+          } else {
+            const orgID = params[0].split("=")[1];
+            const organization: Y.Doc = Array.from(provider.subdocs.values()).find((s: Y.Doc) => s.guid.includes(orgID));
+            const [prefix, userID, suffix] = organization.guid.split(".");
+            
+            const teamSubdoc = new Y.Doc({ guid: `${generateGuid()}.${prefix}.team`});
+            provider.subscribeToSubdocs(organization, "subdocs", "organization");
+            teamSubdoc.getMap("data").set("teamData", { name: "some name"});
+            setTimeout(() => {
+              organization.getMap("subdocs").set(teamSubdoc.guid, teamSubdoc);
+              postMessage({
+                type: 'yjs',
+                response: JSON.stringify({ uuid: data.uuid, action: "Successful creating!" })
+              })
+            }, 100);
+          }
+        } else if (part == "profiles") {
+          const profileGuid = params.find((param) => param.includes("path")).split('=')[1];
+          const serviceGuid = params.find((param) => param.includes("service")).split('=')[1];
+
+          const service: Y.Doc = Array.from(provider.subdocs.values()).find((doc: Y.Doc) => doc.guid == serviceGuid);
+          const profile: Y.Doc = Array.from(provider.subdocs.values()).find((doc: Y.Doc) => doc.guid == profileGuid);
+
+          profile.getMap("subdocs").set(service.guid, service);
+
           postMessage({
             type: 'yjs',
-            response: JSON.stringify({ uuid: data.uuid, action: "Successful creating!" })
+            response: JSON.stringify({ uuid: data.uuid, action: "Successful added service!" })
           })
-          }, 100);
         } else {
           const [docGuidPart, id, suffix] = params.find((param) => param.includes("path")).split('=')[1].split('.');
   
@@ -275,14 +316,33 @@ addEventListener('message', (req) => {
       init(pathParts[0], userID, (ydoc: Y.Doc) => {
         const part = pathParts[pathParts.length - 1];
 
-        if(part == "profiles") {
-          const organization: Y.Doc = Array.from(provider.subdocs.values()).find((s: Y.Doc) => s.guid.includes(params[0].split('=')[1].split(".")[1]));
+        if(part == "profiles" || part == "teams") {
+          if(params.find(param => param.includes("service"))) {
+            debugger
+            const docGuid = params.find(param => param.includes("path")).split("=")[1];
+            const serviceGuid = params.find(param => param.includes("service")).split("=")[1];
 
-          organization.getMap("subdocs").delete(params[0].split("=")[1]);
-          postMessage({
-            type: 'yjs',
-            response: JSON.stringify({ uuid: data.uuid, action: "Successful deleting!" })
-          })
+            const service: Y.Doc = Array.from(provider.subdocs.values()).find((doc: Y.Doc) => doc.guid == serviceGuid);
+            const doc: Y.Doc = Array.from(provider.subdocs.values()).find((doc: Y.Doc) => doc.guid == docGuid);
+  
+            doc.getMap("subdocs").delete(service.guid, service);
+  
+            postMessage({
+              type: 'yjs',
+              response: JSON.stringify({ uuid: data.uuid, action: "Successful added service!" })
+            })
+          } else {
+            const organization: Y.Doc = Array.from(provider.subdocs.values()).find((s: Y.Doc) => s.guid.includes(params[0].split('=')[1].split(".")[1]));
+            const guid = params[0].split("=")[1];
+            if(part == "teams") {
+              organization.getMap("subdocs").get(guid)?.destroy();
+            }
+            organization.getMap("subdocs").delete(params[0].split("=")[1]);
+            postMessage({
+              type: 'yjs',
+              response: JSON.stringify({ uuid: data.uuid, action: "Successful deleting!" })
+            })
+          }
         } else {
           const [docGuidPart, id, suffix] = params.find((param) => param.includes("path")).split('=')[1].split('.');
   
@@ -307,6 +367,13 @@ addEventListener('message', (req) => {
   }
 });
 
+// const getNested = function (nestedObj, path) {
+//   const pathArr = path.split('.');
+//   return pathArr.reduce((obj, key, index) => {
+//     return (obj && obj[key] !== 'undefined') ? (typeof obj[key] === 'function' ? obj[key]() : obj[key]) : undefined;
+//   }, nestedObj);
+// };
+
 function getNested(nestedMap: Y.Map, pathArr: string[]) {
   const obj1 = nestedMap.toJSON();
 
@@ -321,26 +388,74 @@ function getNested(nestedMap: Y.Map, pathArr: string[]) {
   }, obj1);
 }
 
-function iterateDocument (doc: Y.Doc, docStructure: any) {
+const services = ["warehouse"];
+
+// function iterateDocument (doc: Y.Doc, docStructure: any) {
+//   if (!doc?.share) return;
+
+//   doc.share.forEach((yMap: Y.Map, key: string) => {
+//     if(key != "documentStructure") {
+//       const mapContent = doc.getMap(key).toJSON();
+//       if (key == 'subdocs') {
+//         (Object.entries(mapContent) as Array<[string, Y.Doc]>).forEach(([docGuid, subdoc]) => {
+//           const [_, _2, suffix] = docGuid.split(".");
+//           if(!docStructure[suffix + "s"]) {
+//             services.includes(suffix) ? key = "services" : key = suffix + "s";
+
+//             docStructure[key] = { [docGuid]: {} };
+//           } else {
+//             services.includes(suffix) ? key = "services" : key = suffix + "s";
+//             docStructure[key][docGuid] = {};
+//           }
+//           iterateDocument(subdoc, docStructure[key][docGuid]);
+//         });
+//       } else {
+//         (Object.entries(mapContent) as Array<[string, any]>).forEach(([mapKey, value]) => {
+//           docStructure[mapKey] = value.data || value;
+//         });
+//       }
+//     }
+//   });
+// }
+
+function iterateDocument(doc: Y.Doc, docStructure: any, path = []) {
   if (!doc?.share) return;
-  doc.share.forEach((yMap: Y.Map, key: string) => {
-    if(key != "documentStructure") {
-      docStructure[key] = {};
-      const mapContent = doc.getMap(key).toJSON();      
+
+  const docId = doc.guid
+  if (path.includes(docId)) {
+    return;
+  }
+
+  path.push(docId);
+
+  doc.share.forEach((yMap, key) => {
+    if (key != "documentStructure") {
+      const mapContent = doc.getMap(key).toJSON();
       if (key == 'subdocs') {
         (Object.entries(mapContent) as Array<[string, Y.Doc]>).forEach(([docGuid, subdoc]) => {
-            const [_, _2, suffix] = docGuid.split(".");
+          const [_, _2, suffix] = docGuid.split(".");
+          services.includes(suffix) ? key = "services" : key = suffix + "s";
+
+          if (!docStructure[key]) {
+            docStructure[key] = {};
+          }
+          if (!docStructure[key][docGuid]) {
             docStructure[key][docGuid] = {};
-            iterateDocument(subdoc, docStructure[key][docGuid]);
-          });
+          }
+          
+          iterateDocument(subdoc, docStructure[key][docGuid], [...path]);
+        });
       } else {
         (Object.entries(mapContent) as Array<[string, any]>).forEach(([mapKey, value]) => {
-          docStructure[key][mapKey] = value;
+          docStructure[mapKey] = value.data || value;
         });
       }
     }
   });
+
+  path.pop();
 }
+
 
 function getSubdocsData (subdocs: Y.Map, shouldGetWarehouses: boolean, data: { uuid: string }, callback: (response: any) => void) {
   let structure = {};
@@ -504,391 +619,3 @@ function deleteProfile() {
 
 }
 
-const warehouses = [
-  {
-    _id: '64d7431e7cee91fc292ba47e',
-    name: [
-      {
-        key: 'name_k1ey1',
-        value: '1111',
-      },
-      {
-        key: 'name_key2',
-        value: 'name_value2',
-      },
-    ],
-    brand_name: 'brand_name_here',
-    description: [
-      {
-        key: 'description_key1',
-        value: 'desc123ription_value1',
-      },
-      {
-        key: 'description_key2',
-        value: 'description_value2',
-      },
-    ],
-    organizationId: '64d4bd75227bd3a0fdcca700',
-    unit: 'unit_value_here',
-    quantity: 2,
-    tags: null,
-    price: 49.99,
-    currentProducts: [
-      {
-        quantity: 1,
-        expirationDate: '2023-10-31T23:59:59Z',
-      },
-      {
-        quantity: 1,
-        expirationDate: '2023-10-31T23:59:59Z',
-      },
-    ],
-    ingredients: [
-      {
-        quantity: 5,
-        productId: '64d743027cee91fc292ba47d',
-      },
-    ],
-    createdAt: '2023-08-12T08:30:22.904Z',
-    updatedAt: '2023-08-12T08:36:46.639Z',
-  },
-  {
-    _id: '64d752b1be35953488c6a16f',
-    name: [
-      {
-        key: 'name_k1ey1',
-        value: '1113121',
-      },
-      {
-        key: 'name_key2',
-        value: 'name_value2',
-      },
-    ],
-    brand_name: 'brand_name_here',
-    description: [
-      {
-        key: 'description_key1',
-        value: 'desc123ription_value1',
-      },
-      {
-        key: 'description_key2',
-        value: 'description_value2',
-      },
-    ],
-    organizationId: '64d4bd75227bd3a0fdcca700',
-    unit: 'unit_value_here',
-    quantity: 0,
-    tags: null,
-    price: 49.99,
-    currentProducts: [],
-    ingredients: [
-      {
-        quantity: 5,
-        productId: '64d743027cee91fc292ba47d',
-      },
-    ],
-    createdAt: '2023-08-12T09:36:49.290Z',
-    updatedAt: '2023-08-12T09:36:49.290Z',
-  },
-  {
-    _id: '64db246f5ec5e9d1aa5cda46',
-    name: [
-      {
-        key: 'name_k1ey1',
-        value: '1113121',
-      },
-      {
-        key: 'name_key2',
-        value: 'name_value2',
-      },
-    ],
-    brand_name: 'brand_name_here',
-    description: [
-      {
-        key: 'description_key1',
-        value: 'desc123ription_value1',
-      },
-      {
-        key: 'description_key2',
-        value: 'description_value2',
-      },
-    ],
-    organizationId: '64d8c10830379f1db3e8c48e',
-    unit: 'unit_value_here',
-    quantity: 0,
-    tags: null,
-    price: 49.99,
-    currentProducts: [],
-    ingredients: null,
-    createdAt: '2023-08-15T07:08:31.977Z',
-    updatedAt: '2023-08-15T07:08:31.977Z',
-  },
-  {
-    _id: '64ed9bb2167c025d7b7e57c8',
-    name: [
-      {
-        key: 'name_k1ey1',
-        value: '11131121',
-      },
-      {
-        key: 'name_key2',
-        value: 'name_value2',
-      },
-    ],
-    brand_name: 'brand_name_here',
-    description: [
-      {
-        key: 'description_key1',
-        value: 'desc123ription_value1',
-      },
-      {
-        key: 'description_key2',
-        value: 'description_value2',
-      },
-    ],
-    organizationId: '64d8c10830379f1db3e8c48e',
-    unit: 'unit_value_here',
-    quantity: 0,
-    tags: null,
-    price: 49.99,
-    currentProducts: [],
-    ingredients: null,
-    images: [],
-    createdAt: '2023-08-29T07:18:10.929Z',
-    updatedAt: '2023-08-29T07:18:10.929Z',
-  },
-  {
-    _id: '64edd5508749844bcb90601a',
-    name: {
-      en: 'name_k1ey1',
-    },
-    brand_name: 'brand_name_here',
-    description: [
-      {
-        key: 'description_key1',
-        value: 'desc123ription_value1',
-      },
-      {
-        key: 'description_key2',
-        value: 'description_value2',
-      },
-    ],
-    organizationId: '64d8c10830379f1db3e8c48e',
-    unit: 'unit_value_here',
-    quantity: 0,
-    tags: null,
-    price: 49.99,
-    currentProducts: [],
-    ingredients: null,
-    images: [],
-    createdAt: '2023-08-29T11:24:00.485Z',
-    updatedAt: '2023-08-29T11:24:00.485Z',
-  },
-  {
-    _id: '64edd57c8749844bcb90601b',
-    name: {
-      en: 'name_k1ey1',
-      bg: 'сйдкафхкйсд',
-    },
-    brand_name: 'brand_name_here',
-    description: [
-      {
-        key: 'description_key1',
-        value: 'desc123ription_value1',
-      },
-      {
-        key: 'description_key2',
-        value: 'description_value2',
-      },
-    ],
-    organizationId: '64d8c10830379f1db3e8c48e',
-    unit: 'unit_value_here',
-    quantity: 0,
-    tags: null,
-    price: 49.99,
-    currentProducts: [],
-    ingredients: null,
-    images: [],
-    createdAt: '2023-08-29T11:24:44.620Z',
-    updatedAt: '2023-08-29T11:24:44.620Z',
-  },
-  {
-    _id: '64edd5958749844bcb90601c',
-    name: {
-      en: 'name_1k1ey1',
-      bg: 'сйдкафхкйсд',
-    },
-    brand_name: 'brand_name_here',
-    description: {
-      en: 'name_k1ey1',
-      bg: 'сйдкафхкйсд',
-    },
-    organizationId: '64d8c10830379f1db3e8c48e',
-    unit: 'unit_value_here',
-    quantity: 0,
-    tags: null,
-    price: 49.99,
-    currentProducts: [],
-    ingredients: null,
-    images: [],
-    createdAt: '2023-08-29T11:25:09.132Z',
-    updatedAt: '2023-08-29T11:25:09.132Z',
-  },
-  {
-    _id: '64ede35f9b8dacb6179f71e7',
-    name: {
-      en: 'name_1k1ey1',
-      bg: 'сйдкафхкйсд',
-    },
-    brand_name: 'brand_name_here',
-    description: {
-      en: 'name_k1ey1',
-      bg: 'сйдкафхкйсд',
-    },
-    organizationId: '64edda14a254963735dd5a09',
-    unit: 'unit_value_here',
-    quantity: 0,
-    tags: null,
-    price: 49.99,
-    currentProducts: [],
-    ingredients: null,
-    images: [],
-    createdAt: '2023-08-29T12:23:59.105Z',
-    updatedAt: '2023-08-29T12:23:59.105Z',
-  },
-  {
-    _id: '64ede3769b8dacb6179f71e8',
-    name: {
-      en: 'name_1k1ey1',
-      bg: 'сйдкафхкйсд',
-      asd: '3213123',
-    },
-    brand_name: 'brand_name_here',
-    description: {
-      en: 'name_k1ey1',
-      bg: 'сйдкафхкйсд',
-    },
-    organizationId: '64edda14a254963735dd5a09',
-    unit: 'unit_value_here',
-    quantity: 0,
-    tags: null,
-    price: 49.99,
-    currentProducts: [],
-    ingredients: null,
-    images: [],
-    createdAt: '2023-08-29T12:24:22.837Z',
-    updatedAt: '2023-08-29T12:24:22.837Z',
-  },
-  {
-    _id: '64ede39e9b8dacb6179f71e9',
-    name: {
-      en: 'name_1k1ey1',
-    },
-    brand_name: 'brand_name_here',
-    description: {
-      en: 'name_k1ey1',
-      bg: 'сйдкафхкйсд',
-    },
-    organizationId: '64edda14a254963735dd5a09',
-    unit: 'unit_value_here',
-    quantity: 0,
-    tags: null,
-    price: 49.99,
-    currentProducts: [],
-    ingredients: null,
-    images: [],
-    createdAt: '2023-08-29T12:25:02.844Z',
-    updatedAt: '2023-08-29T12:25:02.844Z',
-  },
-  {
-    _id: '64ede3fad9dbb06f10222467',
-    name: {
-      en: 'name_1231k1ey1',
-    },
-    brand_name: 'brand_name_here',
-    description: {
-      en: 'name_k1ey1',
-      bg: 'сйдкафхкйсд',
-    },
-    organizationId: '64edda14a254963735dd5a09',
-    unit: 'unit_value_here',
-    quantity: 0,
-    tags: null,
-    price: 49.99,
-    currentProducts: [],
-    ingredients: null,
-    images: [],
-    createdAt: '2023-08-29T12:26:34.752Z',
-    updatedAt: '2023-08-29T12:26:34.752Z',
-  },
-  {
-    _id: '64ede6096531b929df0997f4',
-    name: {
-      en: 'name_1k1ey1',
-      asd: '123213',
-    },
-    brand_name: 'brand_name_here',
-    description: {
-      en: 'name_k1ey1',
-      bg: 'сйдкафхкйсд',
-    },
-    organizationId: '64edda14a254963735dd5a09',
-    unit: 'unit_value_here',
-    quantity: 0,
-    tags: null,
-    price: 49.99,
-    currentProducts: [],
-    ingredients: null,
-    images: [],
-    createdAt: '2023-08-29T12:35:21.119Z',
-    updatedAt: '2023-08-29T12:35:21.119Z',
-  },
-  {
-    _id: '64ede6c1be779904159612ff',
-    name: {
-      en: 'name_1k1ey3121',
-    },
-    brand_name: 'brand_name_here',
-    description: {
-      en: 'name_k1ey1',
-      bg: 'сйдкафхкйсд',
-    },
-    organizationId: '64edda14a254963735dd5a09',
-    unit: 'unit_value_here',
-    quantity: 0,
-    tags: null,
-    price: 49.99,
-    currentProducts: [],
-    ingredients: null,
-    images: [],
-    createdAt: '2023-08-29T12:38:25.685Z',
-    updatedAt: '2023-08-29T12:38:25.685Z',
-  },
-  {
-    _id: '64ede7a199cb2ec1db55f2ef',
-    name: {
-      en: 'name_1k1ey33123121',
-    },
-    brand_name: 'brand_name_here',
-    description: {
-      en: 'name_k1ey1',
-      bg: 'сйдкафхкйсд',
-    },
-    organizationId: '64edda14a254963735dd5a09',
-    unit: 'unit_value_here',
-    quantity: 0,
-    tags: null,
-    price: 49.99,
-    currentProducts: [],
-    ingredients: null,
-    images: [
-      {
-        key: '1000',
-        value:
-          'https://images-delevery-app.s3.amazonaws.com/1000-64ede7a199cb2ec1db55f2ef-07806681-f5a5-418c-8562-f818defbbe36.png',
-      },
-    ],
-    createdAt: '2023-08-29T12:42:09.133Z',
-    updatedAt: '2023-08-30T05:38:11.199Z',
-  },
-];
