@@ -252,7 +252,6 @@ addEventListener('message', (req) => {
 
         if(part == "teams") {
           if(params.find(param => param.includes("profile"))) {
-            debugger
             const teamGuid = params.find((param) => param.includes("path")).split('=')[1];
             const profileGuid = params.find((param) => param.includes("profile")).split('=')[1];
 
@@ -270,17 +269,21 @@ addEventListener('message', (req) => {
             })
           } else {
             const orgID = params[0].split("=")[1];
-            const organization: Y.Doc = Array.from(provider.subdocs.values()).find((s: Y.Doc) => s.guid.includes(orgID));
+            const organization: Y.Doc = Array.from(provider.subdocs.values()).find((s: Y.Doc) => s.guid == orgID);
+            const organizationCopy: Y.Doc = Array.from(provider.subdocs.values()).find((s: Y.Doc) => s.guid == orgID + "Copy");
             const [prefix, userID, suffix] = organization.guid.split(".");
             
             const teamSubdoc = new Y.Doc({ guid: `${generateGuid()}.${prefix}.team`});
-            provider.subscribeToSubdocs(organization, "subdocs", "organization");
-            teamSubdoc.getMap("data").set("teamData", { name: "some name"});
+            // provider.subscribeToSubdocs(organization, "subdocs", "organization");
+            provider.subscribeToSubdocs(teamSubdoc, "subdocs", "organization");
+            teamSubdoc.getMap("data").set("teamData", data.body);
+
             setTimeout(() => {
+              teamSubdoc.getMap("subdocs").set(organizationCopy.guid, organizationCopy);
               organization.getMap("subdocs").set(teamSubdoc.guid, teamSubdoc);
               postMessage({
                 type: 'yjs',
-                response: JSON.stringify({ uuid: data.uuid, action: "Successful creating!" })
+                response: JSON.stringify({ uuid: data.uuid, action: "Successful created team!" })
               })
             }, 100);
           }
@@ -291,8 +294,10 @@ addEventListener('message', (req) => {
           const service: Y.Doc = Array.from(provider.subdocs.values()).find((doc: Y.Doc) => doc.guid == serviceGuid);
           const profile: Y.Doc = Array.from(provider.subdocs.values()).find((doc: Y.Doc) => doc.guid == profileGuid);
 
-          profile.getMap("subdocs").set(service.guid, service);
-
+          profile.transact(() => {
+            profile.getMap("subdocs").set(service.guid, service);
+          })
+          
           postMessage({
             type: 'yjs',
             response: JSON.stringify({ uuid: data.uuid, action: "Successful added service!" })
@@ -325,7 +330,9 @@ addEventListener('message', (req) => {
             const service: Y.Doc = Array.from(provider.subdocs.values()).find((doc: Y.Doc) => doc.guid == serviceGuid);
             const doc: Y.Doc = Array.from(provider.subdocs.values()).find((doc: Y.Doc) => doc.guid == docGuid);
   
-            doc.getMap("subdocs").delete(service.guid, service);
+            doc.transact(() => {
+              doc.getMap("subdocs").delete(service.guid);
+            })
   
             postMessage({
               type: 'yjs',
@@ -433,6 +440,10 @@ function iterateDocument(doc: Y.Doc, docStructure: any, path = []) {
       const mapContent = doc.getMap(key).toJSON();
       if (key == 'subdocs') {
         (Object.entries(mapContent) as Array<[string, Y.Doc]>).forEach(([docGuid, subdoc]) => {
+
+          // we dont need documents copy in the structure
+          if(docGuid.includes("Copy")) return;
+
           const [_, _2, suffix] = docGuid.split(".");
           services.includes(suffix) ? key = "services" : key = suffix + "s";
 
@@ -516,11 +527,19 @@ function createOrEditOrganization(guid: string, data: any) {
       response: JSON.stringify({ uuid: data.uuid, ...restaurantData, message: "Succesfully edited organization!" }),
     });
   } else {
+    // creating organization document
     subdoc = new Y.Doc({ guid });
     subdocsMap.set(guid, subdoc);
     provider.subscribeToSubdocs(subdoc, "subdocs", "organization");
     subdoc.getMap('data').set('organizationData', JSON.parse(data.body));
     const [orgID, userID, suffix] = guid.split(".");
+
+    // creating organization copy which will be used by employees and teams
+    const organizationCopy = new Y.Doc({ guid: `${orgID}.${userID}.${suffix}Copy` });
+    organizationCopy.getMap('data').set('organizationData', JSON.parse(data.body));
+    subdoc.getMap("subdocs").set(organizationCopy.guid, organizationCopy);
+
+    // creating warehouse
     const warehouseDoc = new Y.Doc({ guid: `${generateGuid()}.${orgID}.warehouse` });
     subdoc.getMap('subdocs').set(warehouseDoc.guid, warehouseDoc);
     warehouseDoc.getMap("data").set("warehouseData", {});
@@ -528,6 +547,7 @@ function createOrEditOrganization(guid: string, data: any) {
     struct["organizations"].push(guid);
     documentStructureMap.set("structure", struct);
     const restaurantData = { ...JSON.parse(data.body), _id: guid };
+
     postMessage({
       type: 'yjs',
       response: JSON.stringify({ uuid: data.uuid, ...restaurantData, message: "Succesfully edited organization!" }),
@@ -619,3 +639,8 @@ function deleteProfile() {
 
 }
 
+/**
+ * example of document uuid
+ * ````````````````````````
+ * (unique id).(parent document unique id).(suffix - 'organization', 'warehouse', 'profile' etc.)
+ */

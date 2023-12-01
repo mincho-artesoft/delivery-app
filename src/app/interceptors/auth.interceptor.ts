@@ -31,14 +31,14 @@ export class AuthInterceptor implements HttpInterceptor {
       request = request.clone({
         setHeaders: {
           Authorization: `Bearer ${userID}`,
-          "x-user-id": userID || "jnkqjndkjsbqshjdjhqbsdjhsqjjhqsbjd1231"
+          "x-user-id": userID || "jnkqjndkjsbqshjdjhqbsdjhsqjjhqsbjd12311231"
         }
       });
     } else {
       request = request.clone({
         setHeaders: {
           Authorization: `Bearer asdasdasd`,
-          "x-user-id": "jnkqjndkjsbqshjdjhqbsdjhsqjjhqsbjd1231"
+          "x-user-id": "jnkqjndkjsbqshjdjhqbsdjhsqjjhqsbjd12311231"
         }
       });
     }
