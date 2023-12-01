@@ -35,7 +35,7 @@ export class BaseControl extends FormControl {
       console.error(`Cannot find control with path: ${path}`);
       return;
     }
-  
+
     this.valueChanges.subscribe(value => {
       targetControl.setValue(value, { emitEvent: false });
     });
@@ -45,7 +45,27 @@ export class BaseControl extends FormControl {
     const asyncValidator = InterpolateValidator.interpolate(data);
     this.setAsyncValidators(asyncValidator);
   }
-  
+  setupAutoDisable(path: string, rootFormGroup: BaseExtendedFormGroup): void {
+    const targetControl = rootFormGroup.findControlByPath(path);
+    if (!targetControl) {
+      console.error(`Cannot find control with path: ${path}`);
+      return;
+    }
+    console.log(targetControl.root.getRawValue()[path])
+    if (!targetControl.getRawValue()) {
+      this.disable({ emitEvent: false })
+    } else {
+      this.enable({ emitEvent: false });
+    }
+    targetControl.root.valueChanges.subscribe(value => {
+      if (!targetControl.root.getRawValue()[path]) {
+        this.disable({ emitEvent: false });
+      } else {
+        this.enable({ emitEvent: false });
+      }
+    });
+  }
+
 }
 
 

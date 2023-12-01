@@ -147,10 +147,6 @@
         </div>
     </ng-container>
 </div>
-<div *ngIf="settings.notTable && formArray">
-    <div *ngFor="let ctrl of formArray.controls" class="teams-wrapper">
-        <mat-card class="team-card">
-            <mat-card-content>{{ctrl.value._id}}</mat-card-content>
-        </mat-card>
-    </div>
+<div *ngIf="settings.notTable && formArray" class="teams-wrapper">
+    <app-team-widget *ngFor="let ctrl of formArray.controls; let i = index" [control]="ctrl" [index]="i"></app-team-widget>
 </div>

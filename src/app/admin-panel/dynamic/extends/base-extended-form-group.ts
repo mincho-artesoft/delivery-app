@@ -65,6 +65,9 @@ export class BaseExtendedFormGroup extends FormGroup {
       if (cell.autopopulate) {
         this.findControlByPath(cell.data)?.setupAutopopulate(cell.autopopulate, this);
       }
+      if (cell.autodisable) {
+        this.findControlByPath(cell.data)?.setupAutoDisable(cell.autodisable, this);
+      }
       if (cell.validators?.some((validator: any) => validator.name === 'asyncVal')) {
         this.findControlByPath(cell.data)?.setupValidator(cell.validators.find((validator: any) => validator.name === 'asyncVal').arg);
       }

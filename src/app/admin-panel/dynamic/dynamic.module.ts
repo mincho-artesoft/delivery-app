@@ -15,6 +15,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { DynamicComponent } from './components/dynamic/dynamic.component';
 import { OrganizationsWidgetComponent } from './components/widgets/organizations-widget/organizations-widget.component';
 import { UserPanelWidgetComponent } from './components/widgets/user-panel-widget/user-panel-widget.component';
+import { TeamWidgetComponent } from './components/widgets/team-widget/team-widget.component';
 
 
 
@@ -31,6 +32,7 @@ import { UserPanelWidgetComponent } from './components/widgets/user-panel-widget
     DynamicMenuComponent,
     OrganizationsWidgetComponent,
     UserPanelWidgetComponent,
+    TeamWidgetComponent,
   ],
   exports: [
     DynamicComponent,

@@ -25,7 +25,8 @@ export const ADMIN_PANEL_SETTINGS = {
             color: 'primary',
             openSidenav: true,
             icon: 'create',
-            active: true
+            active: true,
+            default: true
           },
           {
             label: 'Delete',
@@ -114,7 +115,7 @@ export const ADMIN_PANEL_SETTINGS = {
       path: 'employees',
       title: 'Employees',
       className: 'col-2xl-2 col-md-6 col-xs-11',
-      yGet: { path: '/organizations', prop: 'profile', key: 'employeeData'},
+      yGet: { path: '/organizations', prop: 'profiles', key: 'employeeData' },
       separator: null,
       showHeaders: true,
       navbar: {
@@ -126,7 +127,7 @@ export const ADMIN_PANEL_SETTINGS = {
             openSidenav: true,
             color: 'accent',
             active: true,
-            icon: 'add_box'
+            icon: 'add_box',
           },
           {
             label: 'Edit',
@@ -135,7 +136,9 @@ export const ADMIN_PANEL_SETTINGS = {
             color: 'primary',
             openSidenav: true,
             icon: 'create',
-            active: true
+            active: true,
+            default: true
+
           },
           {
             label: 'Delete',
@@ -180,14 +183,14 @@ export const ADMIN_PANEL_SETTINGS = {
           data: 'position',
           title: 'Position',
         },
-        
+
       ]
     },
     {
       path: 'employees.edit',
       title: 'Employee Edit',
       className: 'col-2xl-2 col-md-6 col-xs-11',
-      yGet: { path: '/organizations', prop: 'employees', id: true },
+      yGet: { path: '/organizations', prop: 'profiles', key: 'employeeData' },
       separator: null,
       showHeaders: true,
       navbar: {
@@ -204,7 +207,7 @@ export const ADMIN_PANEL_SETTINGS = {
             action: 'save',
             icon: 'check',
             active: true,
-            yPost: '${id}.{userID}.organization'
+            http: { path: "http://localhost:80/api/invite-user" }
           }
         ],
       },
@@ -213,15 +216,28 @@ export const ADMIN_PANEL_SETTINGS = {
           data: '_id',
           title: 'ID',
           readOnly: true,
-          width: 80,
+          className: 'col-2xl-6 col-md-6 col-xs-12',
+        },
+        {
+          data: 'email',
+          title: 'Email',
+          className: 'col-2xl-6 col-md-6 col-xs-12',
+          validators: [
+            { name: 'email' },
+            { validator: 'required' }
+          ]
         },
         {
           data: 'img',
+          className: 'col-2xl-6 col-md-6 col-xs-12',
           title: 'Picture',
+          autodisable: '_id'
         },
         {
           data: 'name',
           title: 'Name',
+          className: 'col-2xl-6 col-md-6 col-xs-12',
+          autodisable: '_id',
           validators: [
             { validator: 'required' }
           ]
@@ -229,18 +245,12 @@ export const ADMIN_PANEL_SETTINGS = {
         {
           data: 'position',
           title: 'Position',
+          className: 'col-2xl-6 col-md-6 col-xs-12',
+          autodisable: '_id',
           validators: [
             { validator: 'required' }
           ]
         },
-        {
-          data: 'email',
-          title: 'Email',
-          validators: [
-            { name: 'email' },
-            { validator: 'required' }
-          ]
-        }
       ]
     },
     {
@@ -267,7 +277,7 @@ export const ADMIN_PANEL_SETTINGS = {
             path: 'organizations.edit',
             color: 'primary',
             openSidenav: true,
-            icon: 'create',
+            icon: 'link',
             active: true
           },
           {
@@ -286,7 +296,7 @@ export const ADMIN_PANEL_SETTINGS = {
             path: 'organizations.edit',
             color: 'primary',
             openSidenav: true,
-            icon: 'create',
+            icon: 'exit_to_app',
             active: true
           }
 
@@ -508,7 +518,7 @@ export const ADMIN_PANEL_SETTINGS = {
       path: 'warehouse',
       title: 'Warehouse',
       className: 'col-2xl-2 col-md-6 col-xs-11',
-      yGet: { path: '/warehouses' },
+      yGet: { path: 'warehouses', prop: 'services', key: 'warehouseData' },
       separator: null,
       showHeaders: true,
       menuView: {
@@ -520,34 +530,34 @@ export const ADMIN_PANEL_SETTINGS = {
       },
       navbar: {
         buttons: [
-          {
-            label: 'Add new',
-            action: 'create',
-            path: 'warehouse.edit',
-            openSidenav: true,
-            color: 'accent',
-            active: true,
-            icon: 'add_box'
-          },
-          {
-            label: 'Edit',
-            action: 'edit',
-            path: 'warehouse.edit',
-            color: 'primary',
-            openSidenav: true,
-            icon: 'create',
-            active: true
-          },
-          {
-            label: 'Delete',
-            action: 'delete',
-            isDialog: true,
-            active: true,
-            icon: 'delete',
-            color: 'warn',
-            deletePath: 'https://06hbbmv516.execute-api.eu-central-1.amazonaws.com/api/warehouse/warehouse/${_id}',
-            message: 'Warehouse with ${_id} was successfully deleted'
-          }
+          // {
+          //   label: 'Add new',
+          //   action: 'create',
+          //   path: 'warehouse.edit',
+          //   openSidenav: true,
+          //   color: 'accent',
+          //   active: true,
+          //   icon: 'add_box'
+          // },
+          // {
+          //   label: 'Edit',
+          //   action: 'edit',
+          //   path: 'warehouse.edit',
+          //   color: 'primary',
+          //   openSidenav: true,
+          //   icon: 'create',
+          //   active: true
+          // },
+          // {
+          //   label: 'Delete',
+          //   action: 'delete',
+          //   isDialog: true,
+          //   active: true,
+          //   icon: 'delete',
+          //   color: 'warn',
+          //   deletePath: 'https://06hbbmv516.execute-api.eu-central-1.amazonaws.com/api/warehouse/warehouse/${_id}',
+          //   message: 'Warehouse with ${_id} was successfully deleted'
+          // }
         ],
       },
       columns: [
@@ -622,6 +632,7 @@ export const ADMIN_PANEL_SETTINGS = {
     {
       path: 'warehouse.edit',
       title: 'Warehouses Edit',
+      yGet: { prop: 'warehouse' },
       navbar: {
         reversed: true,
         buttons: [

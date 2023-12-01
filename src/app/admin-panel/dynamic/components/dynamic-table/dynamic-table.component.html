@@ -9,7 +9,7 @@
   <div class="elements-container">
     <cdk-virtual-scroll-viewport itemSize="50" #viewport>
       <app-ultimate-slot  *cdkVirtualFor="let element of t['dataHolder']; let i = index; let last = last;" class="row"
-        [settings]="settings" [dataHolder]="dataHolder" [dataSource]="dataSource" [control]="element" (click)="selectRow(element)" >
+        [settings]="settings" [dataHolder]="dataHolder" [dataSource]="dataSource" [control]="element" (click)="selectRow(element)" (dblclick)="doubleClick(element)">
       </app-ultimate-slot>
     </cdk-virtual-scroll-viewport>
   </div>

@@ -1,0 +1,13 @@
+.team-card {
+    width: 380px;
+    height: 380px;
+    overflow: hidden;
+    border-radius: 2.5%;
+    display: flex;
+
+    img {
+        width: 80%;
+        height: 80%;
+        margin: auto;
+    }
+}

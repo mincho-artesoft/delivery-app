@@ -45,7 +45,7 @@ export function tokenGetter() {
             yjsService.documentStructure = structure.structure;
             console.log("APP MODULE");
             console.log(structure);
-            localStorage.setItem('organizations', JSON.stringify(structure.structure.subdocs))
+            localStorage.setItem('organizations', JSON.stringify(structure.structure.organizations))
             setTimeout(() => {
                   yjsService.stopSpinner();
                   yjsService.connected = true;
