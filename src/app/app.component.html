@@ -1,6 +1,6 @@
 <mat-spinner class="spinner"></mat-spinner>
 <ng-container *ngIf="yjsService.connected && yjsService.documentStructure">
-  <div class="organizations">
+  <!-- <div class="organizations">
     <div *ngFor="let orgGuid of getNested('organizations'); let i = index" style="display: flex; align-items: center;">
       <div class="data">
         <div class="organization">
@@ -39,8 +39,6 @@
                   *ngFor="let guid of getNested('organizations' + '&' + orgGuid + '&' + prop + '&' + subdoc + '&' + prop2)">
                   <div>{{ guid + " " + (i + 1) }} <button *ngIf="prop2 == 'services'" mat-button color="warn"
                       (click)="deleteServiceFrom(subdoc, guid)">Delete Service from this Employee</button></div>
-                  <!-- <button *ngIf="guid.endsWith('profile')" mat-button color="warn"  (click)="deleteUser(guid)">Delete Employee</button> -->
-                  <!-- <button *ngIf="guid.endsWith('profile')" mat-button color="primary"  (click)="addServiceToEmployee(guid, getSubdocs(orgGuid))">Add Service to Employee</button> -->
                   <button *ngIf="guid.endsWith('team')" mat-button color="warn" (click)="deleteTeam(guid)">Delete
                     Team</button>
                   <button *ngIf="guid.endsWith('team')" mat-button color="primary"
@@ -52,7 +50,7 @@
         </ng-container>
       </div>
     </div>
-  </div>
+  </div> -->
 
   <router-outlet></router-outlet>
 </ng-container>

@@ -42,11 +42,11 @@ export class OrganizationsWidgetComponent implements OnInit {
     this.organizations = Object.values(this.yjsService.documentStructure.organizations).map(item => {
       return item.organizationData;
     });
-    if (!this.dynamicService.selectedOrganization) {
-      this.selectOrganization(this.organizations[0]);
+    if (!this.dynamicService.selectedOrganization.value._id) {
+      this.currentOrg = this.organizations[0];
+      this.dynamicService.selectedOrganization.setValue(this.organizations[0], { emitEvent: false });
     } else {
-      this.currentOrg = this.dynamicService.selectedOrganization;
-      console.log(this.currentOrg)
+      this.currentOrg = this.dynamicService.selectedOrganization.value;
     }
   }
   showPopup() {
@@ -59,7 +59,7 @@ export class OrganizationsWidgetComponent implements OnInit {
   scheduleHidePopup() {
     this.hidePopupTimeout = setTimeout(() => {
       this.hoverOrganizationsWidget = false;
-    }, 300); 
+    }, 300);
   }
 
   cancelHidePopup() {
@@ -70,7 +70,7 @@ export class OrganizationsWidgetComponent implements OnInit {
 
   selectOrganization(org: any) {
     this.currentOrg = org;
-    this.dynamicService.selectedOrganization = org
+    this.dynamicService.selectedOrganization.setValue(org);
   }
 
 }

@@ -12,6 +12,13 @@
                     <mat-icon>{{button.icon}}</mat-icon>
                     <span>{{button.label}}</span>
                 </button>
+                <mat-button-toggle-group class="multiple-view" *ngIf="settings.multipleView" name="fontStyle"
+                    aria-label="Font Style" [(value)]="dynamicService.view">
+                    <mat-button-toggle [value]="button.view" *ngFor="let button of settings.multipleView">
+                        
+                        <span><mat-icon>{{button.icon}}</mat-icon> {{button.label}}</span>
+                    </mat-button-toggle>
+                </mat-button-toggle-group>
             </div>
 
         </div>
@@ -28,4 +35,5 @@
             </div>
         </div>
     </ng-container>
+
 </mat-toolbar>

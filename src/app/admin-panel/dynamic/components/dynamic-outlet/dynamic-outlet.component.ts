@@ -12,7 +12,6 @@ import { BaseExtendedFormGroup } from '../../extends/base-extended-form-group';
 export class DynamicOutletComponent implements OnDestroy{
   
 
-
   constructor( public dynamicService: DynamicService){
      
   }

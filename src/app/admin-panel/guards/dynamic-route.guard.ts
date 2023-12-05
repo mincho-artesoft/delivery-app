@@ -38,8 +38,9 @@ export class DynamicRouteGuard {
         try {
           const prop = settings.yGet?.prop;
           if (prop) {
+            const organization = this.yjsService.documentStructure.organizations[this.dynamicService.selectedOrganization?.value._id];
             const key = settings.yGet.key;
-            const data = Object.values(this.yjsService.documentStructure.organizations[this.dynamicService.selectedOrganization?._id][prop]).map(object => {
+            const data = Object.values(organization[prop] || [])?.map(object => {
               if (object[key]) {
                 return object[key];
               }
@@ -70,7 +71,7 @@ export class DynamicRouteGuard {
               const collectedData = await this.extractAndManipulateData(settings?.options);
               const prop = settings.yGet.prop;
               if (prop) {
-                const organization = this.yjsService.documentStructure.organizations[this.dynamicService.selectedOrganization._id];
+                const organization = this.yjsService.documentStructure.organizations[this.dynamicService.selectedOrganization.value._id];
                 const key = settings.yGet.key;
                 let data = {};
                 Object.keys(organization[prop]).map(item => {

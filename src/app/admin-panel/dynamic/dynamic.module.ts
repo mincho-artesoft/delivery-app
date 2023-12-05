@@ -16,6 +16,7 @@ import { DynamicComponent } from './components/dynamic/dynamic.component';
 import { OrganizationsWidgetComponent } from './components/widgets/organizations-widget/organizations-widget.component';
 import { UserPanelWidgetComponent } from './components/widgets/user-panel-widget/user-panel-widget.component';
 import { TeamWidgetComponent } from './components/widgets/team-widget/team-widget.component';
+import { TeamsComponentComponent } from './components/teams-component/teams-component.component';
 
 
 
@@ -33,6 +34,7 @@ import { TeamWidgetComponent } from './components/widgets/team-widget/team-widge
     OrganizationsWidgetComponent,
     UserPanelWidgetComponent,
     TeamWidgetComponent,
+    TeamsComponentComponent,
   ],
   exports: [
     DynamicComponent,

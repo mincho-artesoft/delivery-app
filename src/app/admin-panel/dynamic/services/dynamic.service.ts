@@ -1,11 +1,12 @@
 import { CdkDropList } from '@angular/cdk/drag-drop';
 import { Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, Subject, distinctUntilChanged } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../components/confirm-dialog/confirm-dialog.component';
+import { FormControl } from '@angular/forms';
 
 @Injectable({
   providedIn: 'root'
@@ -23,12 +24,20 @@ export class DynamicService {
   public cellWidths: number[] = [];
   public cellWidthsChanged = new Subject<number[]>();
   unsubscribeOnNavigation = new Subject<any>();
-  selectedOrganization: any;
+  selectedOrganization = new FormControl<any>({});
+  public view: string = 'table';
   constructor(
     public dialog: MatDialog,
     private snackbar: MatSnackBar,
     private router: Router,
     private http: HttpClient) {
+    this.selectedOrganization.valueChanges.pipe(
+      distinctUntilChanged((prev, curr) => {
+        return prev._id === curr._id;
+      })
+    ).subscribe((change: any) => {
+      this.refreshPage();
+    })
   }
 
 
@@ -141,7 +150,7 @@ export class DynamicService {
         } else if (button.http) {
           const data = {
             ...control.getRawValue(),
-            guid: this.selectedOrganization._id
+            guid: this.selectedOrganization.value._id
           }
           this.http.post(button.http.path, data).subscribe(res => {
           })
@@ -149,5 +158,13 @@ export class DynamicService {
 
       }
     }
+  }
+
+  refreshPage() {
+    // Assuming you're refreshing the current route
+    const currentUrl = this.router.url;
+    this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+      this.router.navigate([currentUrl]);
+    });
   }
 }

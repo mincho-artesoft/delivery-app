@@ -50,7 +50,7 @@ export class DynamicTableComponent implements OnInit, OnDestroy, AfterViewInit {
       this.table = this.http.request('Yget', this.settings.yGet.path).pipe(map((res: any) => {
         const prop = this.settings.yGet?.prop;
         if (prop) {
-          const organization = this.yjsService.documentStructure.organizations[this.dynamicService.selectedOrganization._id];
+          const organization = this.yjsService.documentStructure.organizations[this.dynamicService.selectedOrganization.value._id];
           const key = this.settings.yGet.key;
           // TODO when we have ids from the backend this logic must be removed. It's only for testing;
           Object.keys(organization[prop]).map((key: any, index: any) => {

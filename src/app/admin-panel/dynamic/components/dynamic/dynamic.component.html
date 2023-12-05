@@ -147,6 +147,6 @@
         </div>
     </ng-container>
 </div>
-<div *ngIf="settings.notTable && formArray" class="teams-wrapper">
-    <app-team-widget *ngFor="let ctrl of formArray.controls; let i = index" [control]="ctrl" [index]="i"></app-team-widget>
+<div *ngIf="settings.multipleView && formArray && settings.component.name === 'TeamsComponent'">
+    <app-teams-component [formArray]="formArray" [settings]="settings"></app-teams-component>
 </div>

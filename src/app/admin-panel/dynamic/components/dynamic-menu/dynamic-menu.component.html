@@ -32,10 +32,10 @@
             </div>
             <div class="expandable-menu" *ngIf="item.subMenus" [ngClass]="{'active': expandedMenus[item.path]}">
                 <div class="label" (click)="toggleMenu(item.path)">
-                    <span>{{item.label}}</span>
-                    <mat-icon>{{expandedMenus[item.path] ?
-                        'arrow_drop_up' :
-                        'arrow_drop_down'}}</mat-icon>
+                    <span>{{item.label}} <mat-icon>{{expandedMenus[item.path] ?
+                            'arrow_drop_up' :
+                            'arrow_drop_down'}}</mat-icon></span>
+
                 </div>
                 <div class="expandable-content" *ngIf="expandedMenus[item.path]">
                     <span class="link sub-label" *ngFor="let sub of item.subMenus">
