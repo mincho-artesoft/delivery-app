@@ -16,7 +16,9 @@ import { DynamicComponent } from './components/dynamic/dynamic.component';
 import { OrganizationsWidgetComponent } from './components/widgets/organizations-widget/organizations-widget.component';
 import { UserPanelWidgetComponent } from './components/widgets/user-panel-widget/user-panel-widget.component';
 import { TeamWidgetComponent } from './components/widgets/team-widget/team-widget.component';
-import { TeamsComponentComponent } from './components/teams-component/teams-component.component';
+import { TeamsEditorComponent } from './components/custom-editors/teams-editor/teams-editor.component';
+import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
+import { ServicesEditorComponent } from './components/custom-editors/services-editor/services-editor.component';
 
 
 
@@ -34,7 +36,8 @@ import { TeamsComponentComponent } from './components/teams-component/teams-comp
     OrganizationsWidgetComponent,
     UserPanelWidgetComponent,
     TeamWidgetComponent,
-    TeamsComponentComponent,
+    TeamsEditorComponent,
+    ServicesEditorComponent,
   ],
   exports: [
     DynamicComponent,
@@ -45,14 +48,16 @@ import { TeamsComponentComponent } from './components/teams-component/teams-comp
     DynamicOutletComponent,
     DynamicDialogComponent,
     DynamicMenuComponent,
-    HttpClientModule
+    HttpClientModule,
+    NgxMatSelectSearchModule
   ],
   imports: [
     CommonModule,
     FormsModule,
     MaterialModule,
     AppRoutingModule,
-    HttpClientModule
+    HttpClientModule,
+    NgxMatSelectSearchModule
   ]
 })
 export class DynamicModule { }

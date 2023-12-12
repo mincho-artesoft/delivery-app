@@ -1,8 +1,5 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
+import { Component, OnDestroy } from '@angular/core';
 import { DynamicService } from '../../services/dynamic.service';
-import { BaseExtendedFormGroup } from '../../extends/base-extended-form-group';
 
 @Component({
   selector: 'app-dynamic-outlet',

@@ -123,11 +123,11 @@ export class DynamicService {
         let params = button.path.split('.');
         let id = control ? control.getRawValue()._id : this.lastSelectedRow?._id;
         let urlSegments = [params[0]];
-        if (button.action === 'edit' && id) {
+        if (id) {
           const [param, b, c] = id.split(".");
-          urlSegments.push('edit', param);
-        } else if (button.action === 'create') {
-          urlSegments.push('edit');
+          urlSegments.push(button.path.split('.')[1], param);
+        } else {
+          urlSegments.push(button.path.split('.')[1]);
         }
         this.router.navigate(urlSegments);
       }

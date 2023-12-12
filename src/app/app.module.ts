@@ -32,7 +32,7 @@ export function tokenGetter() {
         tokenGetter: tokenGetter
       }
     }),
-    HttpWebWorkerClientModule.forRoot({baseUrl:'ws://localhost:9182', ignorePath:'/api/invite-user'}),
+    HttpWebWorkerClientModule.forRoot({baseUrl:'ws://localhost:9182', ignorePath:'/people'}),
     AuthModule
   ],
   providers: [

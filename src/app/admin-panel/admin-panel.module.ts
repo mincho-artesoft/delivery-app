@@ -6,7 +6,6 @@ import { DynamicModule } from './dynamic/dynamic.module';
 
 
 
-
 @NgModule({
   declarations: [
   ],

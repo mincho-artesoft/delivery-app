@@ -765,20 +765,20 @@ input:-internal-autofill-selected::part(value) {
     background: #FFFFFF !important;
     border: 1.5px solid #D2D5DA !important;
     border-radius: 6px !important;
-  }
-  
-  // .mdc-data-table__row:not(.mdc-data-table__row--selected):hover {
-  //   background-color: transparent !important;
-  // }
-  
-  .mat-mdc-checkbox-checked .mdc-checkbox__background {
+}
+
+// .mdc-data-table__row:not(.mdc-data-table__row--selected):hover {
+//   background-color: transparent !important;
+// }
+
+.mat-mdc-checkbox-checked .mdc-checkbox__background {
     background-color: $secondary !important;
     color: #fff !important;
-  }
-  
-  .mat-mdc-checkbox .mdc-checkbox .mdc-checkbox__native-control:enabled~.mdc-checkbox__background .mdc-checkbox__checkmark {
+}
+
+.mat-mdc-checkbox .mdc-checkbox .mdc-checkbox__native-control:enabled~.mdc-checkbox__background .mdc-checkbox__checkmark {
     color: #fff !important;
-  }
+}
 
 ::-webkit-scrollbar {
     width: 5px;
@@ -827,3 +827,48 @@ input:-internal-autofill-selected::part(value) {
     padding: 0 !important;
 }
 
+.mat-mdc-opt.group-label {
+    text-align: center;
+    justify-content: center !important;
+}
+
+.custom-checkbox .mat-radio-container {
+    display: none;
+}
+
+.custom-checkbox .mat-radio-label-content {
+    position: relative;
+    padding-left: 28px;
+    /* Adjust as needed */
+}
+
+.custom-checkbox .mat-radio-label-content::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    height: 20px;
+    /* Adjust as needed */
+    width: 20px;
+    /* Adjust as needed */
+    border: 1px solid currentColor;
+    box-sizing: border-box;
+    border-radius: 2px;
+    /* For squared edges */
+}
+
+.custom-checkbox.mat-radio-checked .mat-radio-label-content::after {
+    content: '';
+    position: absolute;
+    left: 5px;
+    /* Adjust as needed */
+    top: 55%;
+    transform: translateY(-50%) rotate(45deg);
+    height: 10px;
+    /* Adjust as needed */
+    width: 6px;
+    /* Adjust as needed */
+    border-bottom: 2px solid currentColor;
+    border-right: 2px solid currentColor;
+}

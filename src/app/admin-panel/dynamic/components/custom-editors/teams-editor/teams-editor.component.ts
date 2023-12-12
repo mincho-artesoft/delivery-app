@@ -1,13 +1,13 @@
 import { Component, Input } from '@angular/core';
-import { BaseExtendedFormGroup } from '../../extends/base-extended-form-group';
-import { DynamicService } from '../../services/dynamic.service';
+import { BaseExtendedFormGroup } from '../../../extends/base-extended-form-group';
+import { DynamicService } from '../../../services/dynamic.service';
 
 @Component({
-  selector: 'app-teams-component',
-  templateUrl: './teams-component.component.html',
-  styleUrls: ['./teams-component.component.scss']
+  selector: 'app-teams-editor',
+  templateUrl: './teams-editor.component.html',
+  styleUrls: ['./teams-editor.component.scss']
 })
-export class TeamsComponentComponent {
+export class TeamsEditorComponent {
   @Input('formArray') formArray;
   @Input('settings') settings;
   selectedTeam: BaseExtendedFormGroup;
