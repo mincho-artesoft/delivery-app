@@ -99,4 +99,23 @@ export class AppComponent {
       }
     }) 
   }
+
+  getServices() {
+    //8qP3FS2jgo.jnkqjndkjsbqshjdjhqbsdjhsqjjhqsbjd12311231.organization
+    this.httpClient.request('Yget', `/services?path=ZtlYsEYasf.jnkqjndkjsbqshjdjhqbsdjhsqjjhqsbjd12311231123123.organization`).subscribe((res: string) => {
+      console.log(JSON.parse(res));
+    });
+
+  }
+  addService() {
+    //8qP3FS2jgo.jnkqjndkjsbqshjdjhqbsdjhsqjjhqsbjd12311231.organization
+    this.httpClient.request('Ypost', `/services?path=ZtlYsEYasf.jnkqjndkjsbqshjdjhqbsdjhsqjjhqsbjd12311231123123.organization`, { body: { data: "some data"}}).subscribe((res: string) => {
+      console.log(JSON.parse(res));
+    });
+  }
+  deleteService() {
+    this.httpClient.request('Ydelete', `/services?path=6581b68a-8618-4181-ad66-25a22e90dcd3.ZtlYsEYasf.service`).subscribe((res: string) => {
+      console.log(JSON.parse(res));
+    });
+  }
 }

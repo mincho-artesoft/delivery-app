@@ -182,6 +182,40 @@ addEventListener('message', (req) => {
             }
           }
           return;
+        } else if (pathParts.find(path => path.includes("services"))) {
+          const organizationGuid = params.find(param => param.includes("path")).split("=")[1];
+          
+          if(organizationGuid) {
+            const organizationDoc: Y.Doc = Array.from(provider.subdocs.values()).find((doc: Y.Doc) => doc.guid == organizationGuid);
+
+            const services = {};
+
+            const subdocsData = organizationDoc.getMap("subdocs").toJSON();
+
+            (Object.entries(subdocsData) as Array<[string, Y.Doc]>).forEach(([key, doc]) => {
+              if(key.includes("service")) {
+                services[key] = {};
+
+
+
+
+
+                console.log(subdocsData);
+                
+                console.log(doc?.share, doc);
+                
+                doc.share.forEach((yMap: Y.Map, mapKey: string) => {
+                  const mapContent = subdocsData[key].getMap(mapKey).toJSON();
+                  (Object.entries(mapContent) as Array<[string, any]>).forEach(([k, value]) => {
+                    services[key][k] = value.data || value;
+                  });
+                })
+              }
+            })
+
+            postMessage({ type: 'yjs', response: JSON.stringify({ services, uuid: data.uuid }) });
+          }
+          return;
         } else if (pathParts.find(path => path.includes("team"))) {
           const path = pathParts.find(path => path.includes("team"));
           const shouldBuildArray = path.endsWith("s");
@@ -275,31 +309,7 @@ addEventListener('message', (req) => {
           });
           postMessage({ type: 'yjs', response: JSON.stringify({ structure: structure, uuid: data.uuid }) });
           return;
-        } 
-        // else if (pathParts[pathParts.length - 1] == "teams") {
-        //   const organizationID = params[0].split("=")[1];
-
-        //   const organization: Y.Doc = Array.from(provider.subdocs.values()).find((s: Y.Doc) => s.guid.includes(organizationID));
-        //   const sendMessage = () => {
-        //     const teamsData = [];
-        //     organization.getMap("subdocs").forEach((doc: Y.Doc, guid: string) => {
-        //       console.log(guid, doc.isSynced);
-        //       if(guid.includes("team")) {
-        //         const teamData = doc.getMap("data").get("teamData");
-        //         teamsData.push({ guid, ...(teamData || {} )})
-        //       }
-        //     })
-        //     const test = { type: 'yjs', response: JSON.stringify({ structure: teamsData, uuid: data.uuid }) };
-        //     postMessage(test);
-        //   }
-        //   if(organization) {
-        //     organization.getMap("subdocs").observe(() => {
-        //       sendMessage();
-        //     })
-        //     sendMessage();
-        //   }
-        // }
-         else {
+        } else {
           iterateDocument(ydoc, structure);
           wholeStructure = structure;
           let timeout;
@@ -341,7 +351,7 @@ addEventListener('message', (req) => {
               response: JSON.stringify({ uuid: data.uuid, action: "Successful added employee to team!" })
             })
           } else {
-            debugger
+            
             const orgID = params[0].split("=")[1];
             const organization: Y.Doc = Array.from(provider.subdocs.values()).find((s: Y.Doc) => s.guid == orgID);
             const organizationCopy: Y.Doc = Array.from(provider.subdocs.values()).find((s: Y.Doc) => s.guid == orgID + "Copy");
@@ -377,27 +387,30 @@ addEventListener('message', (req) => {
             response: JSON.stringify({ uuid: data.uuid, action: "Successful added service!" })
           })
         } else if (part == "services") {
-          const organizationGuid = params.find((param) => param.includes("path")).split('=')[1];
+          const guid = params.find((param) => param.includes("path")).split('=')[1];
           
-          if(organizationGuid) {
-            const [prefix, _1, _2] = organizationGuid.split(".");
-            const service: Y.Doc = Array.from(provider.subdocs.values()).find((doc: Y.Doc) => doc.guid.includes("service") && doc.guid.inclues(prefix));
+          if(guid) {
             const settings = JSON.parse(data.body);
+            if(guid.includes("service")) {
+              const service: Y.Doc = Array.from(provider.subdocs.values()).find((doc: Y.Doc) => doc.guid == guid);
 
-            if(service) {
-              service.getMap("data").set("settings", settings);
-              
-              postMessage({
-                type: 'yjs',
-                response: JSON.stringify({ uuid: data.uuid, action: "Successful edited service!" })
-              });
+              if(service) {
+                service.getMap("data").set("settings", settings);
+                
+                postMessage({
+                  type: 'yjs',
+                  response: JSON.stringify({ uuid: data.uuid, action: "Successful edited service!" })
+                });
+              }
             } else {
+              const prefix = guid.split(".")[0];
               const serviceDoc = new Y.Doc({ guid: `${generateGuid()}.${prefix}.service`});
-              serviceDoc.getMap("data").set("settings", settings);
               
-              const organization: Y.Doc = Array.from(provider.subdocs.values()).find((doc: Y.Doc) => doc.guid == organizationGuid);
-              organization.getMap("subdocs").set(serviceDoc.guid, service);
-
+              const organization: Y.Doc = Array.from(provider.subdocs.values()).find((doc: Y.Doc) => doc.guid == guid);
+              organization.getMap("subdocs").set(serviceDoc.guid, serviceDoc);
+              setTimeout(() => {
+                serviceDoc.getMap("data").set("settings", settings);
+              }, 200);
               postMessage({
                 type: 'yjs',
                 response: JSON.stringify({ uuid: data.uuid, action: "Successful added service!" })
@@ -414,7 +427,7 @@ addEventListener('message', (req) => {
         }
       });
       break;
-    }
+    } 
     case 'YDELETE': {
       init(pathParts[0], userID, (ydoc: Y.Doc) => {
         const part = pathParts[pathParts.length - 1];
