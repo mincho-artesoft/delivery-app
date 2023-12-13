@@ -36,6 +36,8 @@ function fromBase64(base64) {
 //   menu
 //   profiles )
 
+const guidSuffixesForSubdocsSubscibe = ["organization", "profile", "team"];
+
 
 const messageSync = 0
 const messageQueryAwareness = 3
@@ -86,15 +88,18 @@ messageHandlers[messageSubDocSync] = (encoder, decoder, provider, emitSynced, me
         subDoc.isSynced = true;
       }
     }
-    const [prefix, parentID, suffix] = subDocID.split(".");
-      provider.subscribeToSubdocs(subDoc);
-      const subdocs = subDoc.getMap("subdocs");
-      console.log(Array.from(subDoc.subdocs).map(s => s.guid));
-      subdocs.forEach((s, key) => {
-        if(s && !s.isSynced) {
-          s.load();
-        }
-      });
+    const [_1, _2, suffix] = subDocID.split(".");
+
+    // only sertain documents should be subscibed for subdocs!
+    guidSuffixesForSubdocsSubscibe.includes(suffix) && provider.subscribeToSubdocs(subDoc);
+
+    const subdocs = subDoc.getMap("subdocs");
+    console.log(Array.from(subDoc.subdocs).map(s => s.guid));
+    subdocs.forEach((s, key) => {
+      if(s && !s.isSynced) {
+        s.load();
+      }
+    });
   }
 }
 
@@ -397,39 +402,13 @@ export class WebsocketProvider extends Observable {
     }
     this.doc.on('update', this._updateHandler);
 
-    this.subscribeToSubdocs = (doc) => {
-      doc.on("subdocs", ({ added, removed, loaded }) => {
-        console.log("added", Array.from(added));
-        console.log("removed", Array.from(removed));
-        console.log("loaded", Array.from(loaded));
-        added.forEach((subdoc) => {
-          this.subdocs.set(subdoc.guid, subdoc);
-          setTimeout(() => {
-            if(!subdoc.isSynced) {
-              const encoder = encoding.createEncoder()
-              encoding.writeVarUint(encoder, messageSubDocSync)
-              encoding.writeVarString(encoder, subdoc.guid)
-              syncProtocol.writeSyncStep1(encoder, subdoc)
-              if (this.ws) {
-                this.send(encoding.toUint8Array(encoder), () => {
-                  subdoc.on('update', this._getSubDocUpdateHandler(subdoc))
-                })
-              }
-              this.iterateFunc(subdoc);
-            }
-          }, 500);
-          this.iterateFunc(subdoc);
-        })
-        removed.forEach((subdoc) => {
-          subdoc.off('update', this._getSubDocUpdateHandler(subdoc))
-          // this.subdocs.delete(subdoc.guid)
-          this.iterateFunc(subdoc, true);
-        })
-        loaded.forEach((subdoc) => {
-          if(!this.subdocs.has(subdoc.guid)) {
-            this.subdocs.set(subdoc.guid, subdoc);
-          }
-  
+    const subdocsHandler = ({ added, removed, loaded }) => {
+      console.log("added in ", Array.from(added));
+      console.log("removed from ", Array.from(removed));
+      console.log("loaded in ", Array.from(loaded));
+      added.forEach((subdoc) => {
+        this.subdocs.set(subdoc.guid, subdoc);
+        setTimeout(() => {
           if(!subdoc.isSynced) {
             const encoder = encoding.createEncoder()
             encoding.writeVarUint(encoder, messageSubDocSync)
@@ -442,8 +421,39 @@ export class WebsocketProvider extends Observable {
             }
             this.iterateFunc(subdoc);
           }
-        })
+        }, 500);
+        this.iterateFunc(subdoc);
       })
+      removed.forEach((subdoc) => {
+        subdoc.off('update', this._getSubDocUpdateHandler(subdoc))
+        // this.subdocs.delete(subdoc.guid)
+        this.iterateFunc(subdoc, true);
+      })
+      loaded.forEach((subdoc) => {
+        if(!this.subdocs.has(subdoc.guid)) {
+          this.subdocs.set(subdoc.guid, subdoc);
+        }
+
+        if(!subdoc.isSynced) {
+          const encoder = encoding.createEncoder()
+          encoding.writeVarUint(encoder, messageSubDocSync)
+          encoding.writeVarString(encoder, subdoc.guid)
+          syncProtocol.writeSyncStep1(encoder, subdoc)
+          if (this.ws) {
+            this.send(encoding.toUint8Array(encoder), () => {
+              subdoc.on('update', this._getSubDocUpdateHandler(subdoc))
+            })
+          }
+          this.iterateFunc(subdoc);
+        }
+      })
+    }
+
+    this.subscribeToSubdocs = (doc) => {
+      console.log("subscribeToSubdocs", doc.guid);
+      // we should first 'off' the function reference because of multiple subscribing for subdocs event
+      doc.off('subdocs', subdocsHandler);
+      doc.on("subdocs", subdocsHandler);
     }
 
     this.send = function (message, callback) {

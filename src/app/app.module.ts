@@ -42,7 +42,7 @@ export function tokenGetter() {
         return () => {
           httpClient.request('Yget', `?initial=true`).subscribe((res: string) => {
             const structure = JSON.parse(res);
-            yjsService.documentStructure = structure.structure;
+            yjsService.documentStructure = Object.keys(structure.structure).length ? structure.structure : { organizations: {} };
             console.log("APP MODULE");
             console.log(structure);
             localStorage.setItem('organizations', JSON.stringify(structure.structure.organizations))
