@@ -141,26 +141,21 @@ addEventListener('message', (req) => {
       init(pathParts[0], userID, (ydoc: Y.Doc) => {
         let structure: any = {};
 
-        if (pathParts.find(path => path.includes("organization")) || pathParts.find(path => path.includes("warehouse"))) {
-          const path = pathParts.find(path => path.includes("organization")) || pathParts.find(path => path.includes("warehouse"))
+        if (pathParts.find(path => path.includes("organization"))) {
+          const path = pathParts.find(path => path.includes("organization"));
           const shouldBuildArray = path.endsWith("s");
 
-          let shouldGetWarehouse = false;
-          if(path.includes("warehouse")) {
-            shouldGetWarehouse = true;
-          }
-
           const setListener = () => {
-            subdocsMap.forEach((doc: Y.Doc, _: string) => docUpdateObserver(doc, () => getSubdocsData(subdocsMap, shouldGetWarehouse, data, (response: any) => postMessage({ type: 'yjs', response }))));
+            subdocsMap.forEach((doc: Y.Doc, _: string) => docUpdateObserver(doc, () => getSubdocsData(subdocsMap, data, (response: any) => postMessage({ type: 'yjs', response }))));
           }
 
           if(shouldBuildArray) {
             setListener();
-            getSubdocsData(subdocsMap, shouldGetWarehouse, data, (response: any) => postMessage({ type: 'yjs', response }));
+            getSubdocsData(subdocsMap, data, (response: any) => postMessage({ type: 'yjs', response }));
             subdocsMap.observe(() => {
               setListener();
               setTimeout(() => {
-                getSubdocsData(subdocsMap, false, data, (response: any) => postMessage({ type: 'yjs', response }));
+                getSubdocsData(subdocsMap, data, (response: any) => postMessage({ type: 'yjs', response }));
               }, 200)
             })
           } else {
@@ -171,7 +166,7 @@ addEventListener('message', (req) => {
             if(path) {
               guid = path.split('=')[1];
 
-              shouldGetWarehouse ? dataKey = "warehouseData" : dataKey = "organizationData";
+              dataKey = "organizationData";
               const docID = Array.from(provider.subdocs.keys()).find((id: string) => id.includes(guid));
               const subdoc = provider.subdocs.get(docID);
               const map = subdoc?.getMap("data");
@@ -184,6 +179,81 @@ addEventListener('message', (req) => {
                   postMessage({ type: 'yjs', response: JSON.stringify({ structure: structure, uuid: data.uuid }) });    
                 });
               }
+            }
+          }
+          return;
+        } else if (pathParts.find(path => path.includes("team"))) {
+          const path = pathParts.find(path => path.includes("team"));
+          const shouldBuildArray = path.endsWith("s");
+
+          if(shouldBuildArray) {
+            const [orgID, userID, _] = params.find((param) => param.includes("path")).split('=')[1].split(".");
+            const teams = Array.from((provider.subdocs as Map<any, any>).values()).filter((doc) => doc.guid.includes(orgID) && doc.guid.includes("team"));
+            // teamSubdoc.getMap("data").set("teamData", data.body);
+
+            let structure = [];
+
+            const structureFunc = () => {
+              const structure = [];
+              teams.forEach(teamDoc => {
+                const data = teamDoc.getMap("data").get("teamData") || {};
+                structure.push({ _id: teamDoc.guid, ...data});
+              });
+              return structure;
+            }
+            structure = structureFunc();
+
+            postMessage({ type: 'yjs', response: JSON.stringify({ structure: structure, uuid: data.uuid }) });
+          } else {
+            const teamGuid = params.find((param) => param.includes("path")).split('=')[1];
+            const teamDoc = provider.subdocs.get(teamGuid);
+
+            if(teamDoc) {
+              const structure = {};
+              iterateDocument(teamDoc, structure);
+
+              postMessage({ type: 'yjs', response: JSON.stringify({ structure, uuid: data.uuid }) });
+            } else {
+              postMessage({ type: 'yjs', response: JSON.stringify({ message: "Cannot find team with this id - " + teamGuid, uuid: data.uuid }) });
+            }
+          }
+          return;
+          // postMessage({ type: 'yjs', response: JSON.stringify({ structure: structure, uuid: data.uuid }) });
+        } else if (pathParts.find(path => path.includes("profile"))) {
+          const path = pathParts.find(path => path.includes("profile"));
+          const shouldBuildArray = path.endsWith("s");
+
+          if(shouldBuildArray) {
+            const [orgID, userID, _] = params.find((param) => param.includes("path")).split('=')[1].split(".");
+            const profiles = Array.from((provider.subdocs as Map<any, any>).values()).filter((doc) => doc.guid.includes(orgID) && doc.guid.includes("profile"));
+            // teamSubdoc.getMap("data").set("profileData", data.body);
+
+            let structure = [];
+
+            const structureFunc = () => {
+              const structure = [];
+              profiles.forEach(profileDoc => {
+                const data = profileDoc.getMap("data").get("profileData");
+                if(data) {
+                  structure.push({ _id: profileDoc.guid, ...data});
+                }
+              });
+              return structure;
+            }
+            structure = structureFunc();
+
+            postMessage({ type: 'yjs', response: JSON.stringify({ structure, uuid: data.uuid }) });
+          } else {
+            const profileGuid = params.find((param) => param.includes("path")).split('=')[1];
+            const profileDoc = provider.subdocs.get(profileGuid);
+
+            if(profileDoc) {
+              const structure = {};
+              iterateDocument(profileDoc, structure);
+
+              postMessage({ type: 'yjs', response: JSON.stringify({ structure, uuid: data.uuid }) });
+            } else {
+              postMessage({ type: 'yjs', response: JSON.stringify({ message: "Cannot find profile with this id - " + profileGuid, uuid: data.uuid }) });
             }
           }
           return;
@@ -205,29 +275,31 @@ addEventListener('message', (req) => {
           });
           postMessage({ type: 'yjs', response: JSON.stringify({ structure: structure, uuid: data.uuid }) });
           return;
-        } else if (pathParts[pathParts.length - 1] == "teams") {
-          const organizationID = params[0].split("=")[1];
+        } 
+        // else if (pathParts[pathParts.length - 1] == "teams") {
+        //   const organizationID = params[0].split("=")[1];
 
-          const organization: Y.Doc = Array.from(provider.subdocs.values()).find((s: Y.Doc) => s.guid.includes(organizationID));
-          const sendMessage = () => {
-            const teamsData = [];
-            organization.getMap("subdocs").forEach((doc: Y.Doc, guid: string) => {
-              console.log(guid, doc.isSynced);
-              if(guid.includes("team")) {
-                const teamData = doc.getMap("data").get("teamData");
-                teamsData.push({ guid, ...(teamData || {} )})
-              }
-            })
-            const test = { type: 'yjs', response: JSON.stringify({ structure: teamsData, uuid: data.uuid }) };
-            postMessage(test);
-          }
-          if(organization) {
-            organization.getMap("subdocs").observe(() => {
-              sendMessage();
-            })
-            sendMessage();
-          }
-        } else {
+        //   const organization: Y.Doc = Array.from(provider.subdocs.values()).find((s: Y.Doc) => s.guid.includes(organizationID));
+        //   const sendMessage = () => {
+        //     const teamsData = [];
+        //     organization.getMap("subdocs").forEach((doc: Y.Doc, guid: string) => {
+        //       console.log(guid, doc.isSynced);
+        //       if(guid.includes("team")) {
+        //         const teamData = doc.getMap("data").get("teamData");
+        //         teamsData.push({ guid, ...(teamData || {} )})
+        //       }
+        //     })
+        //     const test = { type: 'yjs', response: JSON.stringify({ structure: teamsData, uuid: data.uuid }) };
+        //     postMessage(test);
+        //   }
+        //   if(organization) {
+        //     organization.getMap("subdocs").observe(() => {
+        //       sendMessage();
+        //     })
+        //     sendMessage();
+        //   }
+        // }
+         else {
           iterateDocument(ydoc, structure);
           wholeStructure = structure;
           let timeout;
@@ -249,7 +321,8 @@ addEventListener('message', (req) => {
     case 'YPOST': {
       init(pathParts[0], userID, (ydoc: Y.Doc) => {
         const part = pathParts[pathParts.length - 1];
-
+        console.log(part);
+        
         if(part == "teams") {
           if(params.find(param => param.includes("profile"))) {
             const teamGuid = params.find((param) => param.includes("path")).split('=')[1];
@@ -268,6 +341,7 @@ addEventListener('message', (req) => {
               response: JSON.stringify({ uuid: data.uuid, action: "Successful added employee to team!" })
             })
           } else {
+            debugger
             const orgID = params[0].split("=")[1];
             const organization: Y.Doc = Array.from(provider.subdocs.values()).find((s: Y.Doc) => s.guid == orgID);
             const organizationCopy: Y.Doc = Array.from(provider.subdocs.values()).find((s: Y.Doc) => s.guid == orgID + "Copy");
@@ -276,10 +350,10 @@ addEventListener('message', (req) => {
             const teamSubdoc = new Y.Doc({ guid: `${generateGuid()}.${prefix}.team`});
             // provider.subscribeToSubdocs(organization, "subdocs", "organization");
             provider.subscribeToSubdocs(teamSubdoc, "subdocs", "organization");
-            teamSubdoc.getMap("data").set("teamData", data.body);
+            teamSubdoc.getMap("data").set("teamData", JSON.parse(data.body));
 
             setTimeout(() => {
-              teamSubdoc.getMap("subdocs").set(organizationCopy.guid, organizationCopy);
+              // teamSubdoc.getMap("subdocs").set(organizationCopy.guid, organizationCopy);
               organization.getMap("subdocs").set(teamSubdoc.guid, teamSubdoc);
               postMessage({
                 type: 'yjs',
@@ -302,16 +376,40 @@ addEventListener('message', (req) => {
             type: 'yjs',
             response: JSON.stringify({ uuid: data.uuid, action: "Successful added service!" })
           })
+        } else if (part == "services") {
+          const organizationGuid = params.find((param) => param.includes("path")).split('=')[1];
+          
+          if(organizationGuid) {
+            const [prefix, _1, _2] = organizationGuid.split(".");
+            const service: Y.Doc = Array.from(provider.subdocs.values()).find((doc: Y.Doc) => doc.guid.includes("service") && doc.guid.inclues(prefix));
+            const settings = JSON.parse(data.body);
+
+            if(service) {
+              service.getMap("data").set("settings", settings);
+              
+              postMessage({
+                type: 'yjs',
+                response: JSON.stringify({ uuid: data.uuid, action: "Successful edited service!" })
+              });
+            } else {
+              const serviceDoc = new Y.Doc({ guid: `${generateGuid()}.${prefix}.service`});
+              serviceDoc.getMap("data").set("settings", settings);
+              
+              const organization: Y.Doc = Array.from(provider.subdocs.values()).find((doc: Y.Doc) => doc.guid == organizationGuid);
+              organization.getMap("subdocs").set(serviceDoc.guid, service);
+
+              postMessage({
+                type: 'yjs',
+                response: JSON.stringify({ uuid: data.uuid, action: "Successful added service!" })
+              });
+            }
+          }
         } else {
           const [docGuidPart, id, suffix] = params.find((param) => param.includes("path")).split('=')[1].split('.');
   
           if(suffix == "organization") {
             const guid = docGuidPart + '.' + userID + '.' + suffix;
             createOrEditOrganization(guid, data);
-          } else {
-            const guid = Array.from(provider.subdocs.keys()).find((id: string) => id.includes(docGuidPart)) as string;
-  
-            editWarehouse(guid, id, data);
           }
         }
       });
@@ -323,7 +421,6 @@ addEventListener('message', (req) => {
 
         if(part == "profiles" || part == "teams") {
           if(params.find(param => param.includes("service"))) {
-            debugger
             const docGuid = params.find(param => param.includes("path")).split("=")[1];
             const serviceGuid = params.find(param => param.includes("service")).split("=")[1];
 
@@ -336,7 +433,7 @@ addEventListener('message', (req) => {
   
             postMessage({
               type: 'yjs',
-              response: JSON.stringify({ uuid: data.uuid, action: "Successful added service!" })
+              response: JSON.stringify({ uuid: data.uuid, action: "Successful deleted service!" })
             })
           } else {
             const organization: Y.Doc = Array.from(provider.subdocs.values()).find((s: Y.Doc) => s.guid.includes(params[0].split('=')[1].split(".")[1]));
@@ -349,6 +446,21 @@ addEventListener('message', (req) => {
               type: 'yjs',
               response: JSON.stringify({ uuid: data.uuid, action: "Successful deleting!" })
             })
+          }
+        } else if (part == "services") {
+          const serviceGuid = params.find((param) => param.includes("path")).split('=')[1];
+
+          if(serviceGuid) {
+            const [prefix, orgGuid, _] = serviceGuid.split(".");
+
+            const organizationDoc: Y.Doc = Array.from(provider.subdocs.values()).find((doc: Y.Doc) => doc.guid.includes(orgGuid) && doc.guid.includes("organization"));
+
+            organizationDoc.getMap("subdocs").delete(serviceGuid);
+
+            postMessage({
+              type: 'yjs',
+              response: JSON.stringify({ uuid: data.uuid, action: "Successful removed service!" })
+            });
           }
         } else {
           const [docGuidPart, id, suffix] = params.find((param) => param.includes("path")).split('=')[1].split('.');
@@ -363,10 +475,6 @@ addEventListener('message', (req) => {
               type: 'yjs',
               response: JSON.stringify({ uuid: data.uuid, action: "Successful deleting!" }),
             });
-          } else {
-            const guid = Array.from(provider.subdocs.keys()).find((id: string) => id.includes(docGuidPart)) as string;
-            
-            deleteWarehouse(guid, id, data);
           }
         }
       });
@@ -397,34 +505,6 @@ function getNested(nestedMap: Y.Map, pathArr: string[]) {
 
 const services = ["warehouse"];
 
-// function iterateDocument (doc: Y.Doc, docStructure: any) {
-//   if (!doc?.share) return;
-
-//   doc.share.forEach((yMap: Y.Map, key: string) => {
-//     if(key != "documentStructure") {
-//       const mapContent = doc.getMap(key).toJSON();
-//       if (key == 'subdocs') {
-//         (Object.entries(mapContent) as Array<[string, Y.Doc]>).forEach(([docGuid, subdoc]) => {
-//           const [_, _2, suffix] = docGuid.split(".");
-//           if(!docStructure[suffix + "s"]) {
-//             services.includes(suffix) ? key = "services" : key = suffix + "s";
-
-//             docStructure[key] = { [docGuid]: {} };
-//           } else {
-//             services.includes(suffix) ? key = "services" : key = suffix + "s";
-//             docStructure[key][docGuid] = {};
-//           }
-//           iterateDocument(subdoc, docStructure[key][docGuid]);
-//         });
-//       } else {
-//         (Object.entries(mapContent) as Array<[string, any]>).forEach(([mapKey, value]) => {
-//           docStructure[mapKey] = value.data || value;
-//         });
-//       }
-//     }
-//   });
-// }
-
 function iterateDocument(doc: Y.Doc, docStructure: any, path = []) {
   if (!doc?.share) return;
 
@@ -445,7 +525,8 @@ function iterateDocument(doc: Y.Doc, docStructure: any, path = []) {
           if(docGuid.includes("Copy")) return;
 
           const [_, _2, suffix] = docGuid.split(".");
-          services.includes(suffix) ? key = "services" : key = suffix + "s";
+          // services.includes(suffix) ? key = "services" : key = suffix + "s";
+          key = suffix + "s";
 
           if (!docStructure[key]) {
             docStructure[key] = {};
@@ -468,19 +549,19 @@ function iterateDocument(doc: Y.Doc, docStructure: any, path = []) {
 }
 
 
-function getSubdocsData (subdocs: Y.Map, shouldGetWarehouses: boolean, data: { uuid: string }, callback: (response: any) => void) {
+function getSubdocsData (subdocs: Y.Map, data: { uuid: string }, callback: (response: any) => void) {
   let structure = {};
   subdocs.forEach((doc: Y.Doc, key: string) => {
-    if(shouldGetWarehouses) {
-      const warehouseKey = Array.from(provider.subdocs.keys()).find((k: string) => k.includes("warehouse") && k.includes(key.split(".")[0])) as string;
-      const warehouse = provider.subdocs.get(warehouseKey);
-      const map = warehouse.getMap("data");
-      const serializedMapData = {};
-      map.forEach((value: any, mapKey: string) => {
-        serializedMapData[mapKey] = value?.data;
-      });
-      structure[key] = serializedMapData;
-    } else {
+    // if(shouldGetWarehouses) {
+    //   const warehouseKey = Array.from(provider.subdocs.keys()).find((k: string) => k.includes("warehouse") && k.includes(key.split(".")[0])) as string;
+    //   const warehouse = provider.subdocs.get(warehouseKey);
+    //   const map = warehouse.getMap("data");
+    //   const serializedMapData = {};
+    //   map.forEach((value: any, mapKey: string) => {
+    //     serializedMapData[mapKey] = value?.data;
+    //   });
+    //   structure[key] = serializedMapData;
+    // } else {
       const data = doc.getMap('data');
       const serializedMapData = {};
       data.forEach((value: any, mapKey: string) => {
@@ -489,31 +570,20 @@ function getSubdocsData (subdocs: Y.Map, shouldGetWarehouses: boolean, data: { u
         }
       });
       structure[key] = serializedMapData;
-    }
+    // }
   });
-  if(shouldGetWarehouses) {
-    structure = Object.keys(structure).map((key) => ({...structure[key].warehouseData, _id: key}));
-  } else {
-    structure = Object.keys(structure).map((key) => ({...structure[key].organizationData, _id: key}));
-  }
+
+  structure = Object.keys(structure).map((key) => ({...structure[key].organizationData, _id: key}));
 
   callback(JSON.stringify({ structure, uuid: data.uuid }));
 }
 
 function getOne(map: Y.Map, guid: string,dataKey: string) {
-  if(dataKey == "warehouseData") {
-    const data = [];
-    map.forEach((value: any, mapKey: string) => {
-      data.push({ ...value?.data, _id: value._id });
-    });
-    return data;
-  } else {
-    const serializedMapData = {};
-    map.forEach((value: any, mapKey: string) => {
-      serializedMapData[mapKey] = value?.data;
-    });
-    return { ...serializedMapData[dataKey], _id: guid };
-  }
+  const serializedMapData = {};
+  map.forEach((value: any, mapKey: string) => {
+    serializedMapData[mapKey] = value?.data;
+  });
+  return { ...serializedMapData[dataKey], _id: guid };
 }
 
 function createOrEditOrganization(guid: string, data: any) {
@@ -540,39 +610,19 @@ function createOrEditOrganization(guid: string, data: any) {
     subdoc.getMap("subdocs").set(organizationCopy.guid, organizationCopy);
 
     // creating warehouse
-    const warehouseDoc = new Y.Doc({ guid: `${generateGuid()}.${orgID}.warehouse` });
-    subdoc.getMap('subdocs').set(warehouseDoc.guid, warehouseDoc);
-    warehouseDoc.getMap("data").set("warehouseData", {});
-    const struct = documentStructureMap.get("structure");
-    struct["organizations"].push(guid);
-    documentStructureMap.set("structure", struct);
-    const restaurantData = { ...JSON.parse(data.body), _id: guid };
+    // const warehouseDoc = new Y.Doc({ guid: `${generateGuid()}.${orgID}.warehouse` });
+    // subdoc.getMap('subdocs').set(warehouseDoc.guid, warehouseDoc);
+    // warehouseDoc.getMap("data").set("warehouseData", {});
+    // const struct = documentStructureMap.get("structure");
+    // struct["organizations"].push(guid);
+    // documentStructureMap.set("structure", struct);
+    const organizationData = { ...JSON.parse(data.body), _id: guid };
 
     postMessage({
       type: 'yjs',
-      response: JSON.stringify({ uuid: data.uuid, ...restaurantData, message: "Succesfully edited organization!" }),
+      response: JSON.stringify({ uuid: data.uuid, ...organizationData, message: "Succesfully edited organization!" }),
     });
   }
-}
-
-function editWarehouse(guid: string, productID: string,data: any) {
-  const subdoc = provider.subdocs.get(guid);
-  subdoc.getMap('data').set(productID, { ...JSON.parse(data.body), _id: productID });
-
-  postMessage({
-    type: 'yjs',
-    response: JSON.stringify({ uuid: data.uuid, message: "Succesfull operation!" }),
-  });
-}
-
-function deleteWarehouse(guid: string, productID: string, data: any) {
-  const subdoc = provider.subdocs.get(guid);
-  subdoc.getMap('data').delete(productID);
-
-  postMessage({
-    type: 'yjs',
-    response: JSON.stringify({ uuid: data.uuid, message: "Succesfull deleting!" }),
-  });
 }
 
 const updateCallback = (callback: any, clog?: string) => (update: Uint8Array) => callback();
@@ -587,58 +637,6 @@ function docUpdateObserver(doc: Y.Doc, callback: any, shouldOffListener?: boolea
     doc.on("update", updateCallback(callback));
   }
 }
-
-function createProfile(organizationID: string, data: any) {
-  let profileSubdoc = Array.from(provider.subdocs).find((subdoc: Y.Doc) => subdoc.guid.endsWith("profiles")) as Y.Doc;
-
-  if(profileSubdoc) {
-    provider.subscribeToSubdocs(profileSubdoc, "subdocs", "profiles");
-    const profile = new Y.Doc({ guid: `${generateGuid()}.${organizationID}.profile` });
-    profileSubdoc.getMap('subdocs').set(profile.guid, profile);
-    profile.getMap("data").set("profileData", JSON.parse(data.body));
-  } else {
-    const organization = Array.from(provider.subdocs).find((subdoc: Y.Doc) => subdoc.guid.startsWith(organizationID)) as Y.Doc;
-    provider.subscribeToSubdocs(organization, "subdocs", "organization");
-    profileSubdoc = new Y.Doc({ guid: `${generateGuid()}.${organizationID}.profiles` });
-    organization.getMap('subdocs').set(profileSubdoc.guid, profileSubdoc);
-    provider.subscribeToSubdocs(profileSubdoc, "subdocs", "profiles");
-    const profile = new Y.Doc({ guid: `${generateGuid()}.${organizationID}.profile` });
-    profileSubdoc.getMap('subdocs').set(profile.guid, profile);
-    profile.getMap("data").set("profileData", JSON.parse(data.body));
-  }
-
-  postMessage({
-    type: 'yjs',
-    response: JSON.stringify({ uuid: data.uuid, message: "Succesfull operation!" }),
-  });
-}
-
-function getProfiles(organizationID: string, data: any) {
-  const profiles = Array.from(provider.subdocs).filter((subdoc: Y.doc) => subdoc.guid.endsWith("profile") && subdoc.guid.includes(organizationID));
-
-  const serializeData: any = {};
-  
-  if(profiles.length) {
-    profiles.forEach((profile: Y.Doc) => {
-      const data = profile.getMap("data").get("profileData");
-      serializeData[profile.guid] = data;
-    })
-  }
-  
-  postMessage({
-    type: 'yjs',
-    response: JSON.stringify({ uuid: JSON.parse(data.body).uuid, data: serializeData }),
-  });
-}
-
-function editProfile() {
-
-}
-
-function deleteProfile() {
-
-}
-
 /**
  * example of document uuid
  * ````````````````````````
