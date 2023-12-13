@@ -488,7 +488,7 @@ export const ADMIN_PANEL_SETTINGS = {
             {
               data: 'warehouse',
               title: 'Warehouse',
-              default: 'base',
+              // default: 'base',
               validators: [{ name: 'required' }],
               options: [
                 {

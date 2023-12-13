@@ -1,9 +1,16 @@
 <div *ngFor="let group of column.columns" class="services-radio-group">
     <span class="group-label"><strong>{{group.title}}</strong> </span>
     <mat-radio-group class="radio-group" [formControl]="group.control">
-        <mat-radio-button *ngFor="let option of group.options" [value]="option.value" class="radio-button">
-            <div class="option-label"><strong>{{ option.name }}</strong><mat-icon class="expand-button"
-                    (click)="toggleExpand($event, option)">expand_more</mat-icon>
+        <div *ngFor="let option of group.options" class="radio-option">
+            <div class="option-label">
+                <mat-radio-button [value]="option.value" class="radio-button">
+                    <strong>{{ option.name }}</strong>
+                </mat-radio-button>
+                <mat-icon class="expand-button" (click)="toggleExpand($event, option)">
+                    {{option.isExpanded ? 'expand_less' : 'expand_more'}}
+                </mat-icon>
+                <mat-icon class="deselect-button" (click)="deselectService(group)" matTooltip="Unsubscribe service"
+                    *ngIf="group.control.value === option.value">do_not_disturb_on</mat-icon>
             </div>
             <div class="option-information" [class.expanded]="option.isExpanded">
                 <span class="subtitle">{{option.description?.subtitle}}</span>
@@ -13,6 +20,6 @@
                 </div>
                 <span class="hint">{{option.description?.hint}}</span>
             </div>
-        </mat-radio-button>
+        </div>
     </mat-radio-group>
 </div>

@@ -12,11 +12,15 @@ export class ServicesEditorComponent implements OnInit {
     this.column.columns[0].control.root.valueChanges.subscribe(change => {
       console.log(change)
     });
+    console.log(this.column.columns[0])
   }
 
-  toggleExpand(event, option: any): void {
+  toggleExpand(event: Event, option: any): void {
     event.stopPropagation();
     option.isExpanded = !option.isExpanded;
-}
+  }
 
+  deselectService(column: any) {
+    column.control.setValue('');
+  }
 }

@@ -5,11 +5,14 @@
     margin-bottom: 30px;
 
     .group-label {
+        display: flex;
+        flex-direction: row;
         text-align: center;
         font-size: 1.2em;
         color: #333;
-        margin-top: 10px;
-        margin-bottom: 10px;
+        margin: auto;
+        height: 30px;
+        
     }
 
     .radio-group {
@@ -19,7 +22,7 @@
         gap: 10px;
     }
 
-    .radio-button {
+    .radio-option {
         padding: 10px;
         border: 1px solid #ddd;
         border-radius: 8px;
@@ -35,10 +38,28 @@
     .option-label {
         display: flex;
         flex-direction: row;
-        align-items: flex-end;
+        align-items: center;
+
+        .deselect-button {
+            margin-left: auto;
+            border: 1px solid transparent;
+
+        }
+
+        .deselect-button:hover {
+            cursor: pointer;
+            border: 1px solid grey;
+            border-radius: 3px;
+        }
+
         .expand-button {
-            // cursor: pointer;
-            width: 30px;
+            margin-left: 10px;
+            border: 1px solid transparent;
+        }
+        .expand-button:hover {
+            cursor: pointer;
+            border: 1px solid grey;
+            border-radius: 3px;
         }
     }
 
