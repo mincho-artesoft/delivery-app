@@ -14,4 +14,9 @@ export class ServicesEditorComponent implements OnInit {
     });
   }
 
+  toggleExpand(event, option: any): void {
+    event.stopPropagation();
+    option.isExpanded = !option.isExpanded;
+}
+
 }

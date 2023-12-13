@@ -1,9 +1,11 @@
 <div *ngFor="let group of column.columns" class="services-radio-group">
-    <span class="group-label"><strong>{{group.title}}</strong></span>
+    <span class="group-label"><strong>{{group.title}}</strong> </span>
     <mat-radio-group class="radio-group" [formControl]="group.control">
         <mat-radio-button *ngFor="let option of group.options" [value]="option.value" class="radio-button">
-            <strong>{{ option.name }}</strong>
-            <div class="option-information">
+            <div class="option-label"><strong>{{ option.name }}</strong><mat-icon class="expand-button"
+                    (click)="toggleExpand($event, option)">expand_more</mat-icon>
+            </div>
+            <div class="option-information" [class.expanded]="option.isExpanded">
                 <span class="subtitle">{{option.description?.subtitle}}</span>
                 <span class="usage">{{option.description?.usage}}</span>
                 <div class="features">

@@ -32,23 +32,31 @@
         }
     }
 
+    .option-label {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-end;
+        .expand-button {
+            // cursor: pointer;
+            width: 30px;
+        }
+    }
+
     .option-information {
         display: flex;
         flex-direction: column;
         gap: 10px;
         margin-top: 8px;
         padding-left: 20px;
+        display: none;
 
         .subtitle {
             display: block;
-            // color: #666;
-            // font-size: 0.95em;
         }
 
         .usage {
             display: block;
-            // color: #999;
-            // font-size: 0.9em;
+
         }
 
         .features {
@@ -60,9 +68,12 @@
         .hint {
             display: block;
             color: #797777;
-            // font-size: 0.9em;
             margin-top: 5px;
             font-style: italic;
         }
+    }
+
+    .option-information.expanded {
+        display: flex;
     }
 }
