@@ -36,18 +36,19 @@ export class DynamicRouteGuard {
       if (route.params['primary'] && !route.params['id'] && !route.params['secondary']) {
         this.dynamicService.formArrayProvider.set(null);
         try {
-          const res: any = await firstValueFrom(this.http.request('Yget', settings.yGet.path));
           const prop = settings.yGet?.prop;
           if (prop) {
-            const selectedOrg = this.dynamicService.selectedOrganization.orgKey;
-            Object.keys(this.yjsService.documentStructure.subdocs[selectedOrg].subdocs).map(key => {
-              if (key.includes(prop)) {
-                const settingsKey = settings.yGet.key;
-                this.formArray = new BaseExtendedFormArray(settings, this.http, null, [this.yjsService.documentStructure.subdocs[selectedOrg].subdocs[key]?.data[settingsKey]]);
-                this.dynamicService.formArrayProvider.set(this.formArray);
+            const organization = this.yjsService.documentStructure.organizations[this.dynamicService.selectedOrganization?.value._id];
+            const key = settings.yGet.key;
+            const data = Object.values(organization[prop] || [])?.map(object => {
+              if (object[key]) {
+                return object[key];
               }
-            })
+            });
+            this.formArray = new BaseExtendedFormArray(settings, this.http, null, data);
+            this.dynamicService.formArrayProvider.set(this.formArray);
           } else {
+            const res: any = await firstValueFrom(this.http.request('Yget', settings.yGet.path));
             this.formArray = new BaseExtendedFormArray(settings, this.http, null, JSON.parse(res).structure);
             this.dynamicService.formArrayProvider.set(this.formArray);
           }
@@ -67,22 +68,24 @@ export class DynamicRouteGuard {
         if (id || secondary === 'edit') {
           if (id) {
             try {
-              let url = this.dynamicService.interpolate(settings.yGet.path, { _id: id });
-              const res: any = await firstValueFrom(this.http.request('Yget', url));
               const collectedData = await this.extractAndManipulateData(settings?.options);
               const prop = settings.yGet.prop;
               if (prop) {
-                const selectedOrg = this.dynamicService.selectedOrganization.orgKey;
-                Object.keys(this.yjsService.documentStructure.subdocs[selectedOrg].subdocs).map(key => {
-                  if (key.includes(prop)) {
-                    const settingsKey = settings.yGet.key;
-                    console.log(this.yjsService.documentStructure.subdocs[selectedOrg].subdocs[key]?.data[settingsKey]);
-                    this.updateFormGroup(settings, collectedData, this.yjsService.documentStructure.subdocs[selectedOrg].subdocs[key]?.data[settingsKey] || null);
-                    this.dynamicService.formGroupProvider.set(this.formGroup)
+                const organization = this.yjsService.documentStructure.organizations[this.dynamicService.selectedOrganization.value._id];
+                const key = settings.yGet.key;
+                let data = {};
+                Object.keys(organization[prop]).map(item => {
+                  if (item.includes(id)) {
+                    return data = organization[prop][item][key];
                   }
-                })
+                });
+                this.updateFormGroup(settings, collectedData, data || null);
+                this.dynamicService.formGroupProvider.set(this.formGroup)
               } else {
+                const url = this.dynamicService.interpolate(settings.yGet.path, { _id: id });
+                const res: any = await firstValueFrom(this.http.request('Yget', url));
                 this.updateFormGroup(settings, collectedData, JSON.parse(res).structure || null);
+                console.log(this.formGroup)
                 this.dynamicService.formGroupProvider.set(this.formGroup);
               }
             } catch (error) {

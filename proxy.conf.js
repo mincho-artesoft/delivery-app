@@ -14,13 +14,13 @@ const PROXY_CONFIG = [
       "logLevel": "debug"
     }, {
       context: [
-        "/game"
+        "/people"
       ],
       headers: {
         'Access-Control-Allow-Origin': '*'
       },
       autoRewrite: true,
-      "target": "https://fhj079vapc.execute-api.eu-central-1.amazonaws.com/api",
+      "target": "https://swapi.dev/api",
       // "target": "http://127.0.0.1",
       "secure": false,
       "changeOrigin": true,

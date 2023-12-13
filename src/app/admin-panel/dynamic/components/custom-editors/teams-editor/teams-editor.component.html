@@ -1,0 +1,17 @@
+<div class="teams-wrapper">
+    <ng-container *ngFor="let control of formArray.controls; let i = index">
+        <mat-card class="team-card" (click)="clickTeam(control)" *ngIf="control.value && (control.value | json) !== '{}'"
+            [ngClass]="{'selected': control.getRawValue()._id === this.selectedTeam?.getRawValue()._id}">
+            <mat-card-content>{{control.value.name[control.value.language]}}</mat-card-content>
+            <img [src]="images[i]">
+            <div class="buttons">
+                <button class="settings-btn" *ngFor="let button of settings?.component.template.buttons"
+                    [color]="button.color" [disabled]="button.active === false ? true : null"
+                    [matTooltip]="button.label" mat-elevation-z4 mat-mini-fab (click)="onClick(button)">
+                    <mat-icon>{{button.icon}}</mat-icon>
+                    <span>{{button.label}}</span>
+                </button>
+            </div>
+        </mat-card>
+    </ng-container>
+</div>

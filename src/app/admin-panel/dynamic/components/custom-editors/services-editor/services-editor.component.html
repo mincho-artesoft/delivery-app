@@ -1,0 +1,16 @@
+<div *ngFor="let group of column.columns" class="services-radio-group">
+    <span class="group-label"><strong>{{group.title}}</strong></span>
+    <mat-radio-group class="radio-group" [formControl]="group.control">
+        <mat-radio-button *ngFor="let option of group.options" [value]="option.value" class="radio-button">
+            <strong>{{ option.name }}</strong>
+            <div class="option-information">
+                <span class="subtitle">{{option.description?.subtitle}}</span>
+                <span class="usage">{{option.description?.usage}}</span>
+                <div class="features">
+                    <span *ngFor="let feature of option.description?.features">{{feature}}</span>
+                </div>
+                <span class="hint">{{option.description?.hint}}</span>
+            </div>
+        </mat-radio-button>
+    </mat-radio-group>
+</div>

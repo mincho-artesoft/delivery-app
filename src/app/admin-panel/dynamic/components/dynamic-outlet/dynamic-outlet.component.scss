@@ -12,8 +12,16 @@
     width: 100%;
     display: flex;
     flex-direction: row;
-
+    overflow: auto;
     app-dynamic-menu {
         height: calc(100vh - 70px);
     }
+    app-dynamic {
+        width: calc(100% - 180px);
+    }
+
+    .dynamic-table-margin {
+        margin-left: 80px;
+    }
+    
 }

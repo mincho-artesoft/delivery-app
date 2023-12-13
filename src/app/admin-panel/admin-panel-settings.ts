@@ -1,5 +1,98 @@
 export const ADMIN_PANEL_SETTINGS = {
   pages: [
+
+    // WAREHOUSE
+
+    {
+      path: 'warehouse',
+      title: 'Warehouse',
+      className: 'col-2xl-2 col-md-6 col-xs-11',
+      yGet: { path: 'warehouses', prop: 'services', key: 'warehouseData' },
+      separator: null,
+      showHeaders: true,
+      menuView: {
+        'name': 'Warehouse',
+        'icon': 'storage',
+        'tooltip': 'Warehouse',
+        'label': 'Warehouse',
+        'path': '/warehouse',
+      },
+      navbar: {
+        buttons: [
+        ],
+      },
+      columns: [
+        {
+          data: '_id',
+          title: 'Id',
+          width: 80,
+        },
+        {
+          data: 'name',
+          title: 'Name',
+          renderer: 'objectRenderer',
+          label: '${controls.name.value.${controls.language.value}}',
+          width: 120,
+        },
+        {
+          data: 'brand_name',
+          title: 'Brand Name',
+        },
+        {
+          data: 'description',
+          title: 'Description',
+          renderer: 'objectRenderer',
+          label: '${controls.description.value.${controls.language.value}}',
+          className: 'description',
+        },
+        {
+          data: 'unit',
+          title: 'Unit',
+        },
+        {
+          data: 'quantity',
+          title: 'Quantity',
+        },
+        {
+          data: 'tags',
+          title: 'Tags',
+        },
+        {
+          data: 'price',
+          title: 'Price',
+        },
+        {
+          data: 'currentProducts',
+          title: 'Current Products',
+          renderer: 'objectRenderer',
+          label: '${controls.quantity.value}-${controls.expirationDate.value}',
+        },
+        {
+          data: 'ingredients',
+          title: 'Ingredients',
+          renderer: 'objectRenderer',
+          label: '${controls.quantity.value}-${controls.productId.value}',
+        },
+        {
+          data: 'images',
+          title: 'Images',
+        }
+        ,
+        {
+          data: 'createdAt',
+          title: 'CreatedAt',
+        }
+        ,
+        {
+          data: 'updatedAt',
+          title: 'UpdatedAt',
+        }
+
+      ]
+    },
+
+    //ORGANIZATIONS
+
     {
       path: 'organizations',
       title: 'Organizations',
@@ -25,7 +118,18 @@ export const ADMIN_PANEL_SETTINGS = {
             color: 'primary',
             openSidenav: true,
             icon: 'create',
-            active: true
+            active: true,
+            default: true
+          },
+          {
+            label: 'Edit services',
+            action: 'services',
+            path: 'organizations.services',
+            color: '',
+            openSidenav: true,
+            icon: 'playlist_add',
+            active: true,
+            default: true
           },
           {
             label: 'Delete',
@@ -111,193 +215,6 @@ export const ADMIN_PANEL_SETTINGS = {
       ]
     },
     {
-      path: 'employees',
-      title: 'Employees',
-      className: 'col-2xl-2 col-md-6 col-xs-11',
-      yGet: { path: '/organizations', prop: 'profile', key: 'employeeData'},
-      separator: null,
-      showHeaders: true,
-      navbar: {
-        buttons: [
-          {
-            label: 'Add new',
-            action: 'create',
-            path: 'employees.edit',
-            openSidenav: true,
-            color: 'accent',
-            active: true,
-            icon: 'add_box'
-          },
-          {
-            label: 'Edit',
-            action: 'edit',
-            path: 'employees.edit',
-            color: 'primary',
-            openSidenav: true,
-            icon: 'create',
-            active: true
-          },
-          {
-            label: 'Delete',
-            action: 'delete',
-            isDialog: true,
-            active: true,
-            icon: 'delete',
-            color: 'warn',
-            deletePath: '`/profiles?path=${_id}`',
-            message: 'Employee with ${_id} was successfully deleted'
-          }
-        ],
-      },
-      columns: [
-        {
-          data: '_id',
-          title: 'ID',
-          sortable: true,
-          width: 80,
-        },
-        {
-          data: 'email',
-          title: 'Email',
-        },
-        {
-          data: 'img',
-          title: 'Picture',
-        },
-        {
-          data: 'name',
-          title: 'Name',
-        },
-        {
-          data: 'surName',
-          title: 'Surname',
-        },
-        {
-          data: 'lastName',
-          title: 'Lastname',
-        },
-        {
-          data: 'position',
-          title: 'Position',
-        },
-        
-      ]
-    },
-    {
-      path: 'employees.edit',
-      title: 'Employee Edit',
-      className: 'col-2xl-2 col-md-6 col-xs-11',
-      yGet: { path: '/organizations', prop: 'employees', id: true },
-      separator: null,
-      showHeaders: true,
-      navbar: {
-        reversed: true,
-        buttons: [
-          {
-            label: 'Close',
-            action: 'close',
-            icon: 'close',
-            active: true
-          },
-          {
-            label: 'Save',
-            action: 'save',
-            icon: 'check',
-            active: true,
-            yPost: '${id}.{userID}.organization'
-          }
-        ],
-      },
-      columns: [
-        {
-          data: '_id',
-          title: 'ID',
-          readOnly: true,
-          width: 80,
-        },
-        {
-          data: 'img',
-          title: 'Picture',
-        },
-        {
-          data: 'name',
-          title: 'Name',
-          validators: [
-            { validator: 'required' }
-          ]
-        },
-        {
-          data: 'position',
-          title: 'Position',
-          validators: [
-            { validator: 'required' }
-          ]
-        },
-        {
-          data: 'email',
-          title: 'Email',
-          validators: [
-            { name: 'email' },
-            { validator: 'required' }
-          ]
-        }
-      ]
-    },
-    {
-      path: 'teams',
-      title: 'Teams',
-      className: 'col-2xl-2 col-md-6 col-xs-11',
-      yGet: { path: '/organizations' },
-      showHeaders: false,
-      notTable: true,
-      navbar: {
-        buttons: [
-          {
-            label: 'Add new member',
-            action: 'create',
-            path: 'organizations.edit',
-            openSidenav: true,
-            color: 'accent',
-            active: true,
-            icon: 'add_box'
-          },
-          {
-            label: 'Join team',
-            action: 'edit',
-            path: 'organizations.edit',
-            color: 'primary',
-            openSidenav: true,
-            icon: 'create',
-            active: true
-          },
-          {
-            label: 'Remove member',
-            action: 'delete',
-            isDialog: true,
-            active: true,
-            icon: 'delete',
-            color: 'warn',
-            deletePath: '/organization?path=${_id}',
-            message: 'Restaurant with ${_id} was successfully deleted'
-          },
-          {
-            label: 'Leave team',
-            action: 'edit',
-            path: 'organizations.edit',
-            color: 'primary',
-            openSidenav: true,
-            icon: 'create',
-            active: true
-          }
-
-        ],
-      },
-      columns: [
-      ],
-      template: 'teamsComponent'
-    },
-
-    {
       path: 'organizations.edit',
       title: 'Restaurants Edit',
       navbar: {
@@ -331,6 +248,41 @@ export const ADMIN_PANEL_SETTINGS = {
           readOnly: true,
           className: 'col-2xl-12 col-md-12 col-xs-12',
         },
+        // {
+        //   data: 'services',
+        //   title: 'Services',
+        //   controlType: 'DropdownControl',
+        //   className: 'col-2xl-12 col-md-12 col-xs-12',
+        //   multiple: true,
+        //   group: {
+        //     disabled: true
+        //   },
+        //   selectOptions: [
+        //     {
+        //       name: 'Warehouse',
+        //       options: [
+        //         { name: 'Warehouse - Base version' },
+        //         { name: 'Warehouse - Extended version' },
+        //         { name: 'Warehouse - Full version' }
+        //       ]
+        //     },
+        //     {
+        //       name: 'Human resources',
+        //       options: [
+        //         { name: 'HR - Max employees to 10' },
+        //         { name: 'HR - Max employees from 10 to 30' },
+        //         { name: 'HR - Max employees - unlimited' }
+        //       ]
+        //     }
+
+        //   ],
+        //   baseUrl: '/people/',
+        //   label: '${name}',
+        //   page: 1,
+        //   // size: 50,
+        //   editor: 'dropdownEditor'
+
+        // },
         {
           data: 'languages',
           showTabs: true,
@@ -505,38 +457,176 @@ export const ADMIN_PANEL_SETTINGS = {
       ]
     },
     {
-      path: 'warehouse',
-      title: 'Warehouse',
+      path: 'organizations.services',
+      title: 'Add or remove services',
+      navbar: {
+        reversed: true,
+        buttons: [
+
+          {
+            label: 'Close',
+            action: 'close',
+            icon: 'close',
+            active: true
+          },
+          // {
+          //   label: 'Save',
+          //   action: 'save',
+          //   icon: 'check',
+          //   active: true,
+          //   yPost: '${id}.{userID}.organization'
+          // },
+        ]
+      },
+      yGet: { path: '/organization?path=${_id}' },
+      columns: [
+        {
+          data: 'services',
+          className: 'col-2xl-12 col-md-12 col-xs-12',
+          controlType: 'BaseExtendedFormGroup',
+          columns: [
+            {
+              data: 'warehouse',
+              title: 'Warehouse',
+              default: 'base',
+              validators: [{ name: 'required' }],
+              options: [
+                {
+                  name: 'Basic Subscription',
+                  description: {
+                    subtitle: 'Ideal for Small Scale Operations',
+                    usage: 'Inventory Limit: Manage up to 10 items.',
+                    features: [
+                      'Real-time inventory tracking for a concise product range.',
+                      'Basic analytics for inventory optimization.',
+                      'Access to essential warehouse management tools.',
+                      'Email support for queries and troubleshooting.'
+                    ],
+                    hint: '*Best for: Small businesses or startups with a limited range of products.'
+                  },
+                  value: 'base'
+                },
+                {
+                  name: 'Extended Subscription',
+                  description: {
+                    subtitle: 'Perfect for Growing Businesses',
+                    usage: 'Inventory Limit: Handle up to 30 items.',
+                    features: [
+                      'All Basic features included.',
+                      'Enhanced analytics with trend insights.',
+                      'Multi-user access for team collaboration.',
+                      'Priority email and chat support.'
+                    ],
+                    hint: '*Best For: Medium-sized businesses experiencing growth and diversifying their product range.'
+                  },
+                  value: 'extended'
+                },
+                {
+                  name: 'Full Subscription',
+                  description: {
+                    subtitle: 'Ultimate Solution for Large Operations',
+                    usage: 'Inventory Limit: Unlimited items management.',
+                    features: [
+                      'All Extended features included.',
+                      'Advanced inventory forecasting tools.',
+                      'Integration capabilities with other business systems (CRM, ERP).',
+                      'Dedicated account manager and 24/7 support.'
+                    ],
+                    hint: '*Best For: Large enterprises or rapidly expanding businesses needing comprehensive and scalable inventory solutions.'
+                  },
+                  value: 'full'
+                }
+              ]
+            },
+            {
+              data: 'humanResources',
+              title: 'Human Resources',
+              default: 'hr-30',
+              validators: [{ name: 'required' }],
+              options: [
+                {
+                  name: 'HR - Max employees to 10',
+                  description: {
+                    subtitle: 'Efficient for Small Teams',
+                    usage: 'Maximum Employees: Up to 10.',
+                    features: [
+                      'Basic HR management tools.',
+                      'Employee records and attendance tracking.',
+                      'Standard reporting capabilities.',
+                      'Email support for HR queries.'
+                    ],
+                    hint: '*Ideal for: Small businesses or teams with up to 10 employees.'
+                  },
+                  value: 'hr-10'
+                },
+                {
+                  name: 'HR - Max employees from 10 to 30',
+                  description: {
+                    subtitle: 'Optimized for Medium-sized Teams',
+                    usage: 'Maximum Employees: 10 to 30.',
+                    features: [
+                      'Enhanced HR management tools.',
+                      'Advanced employee scheduling and time tracking.',
+                      'Customizable reports and analytics.',
+                      'Priority email and chat support.'
+                    ],
+                    hint: '*Suitable for: Growing businesses with 10 to 30 employees.'
+                  },
+                  value: 'hr-30'
+                },
+                {
+                  name: 'HR - Max employees - unlimited',
+                  description: {
+                    subtitle: 'Comprehensive for Large Enterprises',
+                    usage: 'Maximum Employees: Unlimited.',
+                    features: [
+                      'Full-suite HR management system.',
+                      'Automated payroll and benefits administration.',
+                      'In-depth analytics and predictive insights.',
+                      'Dedicated HR support and consultation.'
+                    ],
+                    hint: '*Best For: Large enterprises or organizations with a large number of employees.'
+                  },
+                  value: 'hr-unlimited'
+                }
+              ]
+            }
+          ],
+          editor: 'servicesEditor'
+        }
+      ]
+    },
+
+    // EMPLOYEES
+
+    {
+      path: 'employees',
+      title: 'Employees',
       className: 'col-2xl-2 col-md-6 col-xs-11',
-      yGet: { path: '/warehouses' },
+      yGet: { path: '/organizations', prop: 'profiles', key: 'employeeData' },
       separator: null,
       showHeaders: true,
-      menuView: {
-        'name': 'Warehouse',
-        'icon': 'storage',
-        'tooltip': 'Warehouse',
-        'label': 'Warehouse',
-        'path': '/warehouse',
-      },
       navbar: {
         buttons: [
           {
             label: 'Add new',
             action: 'create',
-            path: 'warehouse.edit',
+            path: 'employees.edit',
             openSidenav: true,
             color: 'accent',
             active: true,
-            icon: 'add_box'
+            icon: 'add_box',
           },
           {
             label: 'Edit',
             action: 'edit',
-            path: 'warehouse.edit',
+            path: 'employees.edit',
             color: 'primary',
             openSidenav: true,
             icon: 'create',
-            active: true
+            active: true,
+            default: true
+
           },
           {
             label: 'Delete',
@@ -545,87 +635,55 @@ export const ADMIN_PANEL_SETTINGS = {
             active: true,
             icon: 'delete',
             color: 'warn',
-            deletePath: 'https://06hbbmv516.execute-api.eu-central-1.amazonaws.com/api/warehouse/warehouse/${_id}',
-            message: 'Warehouse with ${_id} was successfully deleted'
+            deletePath: '`/profiles?path=${_id}`',
+            message: 'Employee with ${_id} was successfully deleted'
           }
         ],
       },
       columns: [
         {
           data: '_id',
-          title: 'Id',
+          title: 'ID',
+          sortable: true,
           width: 80,
+        },
+        {
+          data: 'email',
+          title: 'Email',
+        },
+        {
+          data: 'img',
+          title: 'Picture',
         },
         {
           data: 'name',
           title: 'Name',
-          renderer: 'objectRenderer',
-          label: '${controls.name.value.${controls.language.value}}',
-          width: 120,
         },
         {
-          data: 'brand_name',
-          title: 'Brand Name',
+          data: 'surName',
+          title: 'Surname',
         },
         {
-          data: 'description',
-          title: 'Description',
-          renderer: 'objectRenderer',
-          label: '${controls.description.value.${controls.language.value}}',
-          className: 'description',
+          data: 'lastName',
+          title: 'Lastname',
         },
         {
-          data: 'unit',
-          title: 'Unit',
+          data: 'position',
+          title: 'Position',
         },
-        {
-          data: 'quantity',
-          title: 'Quantity',
-        },
-        {
-          data: 'tags',
-          title: 'Tags',
-        },
-        {
-          data: 'price',
-          title: 'Price',
-        },
-        {
-          data: 'currentProducts',
-          title: 'Current Products',
-          renderer: 'objectRenderer',
-          label: '${controls.quantity.value}-${controls.expirationDate.value}',
-        },
-        {
-          data: 'ingredients',
-          title: 'Ingredients',
-          renderer: 'objectRenderer',
-          label: '${controls.quantity.value}-${controls.productId.value}',
-        },
-        {
-          data: 'images',
-          title: 'Images',
-        }
-        ,
-        {
-          data: 'createdAt',
-          title: 'CreatedAt',
-        }
-        ,
-        {
-          data: 'updatedAt',
-          title: 'UpdatedAt',
-        }
 
       ]
     },
     {
-      path: 'warehouse.edit',
-      title: 'Warehouses Edit',
+      path: 'employees.edit',
+      title: 'Employee Edit',
+      className: 'col-2xl-2 col-md-6 col-xs-11',
+      yGet: { path: '/organizations', prop: 'profiles', key: 'employeeData' },
+      separator: null,
+      showHeaders: true,
       navbar: {
         reversed: true,
         buttons: [
-
           {
             label: 'Close',
             action: 'close',
@@ -637,110 +695,153 @@ export const ADMIN_PANEL_SETTINGS = {
             action: 'save',
             icon: 'check',
             active: true,
-            yPost: ''
-          },
-        ]
+            http: { path: "http://localhost:80/api/invite-user" }
+          }
+        ],
       },
       columns: [
         {
           data: '_id',
-          title: 'Id',
+          title: 'ID',
           readOnly: true,
-          className: 'col-2xl-12 col-md-12 col-xs-12',
-        },
-        {
-          data: 'language',
-          editor: 'hidden'
-        },
-        {
-          data: 'languages',
-          showTabs: true,
           className: 'col-2xl-6 col-md-6 col-xs-12',
-          editor: 'multiLang',
+        },
+        {
+          data: 'email',
+          title: 'Email',
+          className: 'col-2xl-6 col-md-6 col-xs-12',
+          validators: [
+            { name: 'email' },
+            { validator: 'required' }
+          ]
+        },
+        {
+          data: 'img',
+          className: 'col-2xl-6 col-md-6 col-xs-12',
+          title: 'Picture',
+          autodisable: '_id'
         },
         {
           data: 'name',
           title: 'Name',
-          controlType: 'BaseExtendedFormGroup',
           className: 'col-2xl-6 col-md-6 col-xs-12',
+          autodisable: '_id',
           validators: [
-            { name: 'required' },
-          ],
-          editor: 'langLinked'
+            { validator: 'required' }
+          ]
         },
         {
-          data: 'description',
-          title: 'Description',
-          controlType: 'BaseExtendedFormGroup',
+          data: 'position',
+          title: 'Position',
           className: 'col-2xl-6 col-md-6 col-xs-12',
+          autodisable: '_id',
           validators: [
-            { name: 'required' },
-          ],
-          editor: 'langLinked'
+            { validator: 'required' }
+          ]
         },
-        {
-          data: 'brand_name',
-          title: 'Brand Name',
-          className: 'col-2xl-6 col-md-6 col-xs-12',
-        },
-        {
-          data: 'unit',
-          title: 'Unit',
-          className: 'col-2xl-6 col-md-6 col-xs-12',
-        },
-        {
-          data: 'quantity',
-          title: 'Quantity',
-          className: 'col-2xl-6 col-md-6 col-xs-12',
-        },
-        {
-          data: 'tags',
-          className: 'col-2xl-6 col-md-6 col-xs-12',
-          title: 'Tags',
-          default: [],
-          editor: 'chipListEditor'
-        },
-        {
-          data: 'price',
-          className: 'col-2xl-6 col-md-6 col-xs-12',
-          title: 'Price',
-        },
-        {
-          data: 'currentProducts',
-          title: 'Current Products',
-          renderer: 'objectRenderer',
-          label: '${quantity}-${expirationDate}',
-          className: 'col-2xl-6 col-md-6 col-xs-12',
-        },
-        {
-          data: 'ingredients',
-          title: 'Ingredients',
-          renderer: 'objectRenderer',
-          label: '${quantity}-${productId}',
-          className: 'col-2xl-6 col-md-6 col-xs-12',
-        },
-        {
-          data: 'images',
-          title: 'Images',
-          className: 'col-2xl-6 col-md-6 col-xs-12',
-        }
-        ,
-        {
-          data: 'createdAt',
-          title: 'CreatedAt',
-          className: 'col-2xl-6 col-md-6 col-xs-12',
-          readOnly: true,
-        }
-        ,
-        {
-          data: 'updatedAt',
-          title: 'UpdatedAt',
-          className: 'col-2xl-6 col-md-6 col-xs-12',
-          readOnly: true,
-        }
-
       ]
     },
 
+    // TEAMS
+
+    {
+      path: 'teams',
+      title: 'Teams',
+      className: 'col-2xl-2 col-md-6 col-xs-11',
+      yGet: {
+        path: '/organizations',
+        // prop: 'teams',
+        // key: 'teamData'
+      },
+      menuView: {
+        'name': 'Teams',
+        'icon': 'storage',
+        'tooltip': 'Teams',
+        'label': 'Teams',
+        'path': '/teams',
+        group: {
+          prop: 'teams',
+        }
+      },
+      showHeaders: true,
+      multipleView: [
+        {
+          view: 'table',
+          label: 'Table',
+          icon: 'view_list'
+        },
+        {
+          view: 'cardView',
+          label: 'Cards',
+          icon: 'view_module'
+        }
+      ],
+      navbar: {
+        buttons: [
+          {
+            label: 'Create team',
+            action: 'create',
+            path: 'teams.edit',
+            openSidenav: true,
+            color: 'accent',
+            active: true,
+            icon: 'add_box'
+          },
+          {
+            label: 'Edit team',
+            action: 'edit',
+            path: 'teams.edit',
+            color: 'primary',
+            openSidenav: true,
+            icon: 'create',
+            active: true
+          },
+          {
+            label: 'Delete Team',
+            action: 'delete',
+            isDialog: true,
+            active: true,
+            icon: 'delete',
+            color: 'warn',
+            deletePath: '/organization?path=${_id}',
+            message: 'Tean with ${_id} was successfully deleted'
+          },
+
+
+        ],
+      },
+      columns: [
+        {
+          data: '_id',
+          title: 'ID'
+        }
+      ],
+      component: {
+        name: 'TeamsComponent',
+        template: {
+          buttons: [
+            {
+              label: 'Join',
+              action: 'edit',
+              path: 'organizations.edit',
+              color: 'primary',
+              icon: 'link',
+              active: true
+            },
+            {
+              label: 'Leave',
+              action: 'edit',
+              path: 'organizations.edit',
+              color: 'warn',
+              icon: 'exit_to_app',
+              active: true
+            }
+          ]
+
+
+        }
+
+      }
+    },
   ]
 }

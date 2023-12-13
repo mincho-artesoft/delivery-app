@@ -61,6 +61,7 @@
                 &.user {
                     margin-top: auto;
                 }
+
                 &.employees {
                     span {
                         font-size: 11px;
@@ -94,17 +95,25 @@
                 color: rgba(113, 192, 68, 255);
             }
         }
+
         .expandable-menu {
             padding: 10px;
             padding-bottom: 15px;
             margin-bottom: 20px;
-
+            text-align: center;
             .label {
-                display: flex;
-                flex-direction: row;
-                align-items: flex-start;
-                text-align: center;
-                padding-left: 10px;
+                position: relative;
+                padding-bottom: 20px;
+                span {
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    display: flex;
+                    flex-direction: row;
+                    align-items: flex-end;
+                    gap: 5px;
+                }
             }
 
             .label:hover {
@@ -130,10 +139,6 @@
                 }
             }
 
-            &.active {
-                background-color: rgba(27, 29, 33, 255);
-                border-radius: 10%;
-            }
         }
     }
 

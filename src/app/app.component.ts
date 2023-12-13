@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { YjsService } from './yjs.service';
 import { HttpClient } from '@angular/common/http';
+import { FormControl, FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'app-root',
@@ -13,14 +14,13 @@ export class AppComponent {
   constructor(public yjsService: YjsService, private httpClient: HttpClient) { }
 
   getSubdocs(orgGuid: string) {
-    const subdocs = Object.keys(this.yjsService.documentStructure.subdocs[orgGuid].subdocs || {});
+    const subdocs = Object.keys(this.yjsService.documentStructure[orgGuid].subdocs || {});
 
     return subdocs;
   }
 
   getList() {
-    const organizationKeys =  Object.keys(this.yjsService.documentStructure.subdocs || {});
-    // console.log(organizationKeys);
+    const organizationKeys =  Object.keys(this.yjsService.documentStructure || {});
     
     return organizationKeys
   }
@@ -30,9 +30,63 @@ export class AppComponent {
       console.log(res);
     });
   }
+  formGroup = new FormGroup({
+    name: new FormControl(""),
+  })
+  shouldShow = false;
+  showEmployees = false;
+  createTeam(orgGuid: string) {
+    console.log(this.formGroup.value);
+    this.httpClient.request('Ypost', `/teams?path=${orgGuid}`, { body: { ...this.formGroup.value } }).subscribe((res: string) => {
+      console.log(res);
+    });
+  }
+
+  addUserToTeam(teamGuid: string, employeeGuid: string) {
+    this.httpClient.request('Ypost', `/teams?path=${teamGuid}&profile=${employeeGuid}`, { body: { ...this.formGroup.value } }).subscribe((res: string) => {
+      console.log(res);
+    });
+  }
+
+  deleteTeam(guid: string) {
+    this.httpClient.request('Ydelete', `/teams?path=${guid}`).subscribe((res: string) => {
+      console.log(res);
+    });
+  }
+
+  addServiceToEmployee(profileGuid: string, guids: string[]) {
+    const warehouseGuid = guids.find(guid => guid.endsWith("warehouse"));
+    this.httpClient.request('Ypost', `/profiles?path=${profileGuid}&service=${warehouseGuid}`).subscribe((res: string) => {
+      console.log(res);
+    });
+  }
+
+  deleteServiceFrom(employeeGuid: string, serviceGuid: string) {
+    debugger
+    this.httpClient.request('Ydelete', `/profiles?path=${employeeGuid}&service=${serviceGuid}`).subscribe((res: string) => {
+      console.log(res);
+    });
+  }
+
+  // isEmployeeAlreadyInTeam(employeeGuid: string, path: string) {
+  //   return getNe
+  // }
+
+  getNested (path: string, from?: string) {
+    const pathArr = path.split('&');
+    const result = pathArr.reduce((obj, key, index) => {
+      //@ts-ignore
+      return (obj && obj[key] !== 'undefined') ? (typeof obj[key] === 'function' ? obj[key]() : obj[key]) : undefined;
+    }, this.yjsService.documentStructure);
+    if(result) {
+      return Object.keys(result);
+    }
+
+    return [];
+  };
 
   addUser(guid: string) {
-    const email = "test2@gmail.com" //"test2@gmail.com";
+    const email = "test51@gmail.com";//"test2@gmail.com" 
 
     this.httpClient.post("http://localhost:80/api/invite-user", { email, guid }).subscribe({
       next: (res) => {

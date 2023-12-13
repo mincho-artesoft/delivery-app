@@ -1,19 +1,56 @@
 <mat-spinner class="spinner"></mat-spinner>
 <ng-container *ngIf="yjsService.connected && yjsService.documentStructure">
-  <div class="organizations">
-    <div *ngFor="let orgGuid of getList(); let i = index" style="display: flex; align-items: center;">
+  <!-- <div class="organizations">
+    <div *ngFor="let orgGuid of getNested('organizations'); let i = index" style="display: flex; align-items: center;">
       <div class="data">
         <div class="organization">
-          <div >{{ orgGuid + " " + (i + 1) }}</div>
-          <button *ngIf="!orgGuid.endsWith('profile')" mat-button color="primary" (click)="addUser(orgGuid)">Invite Employee</button>
+          <div>{{ orgGuid + " " + (i + 1) }}</div>
+          <button mat-button color="primary" (click)="addUser(orgGuid)">Invite Employee</button>
+          <button mat-button color="primary" (click)="shouldShow = !shouldShow">Add Team</button>
+          <mat-form-field *ngIf="shouldShow" [formGroup]="formGroup">
+            <input type="text" matInput formControlName="name">
+            <button mat-button type="button" (click)="createTeam(orgGuid)">Submit</button>
+          </mat-form-field>
         </div>
-        <div class="team" *ngFor="let subdoc of getSubdocs(orgGuid)">
-          <div >{{ subdoc + " " + (i + 1) }}</div>
-          <button *ngIf="subdoc.endsWith('profile')" mat-button color="warn"  (click)="deleteUser(subdoc)">Delete Team</button>
-        </div>
+        <ng-container *ngFor="let prop of ['services', 'profiles', 'teams']">
+          <div>{{prop}}:</div>
+          <div *ngFor="let subdoc of getNested('organizations' + '&' + orgGuid + '&' + prop)">
+            <div class="team">
+              <div>{{ subdoc + " " + (i + 1) }}</div>
+              <button *ngIf="subdoc.endsWith('profile')" mat-button color="warn" (click)="deleteUser(subdoc)">Delete
+                Employee</button>
+              <button *ngIf="subdoc.endsWith('profile')" mat-button color="primary"
+                (click)="addServiceToEmployee(subdoc, getNested('organizations' + '&' + orgGuid +  '&' + 'services'))">Add
+                Service to Employee</button>
+              <button *ngIf="subdoc.endsWith('team')" mat-button color="warn" (click)="deleteTeam(subdoc)">Delete
+                Team</button>
+              <button *ngIf="subdoc.endsWith('team')" mat-button color="primary"
+                (click)="showEmployees = !showEmployees">Add Employee</button>
+              <ng-container *ngIf="showEmployees && subdoc.endsWith('team')">
+                <div *ngFor="let s of getNested('organizations' + '&' + orgGuid + '&' + 'profiles', 'from team')">
+                  <button mat-button color="primary" (click)="addUserToTeam(subdoc, s)">ADD {{s}}</button>
+                </div>
+              </ng-container>
+            </div>
+            <div *ngIf="subdoc.endsWith('profile') || subdoc.endsWith('team')">
+              <ng-container *ngFor="let prop2 of ['services', 'profiles', 'teams']">
+                <div style="margin-left: 20px;">{{prop2}}:</div>
+                <div style="margin-left: 20px;"
+                  *ngFor="let guid of getNested('organizations' + '&' + orgGuid + '&' + prop + '&' + subdoc + '&' + prop2)">
+                  <div>{{ guid + " " + (i + 1) }} <button *ngIf="prop2 == 'services'" mat-button color="warn"
+                      (click)="deleteServiceFrom(subdoc, guid)">Delete Service from this Employee</button></div>
+                  <button *ngIf="guid.endsWith('team')" mat-button color="warn" (click)="deleteTeam(guid)">Delete
+                    Team</button>
+                  <button *ngIf="guid.endsWith('team')" mat-button color="primary"
+                    (click)="showEmployees = !showEmployees">Add Employee</button>
+                </div>
+              </ng-container>
+            </div>
+          </div>
+        </ng-container>
       </div>
     </div>
-  </div>
+  </div> -->
 
   <router-outlet></router-outlet>
 </ng-container>

@@ -1,11 +1,12 @@
 import { CdkDropList } from '@angular/cdk/drag-drop';
 import { Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Subject } from 'rxjs';
+import { BehaviorSubject, Subject, distinctUntilChanged } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../components/confirm-dialog/confirm-dialog.component';
+import { FormControl } from '@angular/forms';
 
 @Injectable({
   providedIn: 'root'
@@ -23,12 +24,20 @@ export class DynamicService {
   public cellWidths: number[] = [];
   public cellWidthsChanged = new Subject<number[]>();
   unsubscribeOnNavigation = new Subject<any>();
-  selectedOrganization: any;
+  selectedOrganization = new FormControl<any>({});
+  public view: string = 'table';
   constructor(
     public dialog: MatDialog,
     private snackbar: MatSnackBar,
     private router: Router,
     private http: HttpClient) {
+    this.selectedOrganization.valueChanges.pipe(
+      distinctUntilChanged((prev, curr) => {
+        return prev._id === curr._id;
+      })
+    ).subscribe((change: any) => {
+      this.refreshPage();
+    })
   }
 
 
@@ -114,11 +123,11 @@ export class DynamicService {
         let params = button.path.split('.');
         let id = control ? control.getRawValue()._id : this.lastSelectedRow?._id;
         let urlSegments = [params[0]];
-        if (button.action === 'edit' && id) {
+        if (id) {
           const [param, b, c] = id.split(".");
-          urlSegments.push('edit', param);
-        } else if (button.action === 'create') {
-          urlSegments.push('edit');
+          urlSegments.push(button.path.split('.')[1], param);
+        } else {
+          urlSegments.push(button.path.split('.')[1]);
         }
         this.router.navigate(urlSegments);
       }
@@ -126,18 +135,36 @@ export class DynamicService {
       if (button.action === 'close') {
         this.toggleSidenav()
       } else if (button.action === 'save') {
-        const id = (control ? control.getRawValue()._id : this.lastSelectedRow?._id) || this.generateRandomId(10);
-        const path = this.interpolate(button.yPost, { id: id });
-        this.http.request('Ypost', `?path=${path}`, { body: { data: control.getRawValue() } }).subscribe((res: string) => {
-          const data = JSON.parse(res);
-          control.patchValue(data.data);
-          this.snackbar.open(data.message, 'Close', {
-            duration: 2000, horizontalPosition: 'right', verticalPosition: 'top'
-          });
-          // this.toggleSidenav()
-          // this.currentRoute.set("");
-        })
+        if (button.yPost) {
+          const id = (control ? control.getRawValue()._id : this.lastSelectedRow?._id) || this.generateRandomId(10);
+          const path = this.interpolate(button.yPost, { id: id });
+          this.http.request('Ypost', `?path=${path}`, { body: { data: control.getRawValue() } }).subscribe((res: string) => {
+            const data = JSON.parse(res);
+            control.patchValue(data.data);
+            this.snackbar.open(data.message, 'Close', {
+              duration: 2000, horizontalPosition: 'right', verticalPosition: 'top'
+            });
+            // this.toggleSidenav()
+            // this.currentRoute.set("");
+          })
+        } else if (button.http) {
+          const data = {
+            ...control.getRawValue(),
+            guid: this.selectedOrganization.value._id
+          }
+          this.http.post(button.http.path, data).subscribe(res => {
+          })
+        }
+
       }
     }
+  }
+
+  refreshPage() {
+    // Assuming you're refreshing the current route
+    const currentUrl = this.router.url;
+    this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
+      this.router.navigate([currentUrl]);
+    });
   }
 }

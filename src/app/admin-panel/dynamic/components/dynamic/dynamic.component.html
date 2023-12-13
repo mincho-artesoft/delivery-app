@@ -48,10 +48,11 @@
                     <div *ngSwitchCase="'dropdownEditor'"
                         [ngStyle]="{'flex': '0 0 ' + ((+column.width + 'px') || '100%') }"
                         [className]="column.className">
-                        <app-custom-mat-select-search [showChipList]="true" [formControlName]='column.data'
-                            [queryParams]="{url: 'https://swapi.dev/api/people/'}">
+                        <app-custom-mat-select-search [cellControl]="column.control">
                         </app-custom-mat-select-search>
                     </div>
+
+
 
                     <div *ngSwitchCase="'dateEditor'" [ngStyle]="{'flex': '0 0 ' + ((+column.width + 'px') || '100%') }"
                         [className]="column.className">
@@ -81,7 +82,6 @@
                         </mat-form-field>
                     </div>
                     <div *ngSwitchCase="'multiLang'" style="width: 100%;">
-                        <!-- Parent Toggle Group  for language showing-->
                         <mat-button-toggle-group class="button-group unique-button-group" aria-label="Favorite Color">
                             <mat-button-toggle class="button-item" *ngFor="let country of formGroup.resources.languages"
                                 [value]="country.code" (click)="toggleLang(country.code, column)"
@@ -89,9 +89,7 @@
                                 [ngClass]="{'selected-green': (formGroup.activeLang | async) === country.code}">
 
                                 <span>{{country.code}}</span>
-                                <!-- Wrapper for Inner Toggle Group -->
                                 <div class="inner-toggle-wrapper">
-                                    <!-- Nested Toggle Group for default language -->
                                     <mat-button-toggle-group *ngIf="(formGroup.activeLang | async) === country.code"
                                         formControlName="language"
                                         (change)="formGroup.get('language')?.patchValue($event.value)">
@@ -142,15 +140,17 @@
                         </div>
 
                     </div>
+
+                    <div *ngSwitchCase="'servicesEditor'"
+                        [ngStyle]="{'flex': '0 0 ' + ((+column.width + 'px') || '100%') }"
+                        [className]="column.className">
+                        <app-services-editor [column]="column"></app-services-editor>
+                    </div>
                 </ng-container>
             </ng-container>
         </div>
     </ng-container>
 </div>
-<div *ngIf="settings.notTable && formArray">
-    <div *ngFor="let ctrl of formArray.controls" class="teams-wrapper">
-        <mat-card class="team-card">
-            <mat-card-content>{{ctrl.value._id}}</mat-card-content>
-        </mat-card>
-    </div>
+<div *ngIf="settings.multipleView && formArray && settings.component.name === 'TeamsComponent'">
+    <app-teams-editor [formArray]="formArray" [settings]="settings"></app-teams-editor>
 </div>

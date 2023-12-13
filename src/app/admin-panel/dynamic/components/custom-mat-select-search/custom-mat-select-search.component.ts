@@ -2,13 +2,14 @@ import { HttpClient } from '@angular/common/http';
 import { Component, forwardRef, Input, OnInit, OnDestroy, ChangeDetectorRef, signal, computed } from '@angular/core';
 import { ControlValueAccessor, FormControl, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { MatSelectChange } from '@angular/material/select';
-import { catchError, map, Observable, of, Subject, tap } from 'rxjs';
+import { BehaviorSubject, catchError, debounce, map, Observable, of, Subject, tap } from 'rxjs';
 import { RendererFactory2 } from '@angular/core';
 import { MatSelect } from '@angular/material/select';
 import { ViewChild } from '@angular/core';
 import { switchMap } from "rxjs";
 import { fromObservable } from './from-observable';
 import { fromSignal } from './from-signal';
+import { DropdownControl } from '../../extends/dropdown-control';
 
 
 @Component({
@@ -24,10 +25,7 @@ import { fromSignal } from './from-signal';
   ]
 })
 export class CustomMatSelectSearchComponent implements ControlValueAccessor, OnInit, OnDestroy {
-  @Input() selectOptions?: any;
-  @Input() multiple?: boolean;
-  @Input() showChipList: boolean = false;
-  @Input() queryParams: any;
+  @Input('cellControl') cellControl: DropdownControl;
 
   @ViewChild('matSelectElement', { static: false }) matSelect!: MatSelect;
 
@@ -44,13 +42,16 @@ export class CustomMatSelectSearchComponent implements ControlValueAccessor, OnI
 
   searchInput = signal('');
   currentPage = signal(this.firstPage);
+  searchControl = new FormControl('');
 
   private readonly loading = signal(true);
   private readonly query = signal('');
 
   private readonly results = fromObservable(
     fromSignal(this.query).pipe(
-      switchMap((query) => this.fetchData(query)),
+      switchMap((query) => {
+        return this.cellControl.search(query);
+      }),
       tap(() => this.loading.set(false))
     ),
     []
@@ -66,48 +67,30 @@ export class CustomMatSelectSearchComponent implements ControlValueAccessor, OnI
     this.renderer = this.rendererFactory.createRenderer(null, null);
   }
 
-  private fetchData(query: any): Observable<any[]> {
-    query = query || '';
-    return this.http.get(`https://swapi.dev/api/people/?page=${this.currentPage()}`).pipe(
-      catchError((v) => {
-        this.isPending = false;
-        return of({ results: [] })
-      }),
-      map((res: any) => {
-        this.isPending = false;
-        // if (res.results.length < this.pageSize) {
-        //   this.lastPage = true;
-        // }
-        if (this.viewModel().filteredOptions.length > 0 && this.currentPage() > this.firstPage) {
-          res.results = [...this.viewModel().filteredOptions, ...res.results]
-        }
-        return res.results
-      })
-    );
-  }
+
 
   public changeQuery(query: string): void {
     this.currentPage.set(this.firstPage);
+    this.cellControl.search(query)
     this.loading.set(true);
     this.query.set(query);
   }
 
-  goToNextPage(): void {
-    this.isPending = true;
-    this.currentPage.update((currentPage) =>
-      currentPage += 1
-    );
-    console.log(this.currentPage)
 
-  }
   ngOnInit(): void {
-    this.firstPage = this.queryParams.page
-    console.log(this.queryParams)
+    this.cellControl.valueChanges.subscribe(res => console.log(res));
+    if (!this.cellControl.cell.selectedOptions) {
+      this.searchControl.valueChanges.subscribe((res: any) => {
+        this.cellControl.search(res);
+      })
+    }
+
   }
 
   writeValue(value: any): void {
     if (value) {
       this.selectedOptions = value;
+      // this.cellControl.patchValue(value)
     }
   }
 
@@ -135,6 +118,7 @@ export class CustomMatSelectSearchComponent implements ControlValueAccessor, OnI
   onSelectionChange(event: MatSelectChange): void {
     this.onChange(this.selectedOptions);
     this.onTouched();
+    console.log(event)
   }
 
 
@@ -144,10 +128,9 @@ export class CustomMatSelectSearchComponent implements ControlValueAccessor, OnI
       if (this.matSelect.panel) {
         const panel = this.matSelect.panel.nativeElement;
         this.renderer.listen(panel, 'scroll', (event) => {
-          console.log(event.target.scrollHeight - (event.target.scrollTop + event.target.clientHeight) <= 150)
           if (event.target.scrollHeight - (event.target.scrollTop + event.target.clientHeight) <= 150) {
-            if (!this.isPending && !this.lastPage) {
-              this.goToNextPage();
+            if (!this.cellControl.isPending && !this.lastPage) {
+              this.cellControl.loadNextPage();
             }
           }
         });

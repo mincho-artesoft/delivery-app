@@ -48,29 +48,35 @@ export class DynamicTableComponent implements OnInit, OnDestroy, AfterViewInit {
     this.settings = this.formArray.htmlSettings;
     if (this.settings) {
       this.table = this.http.request('Yget', this.settings.yGet.path).pipe(map((res: any) => {
-        if (this.settings.yGet.prop) {
-          const prop = this.settings.yGet.prop;
-          const activeOrganizationId = this.dynamicService.selectedOrganization.orgKey;
-          Object.keys(this.yjsService.documentStructure.subdocs[activeOrganizationId].subdocs).map(key => {
-            if (key.includes(prop)) {
-              const data = [this.yjsService.documentStructure.subdocs[activeOrganizationId].subdocs[key]?.data.employeeData]
-              this.formArray.fillFormWithResponse(data);
-              this.dataSource = new MatTableDataSource((this.formArray as FormArray).controls);
-              this.dataSource.data.map((ctrl: any) => {
-                ctrl.addControl('uid', new FormControl(this.generateRandomId(10)), { emitEvent: false });
-              });
-              this.syncContainerWidths();
-              this.syncCellWidths();
+        const prop = this.settings.yGet?.prop;
+        if (prop) {
+          const organization = this.yjsService.documentStructure.organizations[this.dynamicService.selectedOrganization.value._id];
+          const key = this.settings.yGet.key;
+          // TODO when we have ids from the backend this logic must be removed. It's only for testing;
+          Object.keys(organization[prop]).map((key: any, index: any) => {
+            if (!organization[prop][key][this.settings.yGet.key]._id || Object.keys(organization[prop][key][this.settings.yGet.key]._id)?.length === 0) {
+              organization[prop][key][this.settings.yGet.key]._id = key;
             }
           });
-          console.log(this.dataSource.data)
+          //
+
+          const data = Object.values(organization[prop]).map(item => {
+            return item[key]
+          });
+          console.log(data)
+          this.formArray.fillFormWithResponse(data);
+          this.dataSource = new MatTableDataSource((this.formArray as FormArray).controls);
+          this.dataSource.data.map((ctrl: any) => {
+            ctrl.addControl('uid', new FormControl(this.generateRandomId(10)), { emitEvent: false });
+          });
+          this.syncContainerWidths();
+          this.syncCellWidths();
           return {
             displayedColumns: this.settings.columns,
             dataHolder: [...this.dataSource.data]
           }
         } else {
           const data = JSON.parse(res);
-          console.log(data);
           this.formArray.fillFormWithResponse(data.structure)
           this.dataSource = new MatTableDataSource((this.formArray as FormArray).controls);
           this.dataSource.data.map((ctrl: any) => {
@@ -79,7 +85,6 @@ export class DynamicTableComponent implements OnInit, OnDestroy, AfterViewInit {
           // this.dataHolder = this.formArray.controls;
           this.syncContainerWidths();
           this.syncCellWidths();
-          console.log(this.dataSource.data)
           return {
             displayedColumns: this.settings.columns,
             dataHolder: [...this.dataSource.data]
@@ -98,7 +103,18 @@ export class DynamicTableComponent implements OnInit, OnDestroy, AfterViewInit {
   ngAfterViewInit(): void {
     setTimeout(() => {
       this.syncContainerWidths();
-    }, 500)
+    }, 50)
+  }
+  stretchLastColumnIfNeeded() {
+    let totalWidth = 0;
+    this.settings.columns.forEach(col => {
+      totalWidth += col.width || 250;
+    });
+    const viewportWidth = window.innerWidth;
+    if (totalWidth < viewportWidth) {
+      const lastColumn = this.settings.columns[this.settings.columns.length - 1];
+      lastColumn.width = (lastColumn.width || 250) + (viewportWidth - totalWidth - 90);
+    }
   }
   generateRandomId(length: number): string {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -184,7 +200,7 @@ export class DynamicTableComponent implements OnInit, OnDestroy, AfterViewInit {
   syncContainerWidths() {
     const tableWidth = this.getTableWidth();
     const elementsContainer = this.elementRef.nativeElement.querySelector('.elements-container');
-    console.log(elementsContainer)
+    this.stretchLastColumnIfNeeded();
     if (elementsContainer) {
       this.renderer?.setStyle(elementsContainer, 'width', `${tableWidth}px`);
       this.syncCellWidths();
@@ -199,6 +215,18 @@ export class DynamicTableComponent implements OnInit, OnDestroy, AfterViewInit {
     const fetchedWidths = Array.from(headerCells).map((cell: HTMLElement) => cell.offsetWidth);
 
     this.dynamicService.setCellWidths(fetchedWidths);
+  }
+
+  doubleClick(element) {
+    let button = null;
+    this.settings.navbar.buttons.map(btn => {
+      if (btn.default) {
+        return button = btn;
+      }
+    });
+    if (button) {
+      this.dynamicService.handleButtonActions(button, element);
+    }
   }
 
 

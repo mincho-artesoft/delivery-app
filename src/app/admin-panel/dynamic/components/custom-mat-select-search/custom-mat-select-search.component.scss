@@ -3,3 +3,10 @@
     margin: 0 auto;
     text-align: center;
 }
+
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    align-items: flex-start;
+}

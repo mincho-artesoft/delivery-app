@@ -32,7 +32,7 @@ export function tokenGetter() {
         tokenGetter: tokenGetter
       }
     }),
-    HttpWebWorkerClientModule.forRoot({baseUrl:'ws://localhost:9182', ignorePath:'/api/invite-user'}),
+    HttpWebWorkerClientModule.forRoot({baseUrl:'ws://localhost:9182', ignorePath:'/people'}),
     AuthModule
   ],
   providers: [
@@ -45,7 +45,7 @@ export function tokenGetter() {
             yjsService.documentStructure = structure.structure;
             console.log("APP MODULE");
             console.log(structure);
-            localStorage.setItem('organizations', JSON.stringify(structure.structure.subdocs))
+            localStorage.setItem('organizations', JSON.stringify(structure.structure.organizations))
             setTimeout(() => {
                   yjsService.stopSpinner();
                   yjsService.connected = true;

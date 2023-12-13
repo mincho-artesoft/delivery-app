@@ -7,16 +7,27 @@
                 [formGroup]="dynamicService.formGroupProvider()"></app-dynamic>
         </mat-drawer>
         <mat-drawer-content>
-            <app-dynamic-navbar *ngIf="dynamicService.formArrayProvider()?.htmlSettings?.navbar" [settings]="dynamicService.formArrayProvider()?.htmlSettings"></app-dynamic-navbar>
-            <div class="table-menu-wrapper">
-                <app-dynamic-table
-                    *ngIf="dynamicService.formArrayProvider() && !dynamicService.formArrayProvider().htmlSettings.notTable"
-                    [settings]="dynamicService.formArrayProvider()?.htmlSettings" style="margin-left: 80px;"
-                    [formGroup]="dynamicService.formArrayProvider()"></app-dynamic-table>
-                <app-dynamic
-                    *ngIf="dynamicService.formArrayProvider() && dynamicService.formArrayProvider().htmlSettings.notTable"
-                    [settings]="dynamicService.formArrayProvider()?.htmlSettings" style="margin-left: 80px;"
-                    [formArray]="dynamicService.formArrayProvider()"></app-dynamic>
+            <app-dynamic-navbar *ngIf="dynamicService.formArrayProvider()?.htmlSettings?.navbar"
+                [settings]="dynamicService.formArrayProvider()?.htmlSettings"></app-dynamic-navbar>
+            <div class="table-menu-wrapper" *ngIf="dynamicService.formArrayProvider()">
+                <div>
+                    <ng-container *ngIf="dynamicService.formArrayProvider()?.htmlSettings.multipleView">
+                        <app-dynamic-table *ngIf="dynamicService.view === 'table'"
+                            [settings]="dynamicService.formArrayProvider()?.htmlSettings"
+                            [formGroup]="dynamicService.formArrayProvider()"
+                            class="dynamic-table-margin"></app-dynamic-table>
+
+                        <app-dynamic *ngIf="dynamicService.view !== 'table'"
+                            [settings]="dynamicService.formArrayProvider()?.htmlSettings"
+                            [formArray]="dynamicService.formArrayProvider()" class="dynamic-table-margin"></app-dynamic>
+                    </ng-container>
+
+                    <app-dynamic-table *ngIf="!dynamicService.formArrayProvider()?.htmlSettings.multipleView"
+                        [settings]="dynamicService.formArrayProvider()?.htmlSettings"
+                        [formGroup]="dynamicService.formArrayProvider()"
+                        class="dynamic-table-margin"></app-dynamic-table>
+                </div>
+
             </div>
             <app-dynamic-menu></app-dynamic-menu>
         </mat-drawer-content>
