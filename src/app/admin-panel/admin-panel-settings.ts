@@ -232,7 +232,8 @@ export const ADMIN_PANEL_SETTINGS = {
             action: 'save',
             icon: 'check',
             active: true,
-            yPost: '${id}.{userID}.organization'
+            yPost: '${id}.{userID}.organization',
+            createServices: true
           },
         ]
       },

@@ -14,18 +14,16 @@
                     <ng-container *ngIf="dynamicService.formArrayProvider()?.htmlSettings.multipleView">
                         <app-dynamic-table *ngIf="dynamicService.view === 'table'"
                             [settings]="dynamicService.formArrayProvider()?.htmlSettings"
-                            [formGroup]="dynamicService.formArrayProvider()"
-                            class="dynamic-table-margin"></app-dynamic-table>
+                            [formGroup]="dynamicService.formArrayProvider()"></app-dynamic-table>
 
                         <app-dynamic *ngIf="dynamicService.view !== 'table'"
                             [settings]="dynamicService.formArrayProvider()?.htmlSettings"
-                            [formArray]="dynamicService.formArrayProvider()" class="dynamic-table-margin"></app-dynamic>
+                            [formArray]="dynamicService.formArrayProvider()"></app-dynamic>
                     </ng-container>
 
                     <app-dynamic-table *ngIf="!dynamicService.formArrayProvider()?.htmlSettings.multipleView"
                         [settings]="dynamicService.formArrayProvider()?.htmlSettings"
-                        [formGroup]="dynamicService.formArrayProvider()"
-                        class="dynamic-table-margin"></app-dynamic-table>
+                        [formGroup]="dynamicService.formArrayProvider()"></app-dynamic-table>
                 </div>
 
             </div>

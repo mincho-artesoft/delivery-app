@@ -19,6 +19,7 @@ import { TeamWidgetComponent } from './components/widgets/team-widget/team-widge
 import { TeamsEditorComponent } from './components/custom-editors/teams-editor/teams-editor.component';
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { ServicesEditorComponent } from './components/custom-editors/services-editor/services-editor.component';
+import { ServiceWidgetComponent } from './components/widgets/service-widget/service-widget.component';
 
 
 
@@ -38,6 +39,7 @@ import { ServicesEditorComponent } from './components/custom-editors/services-ed
     TeamWidgetComponent,
     TeamsEditorComponent,
     ServicesEditorComponent,
+    ServiceWidgetComponent,
   ],
   exports: [
     DynamicComponent,

@@ -138,12 +138,19 @@ export class DynamicService {
         if (button.yPost) {
           const id = (control ? control.getRawValue()._id : this.lastSelectedRow?._id) || this.generateRandomId(10);
           const path = this.interpolate(button.yPost, { id: id });
-          this.http.request('Ypost', `?path=${path}`, { body: { data: control.getRawValue() } }).subscribe((res: string) => {
+          this.http.request('Ypost', `?path=${path}`, { body: { data: control.getRawValue() } }).subscribe((res: any) => {
             const data = JSON.parse(res);
             control.patchValue(data.data);
             this.snackbar.open(data.message, 'Close', {
               duration: 2000, horizontalPosition: 'right', verticalPosition: 'top'
             });
+            if (button.createServices) {
+              [{ name: 'warehouse', value: 'base' }, { name: 'humanResources', value: 'hr-10' }].map(service => {
+                this.http.request('Ypost', `/services?path=${data._id}`, { body: { service } }).subscribe((res: string) => {
+                });
+              })
+
+            }
             // this.toggleSidenav()
             // this.currentRoute.set("");
           })

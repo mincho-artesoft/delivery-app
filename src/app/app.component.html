@@ -1,6 +1,6 @@
 <mat-spinner class="spinner"></mat-spinner>
 <ng-container *ngIf="yjsService.connected && yjsService.documentStructure">
-  <div class="organizations">
+  <!-- <div class="organizations">
     <div *ngFor="let orgGuid of getNested('organizations'); let i = index" style="display: flex; align-items: center;">
       <div class="data">
         <div class="organization">
@@ -53,7 +53,7 @@
   </div>
   <button (click)="getServices()">get services</button>
   <button (click)="addService()">add services</button>
-  <button (click)="deleteService()">delete services</button>
+  <button (click)="deleteService()">delete services</button> -->
 
   <router-outlet></router-outlet>
 </ng-container>
