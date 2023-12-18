@@ -188,26 +188,16 @@ addEventListener('message', (req) => {
           if(organizationGuid) {
             const organizationDoc: Y.Doc = Array.from(provider.subdocs.values()).find((doc: Y.Doc) => doc.guid == organizationGuid);
 
-            const services = {};
+            const services = [];
 
             const subdocsData = organizationDoc.getMap("subdocs").toJSON();
 
             (Object.entries(subdocsData) as Array<[string, Y.Doc]>).forEach(([key, doc]) => {
               if(key.includes("service")) {
-                services[key] = {};
-
-
-
-
-
-                console.log(subdocsData);
-                
-                console.log(doc?.share, doc);
-                
                 doc.share.forEach((yMap: Y.Map, mapKey: string) => {
                   const mapContent = subdocsData[key].getMap(mapKey).toJSON();
                   (Object.entries(mapContent) as Array<[string, any]>).forEach(([k, value]) => {
-                    services[key][k] = value.data || value;
+                    services.push({ ...(/*value.data ? value.data :*/ value), _id: key });
                   });
                 })
               }
@@ -230,13 +220,14 @@ addEventListener('message', (req) => {
             const structureFunc = () => {
               const structure = [];
               teams.forEach(teamDoc => {
-                const data = teamDoc.getMap("data").get("teamData") || {};
-                structure.push({ _id: teamDoc.guid, ...data});
+                const data: any = { _id: teamDoc.guid };
+                iterateDocument(teamDoc, data);
+
+                structure.push(data);
               });
               return structure;
             }
             structure = structureFunc();
-
             postMessage({ type: 'yjs', response: JSON.stringify({ structure: structure, uuid: data.uuid }) });
           } else {
             const teamGuid = params.find((param) => param.includes("path")).split('=')[1];
@@ -545,7 +536,7 @@ function iterateDocument(doc: Y.Doc, docStructure: any, path = []) {
             docStructure[key] = {};
           }
           if (!docStructure[key][docGuid]) {
-            docStructure[key][docGuid] = {};
+            docStructure[key][docGuid] = { _id: docGuid };
           }
           
           iterateDocument(subdoc, docStructure[key][docGuid], [...path]);

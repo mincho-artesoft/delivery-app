@@ -107,6 +107,14 @@ export class AppComponent {
     });
 
   }
+
+  getTeams() {
+    //ZtlYsEYasf.jnkqjndkjsbqshjdjhqbsdjhsqjjhqsbjd12311231123123.organization
+    this.httpClient.request('Yget', `/teams?path=ZtlYsEYasf.jnkqjndkjsbqshjdjhqbsdjhsqjjhqsbjd12311231123123.organization`).subscribe((res: string) => {
+      console.log(JSON.parse(res));
+    });
+  }
+
   addService() {
     //8qP3FS2jgo.jnkqjndkjsbqshjdjhqbsdjhsqjjhqsbjd12311231.organization
     this.httpClient.request('Ypost', `/services?path=ZtlYsEYasf.jnkqjndkjsbqshjdjhqbsdjhsqjjhqsbjd12311231123123.organization`, { body: { data: "some data"}}).subscribe((res: string) => {
