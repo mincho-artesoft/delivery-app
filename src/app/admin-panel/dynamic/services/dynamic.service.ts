@@ -7,6 +7,7 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../components/confirm-dialog/confirm-dialog.component';
 import { FormControl } from '@angular/forms';
+import { InterpolateService } from './interpolate.service';
 
 @Injectable({
   providedIn: 'root'
@@ -30,7 +31,8 @@ export class DynamicService {
     public dialog: MatDialog,
     private snackbar: MatSnackBar,
     private router: Router,
-    private http: HttpClient) {
+    private http: HttpClient,
+    private interpolateService: InterpolateService) {
     this.selectedOrganization.valueChanges.pipe(
       distinctUntilChanged((prev, curr) => {
         return prev._id === curr._id;
@@ -123,7 +125,7 @@ export class DynamicService {
         let params = button.path.split('.');
         let id = control ? control.getRawValue()._id : this.lastSelectedRow?._id;
         let urlSegments = [params[0]];
-        if (id) {
+        if (id && button.action !== 'create') {
           const [param, b, c] = id.split(".");
           urlSegments.push(button.path.split('.')[1], param);
         } else {
@@ -136,20 +138,24 @@ export class DynamicService {
         this.toggleSidenav()
       } else if (button.action === 'save') {
         if (button.yPost) {
-          const id = (control ? control.getRawValue()._id : this.lastSelectedRow?._id) || this.generateRandomId(10);
-          const path = this.interpolate(button.yPost, { id: id });
-          this.http.request('Ypost', `?path=${path}`, { body: { data: control.getRawValue() } }).subscribe((res: any) => {
+          const values = {
+            lastSelectedRow: this.lastSelectedRow,
+            selectedOrganization: this.selectedOrganization.value
+          }
+          const path = InterpolateService.suplant(button.yPost, values);
+          console.log(path)
+          this.http.request('Ypost', `${path}`, { body: { data: control.getRawValue() } }).subscribe((res: any) => {
             const data = JSON.parse(res);
             control.patchValue(data.data);
             this.snackbar.open(data.message, 'Close', {
               duration: 2000, horizontalPosition: 'right', verticalPosition: 'top'
             });
             if (button.createServices) {
+              // TODO Services hardcoded in different ts file
               [{ name: 'warehouse', value: 'base' }, { name: 'humanResources', value: 'hr-10' }].map(service => {
                 this.http.request('Ypost', `/services?path=${data._id}`, { body: { service } }).subscribe((res: string) => {
                 });
-              })
-
+              });
             }
             // this.toggleSidenav()
             // this.currentRoute.set("");

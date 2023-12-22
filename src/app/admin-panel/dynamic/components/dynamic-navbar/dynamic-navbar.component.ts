@@ -21,6 +21,6 @@ export class DynamicNavbarComponent {
 
 
   onClick(button: any) {
-    this.dynamicService.handleButtonActions(button, this.formGroup)
+    this.dynamicService.handleButtonActions(button, this.formGroup);
   }
 }

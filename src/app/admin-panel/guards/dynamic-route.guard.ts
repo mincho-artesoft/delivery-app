@@ -8,6 +8,7 @@ import { BaseExtendedFormGroup } from "../dynamic/extends/base-extended-form-gro
 import { HttpClient } from "@angular/common/http";
 import { BaseExtendedFormArray } from "../dynamic/extends/base-extended-form-array";
 import { YjsService } from "src/app/yjs.service";
+import { InterpolateService } from "../dynamic/services/interpolate.service";
 
 @Injectable({
   providedIn: 'root'
@@ -32,26 +33,24 @@ export class DynamicRouteGuard {
       searchPath = `${route.parent?.params['primary']}.${route.params['secondary'] || route.params['id']}`;
     }
     let settings: any = this.getSettingsBasedOnRoute(searchPath);
+    const values = {
+      selectedOrganization: this.dynamicService.selectedOrganization.value,
+      lastSelectedRow: this.dynamicService.lastSelectedRow
+    };
+    if (!this.dynamicService.selectedOrganization.value._id) {
+      const selectedOrg = JSON.parse(localStorage.getItem('selectedOrganization'));
+      if (selectedOrg) {
+        this.dynamicService.selectedOrganization.patchValue(selectedOrg, { emitEvent: false })
+      }
+    }
     if (settings) {
       if (route.params['primary'] && !route.params['id'] && !route.params['secondary']) {
         this.dynamicService.formArrayProvider.set(null);
         try {
-          const prop = settings.yGet?.prop;
-          if (prop) {
-            const organization = this.yjsService.documentStructure.organizations[this.dynamicService.selectedOrganization?.value._id];
-            const key = settings.yGet.key;
-            const data = Object.values(organization[prop] || [])?.map(object => {
-              if (object[key]) {
-                return object[key];
-              }
-            });
-            this.formArray = new BaseExtendedFormArray(settings, this.http, null, data);
-            this.dynamicService.formArrayProvider.set(this.formArray);
-          } else {
-            const res: any = await firstValueFrom(this.http.request('Yget', settings.yGet.path));
-            this.formArray = new BaseExtendedFormArray(settings, this.http, null, JSON.parse(res).structure);
-            this.dynamicService.formArrayProvider.set(this.formArray);
-          }
+          const path = settings.yGet.interpolate ? InterpolateService.suplant(settings.yGet.interpolate, values) : settings.yGet.path;
+          const res: any = await firstValueFrom(this.http.request('Yget', path));
+          this.formArray = new BaseExtendedFormArray(settings, this.http, null, JSON.parse(res).structure);
+          this.dynamicService.formArrayProvider.set(this.formArray);
 
         } catch (error) {
           console.error("Failed to fetch data:", error);
@@ -69,25 +68,10 @@ export class DynamicRouteGuard {
           if (id) {
             try {
               const collectedData = await this.extractAndManipulateData(settings?.options);
-              const prop = settings.yGet.prop;
-              if (prop) {
-                const organization = this.yjsService.documentStructure.organizations[this.dynamicService.selectedOrganization.value._id];
-                const key = settings.yGet.key;
-                let data = {};
-                Object.keys(organization[prop]).map(item => {
-                  if (item.includes(id)) {
-                    return data = organization[prop][item][key];
-                  }
-                });
-                this.updateFormGroup(settings, collectedData, data || null);
-                this.dynamicService.formGroupProvider.set(this.formGroup)
-              } else {
-                const url = this.dynamicService.interpolate(settings.yGet.path, { _id: id });
-                const res: any = await firstValueFrom(this.http.request('Yget', url));
-                this.updateFormGroup(settings, collectedData, JSON.parse(res).structure || null);
-                console.log(this.formGroup)
-                this.dynamicService.formGroupProvider.set(this.formGroup);
-              }
+              const path = settings.yGet.interpolate ? InterpolateService.suplant(settings.yGet.interpolate, values) : settings.yGet.path;
+              const res: any = await firstValueFrom(this.http.request('Yget', path))
+              this.updateFormGroup(settings, collectedData, JSON.parse(res).structure || null);
+              this.dynamicService.formGroupProvider.set(this.formGroup);
             } catch (error) {
               console.error("Failed to fetch data:", error);
               return false;

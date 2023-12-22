@@ -7,7 +7,7 @@ export const ADMIN_PANEL_SETTINGS = {
       path: 'warehouse',
       title: 'Warehouse',
       className: 'col-2xl-2 col-md-6 col-xs-11',
-      yGet: { path: 'warehouses', prop: 'services', key: 'warehouseData' },
+      yGet: { path: '/warehouses'},
       separator: null,
       showHeaders: true,
       menuView: {
@@ -237,7 +237,7 @@ export const ADMIN_PANEL_SETTINGS = {
           },
         ]
       },
-      yGet: { path: '/organization?path=${_id}' },
+      yGet: { interpolate: '/organization?path=${lastSelectedRow._id}' },
       columns: [
         {
           data: 'language',
@@ -479,7 +479,7 @@ export const ADMIN_PANEL_SETTINGS = {
           // },
         ]
       },
-      yGet: { path: '/organization?path=${_id}' },
+      yGet: { interpolate: '/organization?path=${lastSelectedRow._id}' },
       columns: [
         {
           data: 'services',
@@ -604,7 +604,7 @@ export const ADMIN_PANEL_SETTINGS = {
       path: 'employees',
       title: 'Employees',
       className: 'col-2xl-2 col-md-6 col-xs-11',
-      yGet: { path: '/organizations', prop: 'profiles', key: 'employeeData' },
+      yGet: { interpolate: '/profiles?path=${selectedOrganization._id}' },
       separator: null,
       showHeaders: true,
       navbar: {
@@ -679,7 +679,7 @@ export const ADMIN_PANEL_SETTINGS = {
       path: 'employees.edit',
       title: 'Employee Edit',
       className: 'col-2xl-2 col-md-6 col-xs-11',
-      yGet: { path: '/organizations', prop: 'profiles', key: 'employeeData' },
+      yGet: { interpolate: '/employees?path=${lastSelectedRow._id}' },
       separator: null,
       showHeaders: true,
       navbar: {
@@ -749,11 +749,7 @@ export const ADMIN_PANEL_SETTINGS = {
       path: 'teams',
       title: 'Teams',
       className: 'col-2xl-2 col-md-6 col-xs-11',
-      yGet: {
-        path: '/organizations',
-        // prop: 'teams',
-        // key: 'teamData'
-      },
+      yGet: { interpolate: '/teams?path=${selectedOrganization._id}' },
       menuView: {
         'name': 'Teams',
         'icon': 'storage',
@@ -805,7 +801,7 @@ export const ADMIN_PANEL_SETTINGS = {
             icon: 'delete',
             color: 'warn',
             deletePath: '/organization?path=${_id}',
-            message: 'Tean with ${_id} was successfully deleted'
+            message: 'Team with ${_id} was successfully deleted'
           },
 
 
@@ -844,5 +840,49 @@ export const ADMIN_PANEL_SETTINGS = {
 
       }
     },
+
+    {
+      path: 'teams.edit',
+      title: 'Team Edit',
+      className: 'col-2xl-2 col-md-6 col-xs-11',
+      yGet: { path: '/team?path={id}' },
+      separator: null,
+      showHeaders: true,
+      navbar: {
+        reversed: true,
+        buttons: [
+          {
+            label: 'Close',
+            action: 'close',
+            icon: 'close',
+            active: true
+          },
+          {
+            label: 'Save',
+            action: 'save',
+            icon: 'check',
+            active: true,
+            yPost: '/teams?path=${selectedOrganization._id}'
+          }
+        ],
+      },
+      columns: [
+        {
+          data: '_id',
+          title: 'ID',
+          readOnly: true,
+          className: 'col-2xl-6 col-md-6 col-xs-12',
+        },
+
+        {
+          data: 'name',
+          title: 'Name',
+          className: 'col-2xl-6 col-md-6 col-xs-12',
+          validators: [
+            { validator: 'required' }
+          ]
+        },
+      ]
+    }
   ]
 }

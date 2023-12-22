@@ -45,6 +45,7 @@ export class OrganizationsWidgetComponent implements OnInit {
     if (!this.dynamicService.selectedOrganization.value._id) {
       this.currentOrg = this.organizations[0];
       this.dynamicService.selectedOrganization.setValue(this.organizations[0], { emitEvent: false });
+      localStorage.setItem('selectedOrganization', JSON.stringify(this.organizations[0]));
     } else {
       this.currentOrg = this.dynamicService.selectedOrganization.value;
     }
@@ -71,6 +72,7 @@ export class OrganizationsWidgetComponent implements OnInit {
   selectOrganization(org: any) {
     this.currentOrg = org;
     this.dynamicService.selectedOrganization.setValue(org);
+    localStorage.setItem('selectedOrganization', JSON.stringify(this.organizations[0]));
   }
 
 }

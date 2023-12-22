@@ -5,7 +5,7 @@
         </div>
         <div class="search-wrapper">
             <input matInput placeholder="Search">
-            <div class="buttons-wrapper" [ngClass]="{ 'reversed': settings.navbar.reversed }">
+            <div class="buttons-wrapper">
                 <button class="settings-btn" *ngFor="let button of settings?.navbar.buttons" [color]="button.color"
                     [disabled]="button.active === false ? true : null" [matTooltip]="button.label" mat-elevation-z4
                     mat-mini-fab (click)="onClick(button)">
