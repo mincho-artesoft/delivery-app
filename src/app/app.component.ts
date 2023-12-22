@@ -86,7 +86,7 @@ export class AppComponent {
   };
 
   addUser(guid: string) {
-    const email = "test51@gmail.com";//"test2@gmail.com" 
+    const email = "test@gmail.com";//"test2@gmail.com" 
 
     this.httpClient.post("http://localhost:80/api/invite-user", { email, guid }).subscribe({
       next: (res) => {
@@ -123,6 +123,12 @@ export class AppComponent {
   }
   deleteService() {
     this.httpClient.request('Ydelete', `/services?path=6581b68a-8618-4181-ad66-25a22e90dcd3.ZtlYsEYasf.service`).subscribe((res: string) => {
+      console.log(JSON.parse(res));
+    });
+  }
+
+  getOneTeam() {
+    this.httpClient.request('Yget', `?path=0694679f-7093-43be-a390-22664cbfd05e.ZtlYsEYasf.team`).subscribe((res: string) => {
       console.log(JSON.parse(res));
     });
   }

@@ -213,7 +213,6 @@ addEventListener('message', (req) => {
           if(shouldBuildArray) {
             const [orgID, userID, _] = params.find((param) => param.includes("path")).split('=')[1].split(".");
             const teams = Array.from((provider.subdocs as Map<any, any>).values()).filter((doc) => doc.guid.includes(orgID) && doc.guid.includes("team"));
-            // teamSubdoc.getMap("data").set("teamData", data.body);
 
             let structure = [];
 
@@ -282,7 +281,7 @@ addEventListener('message', (req) => {
             }
           }
           return;
-        } else if (params?.find((param) => param.includes('path')) && pathParts[pathParts.length - 1] !== "teams") {
+        } else if (params?.find((param) => param.includes('path')) && pathParts[pathParts.length - 1] !== "teams" && (pathParts || []).length > 1) {
           const [subdocID, parentID, suffix] = params.find((param) => param.includes("path")).split('=')[1].split('.');
           let subdoc: Y.Doc;
           let dataKey: string;
@@ -301,18 +300,32 @@ addEventListener('message', (req) => {
           postMessage({ type: 'yjs', response: JSON.stringify({ structure: structure, uuid: data.uuid }) });
           return;
         } else {
-          iterateDocument(ydoc, structure);
-          wholeStructure = structure;
-          let timeout;
-          docUpdateObserver(ydoc, () => {    
-            clearTimeout(timeout);
-            timeout = setTimeout(() => {
-              structure = {};
-              iterateDocument(ydoc, structure);
-              wholeStructure = structure;
-              postMessage({ type: 'yjs', response: JSON.stringify({ structure, uuid: initialUUID }) });
-            }, 200);
-          });
+          if((pathParts || []).length == 1 && (params || []).find(param => param.includes("path"))) {
+            const docGuid = params.find(param => param.includes("path")).split("=")[1];
+
+            const doc: Y.Doc = Array.from(provider.subdocs.values()).find((doc: Y.Doc) => doc.guid == docGuid);
+            
+            if(doc) {
+              const structure = { _id: doc.guid }
+              iterateDocument(doc, structure);
+
+              postMessage({ type: 'yjs', response: JSON.stringify({ structure, uuid: data.uuid }) });
+            }
+            return;
+          } else {
+            iterateDocument(ydoc, structure);
+            wholeStructure = structure;
+            let timeout;
+            docUpdateObserver(ydoc, () => {    
+              clearTimeout(timeout);
+              timeout = setTimeout(() => {
+                structure = {};
+                iterateDocument(ydoc, structure);
+                wholeStructure = structure;
+                postMessage({ type: 'yjs', response: JSON.stringify({ structure, uuid: initialUUID }) });
+              }, 200);
+            });
+          }
         }
 
         postMessage({ type: 'yjs', response: JSON.stringify({ structure, uuid: data.uuid }) });
@@ -351,11 +364,11 @@ addEventListener('message', (req) => {
             const teamSubdoc = new Y.Doc({ guid: `${generateGuid()}.${prefix}.team`});
             // provider.subscribeToSubdocs(organization, "subdocs", "organization");
             provider.subscribeToSubdocs(teamSubdoc, "subdocs", "organization");
-            teamSubdoc.getMap("data").set("teamData", JSON.parse(data.body));
-
+            organization.getMap("subdocs").set(teamSubdoc.guid, teamSubdoc);
+            
             setTimeout(() => {
               // teamSubdoc.getMap("subdocs").set(organizationCopy.guid, organizationCopy);
-              organization.getMap("subdocs").set(teamSubdoc.guid, teamSubdoc);
+              teamSubdoc.getMap("data").set("teamData", JSON.parse(data.body));
               postMessage({
                 type: 'yjs',
                 response: JSON.stringify({ uuid: data.uuid, action: "Successful created team!" })
@@ -512,7 +525,8 @@ const services = ["warehouse"];
 function iterateDocument(doc: Y.Doc, docStructure: any, path = []) {
   if (!doc?.share) return;
 
-  const docId = doc.guid
+  const docId = doc.guid;
+
   if (path.includes(docId)) {
     return;
   }
@@ -539,7 +553,7 @@ function iterateDocument(doc: Y.Doc, docStructure: any, path = []) {
             docStructure[key][docGuid] = { _id: docGuid };
           }
           
-          iterateDocument(subdoc, docStructure[key][docGuid], [...path]);
+          iterateDocument(provider.subdocs.get(docGuid), docStructure[key][docGuid], [...path]);
         });
       } else {
         (Object.entries(mapContent) as Array<[string, any]>).forEach(([mapKey, value]) => {

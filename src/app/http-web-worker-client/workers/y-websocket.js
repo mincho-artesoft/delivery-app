@@ -405,8 +405,11 @@ export class WebsocketProvider extends Observable {
     const subdocsHandler = ({ added, removed, loaded }) => {
       console.log("added in ", Array.from(added));
       console.log("removed from ", Array.from(removed));
-      console.log("loaded in ", Array.from(loaded));
+      console.log("loaded ", Array.from(loaded));
       added.forEach((subdoc) => {
+        if(!this.subdocs.has(subdoc.guid)) {
+          this.subdocs.set(subdoc.guid, subdoc);
+        }
         this.subdocs.set(subdoc.guid, subdoc);
         setTimeout(() => {
           if(!subdoc.isSynced) {
