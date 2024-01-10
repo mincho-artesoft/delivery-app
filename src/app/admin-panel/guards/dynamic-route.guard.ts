@@ -32,10 +32,11 @@ export class DynamicRouteGuard {
     } else {
       searchPath = `${route.parent?.params['primary']}.${route.params['secondary'] || route.params['id']}`;
     }
-    let settings: any = this.getSettingsBasedOnRoute(searchPath);
+    const settings: any = this.getSettingsBasedOnRoute(searchPath);
     const values = {
       selectedOrganization: this.dynamicService.selectedOrganization.value,
-      lastSelectedRow: this.dynamicService.lastSelectedRow
+      lastSelectedRow: this.dynamicService.lastSelectedRow,
+      serviceGuid: this.dynamicService.serviceGuid
     };
     if (!this.dynamicService.selectedOrganization.value._id) {
       const selectedOrg = JSON.parse(localStorage.getItem('selectedOrganization'));
@@ -48,7 +49,9 @@ export class DynamicRouteGuard {
         this.dynamicService.formArrayProvider.set(null);
         try {
           const path = settings.yGet.interpolate ? InterpolateService.suplant(settings.yGet.interpolate, values) : settings.yGet.path;
+          console.log(path)
           const res: any = await firstValueFrom(this.http.request('Yget', path));
+          console.log(JSON.parse(res).structure)
           this.formArray = new BaseExtendedFormArray(settings, this.http, null, JSON.parse(res).structure);
           this.dynamicService.formArrayProvider.set(this.formArray);
 
@@ -79,6 +82,7 @@ export class DynamicRouteGuard {
           } else {
             const collectedData = await this.extractAndManipulateData(settings?.options);
             this.updateFormGroup(settings, collectedData);
+            this.dynamicService.lastSelectedRow = null;
           }
 
         }

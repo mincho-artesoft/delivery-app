@@ -26,6 +26,7 @@ export class DynamicService {
   public cellWidthsChanged = new Subject<number[]>();
   unsubscribeOnNavigation = new Subject<any>();
   selectedOrganization = new FormControl<any>({});
+  serviceGuid: any;
   public view: string = 'table';
   constructor(
     public dialog: MatDialog,
@@ -142,23 +143,36 @@ export class DynamicService {
             lastSelectedRow: this.lastSelectedRow,
             selectedOrganization: this.selectedOrganization.value
           }
-          const path = InterpolateService.suplant(button.yPost, values);
+          let path;
+          if(button.createServices) {
+            if (this.lastSelectedRow) {
+              path = InterpolateService.suplant(button.yPost, this);
+            } else {
+              path = button.yPost.replace('${lastSelectedRow._id}', `${this.generateRandomId(5)}.${this.generateRandomId(20)}.organization`);
+            }
+          } else {
+            path = InterpolateService.suplant(button.yPost, this);
+          }
+          
           console.log(path)
           this.http.request('Ypost', `${path}`, { body: { data: control.getRawValue() } }).subscribe((res: any) => {
+            console.log(JSON.parse(res));
+            const generateServices = button.createServices && !control.getRawValue()._id;
             const data = JSON.parse(res);
             control.patchValue(data.data);
             this.snackbar.open(data.message, 'Close', {
               duration: 2000, horizontalPosition: 'right', verticalPosition: 'top'
             });
-            if (button.createServices) {
-              // TODO Services hardcoded in different ts file
-              [{ name: 'warehouse', value: 'base' }, { name: 'humanResources', value: 'hr-10' }].map(service => {
-                this.http.request('Ypost', `/services?path=${data._id}`, { body: { service } }).subscribe((res: string) => {
-                });
+            // This creates services when we create a new organization
+            if (generateServices) {
+              services.map((service: any) => {
+                if (service.default) {
+                  this.http.request('Ypost', `/services?path=${data._id}`, { body: { settings: service, value: service.default } }).subscribe((res: string) => {
+                    console.log(res)
+                  });
+                }
               });
             }
-            // this.toggleSidenav()
-            // this.currentRoute.set("");
           })
         } else if (button.http) {
           const data = {
@@ -174,10 +188,119 @@ export class DynamicService {
   }
 
   refreshPage() {
-    // Assuming you're refreshing the current route
     const currentUrl = this.router.url;
     this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
       this.router.navigate([currentUrl]);
     });
   }
 }
+
+
+const services = [
+  {
+    data: 'warehouse',
+    title: 'Warehouse',
+    default: 'base',
+    validators: [{ name: 'required' }],
+    options: [
+      {
+        name: 'Basic Subscription',
+        description: {
+          subtitle: 'Ideal for Small Scale Operations',
+          usage: 'Inventory Limit: Manage up to 10 items.',
+          features: [
+            'Real-time inventory tracking for a concise product range.',
+            'Basic analytics for inventory optimization.',
+            'Access to essential warehouse management tools.',
+            'Email support for queries and troubleshooting.'
+          ],
+          hint: '*Best for: Small businesses or startups with a limited range of products.'
+        },
+        value: 'base'
+      },
+      {
+        name: 'Extended Subscription',
+        description: {
+          subtitle: 'Perfect for Growing Businesses',
+          usage: 'Inventory Limit: Handle up to 30 items.',
+          features: [
+            'All Basic features included.',
+            'Enhanced analytics with trend insights.',
+            'Multi-user access for team collaboration.',
+            'Priority email and chat support.'
+          ],
+          hint: '*Best For: Medium-sized businesses experiencing growth and diversifying their product range.'
+        },
+        value: 'extended'
+      },
+      {
+        name: 'Full Subscription',
+        description: {
+          subtitle: 'Ultimate Solution for Large Operations',
+          usage: 'Inventory Limit: Unlimited items management.',
+          features: [
+            'All Extended features included.',
+            'Advanced inventory forecasting tools.',
+            'Integration capabilities with other business systems (CRM, ERP).',
+            'Dedicated account manager and 24/7 support.'
+          ],
+          hint: '*Best For: Large enterprises or rapidly expanding businesses needing comprehensive and scalable inventory solutions.'
+        },
+        value: 'full'
+      }
+    ]
+  },
+  {
+    data: 'humanResources',
+    title: 'Human Resources',
+    default: 'base',
+    validators: [{ name: 'required' }],
+    options: [
+      {
+        name: 'HR - Max employees to 10',
+        description: {
+          subtitle: 'Efficient for Small Teams',
+          usage: 'Maximum Employees: Up to 10.',
+          features: [
+            'Basic HR management tools.',
+            'Employee records and attendance tracking.',
+            'Standard reporting capabilities.',
+            'Email support for HR queries.'
+          ],
+          hint: '*Ideal for: Small businesses or teams with up to 10 employees.'
+        },
+        value: 'base'
+      },
+      {
+        name: 'HR - Max employees from 10 to 30',
+        description: {
+          subtitle: 'Optimized for Medium-sized Teams',
+          usage: 'Maximum Employees: 10 to 30.',
+          features: [
+            'Enhanced HR management tools.',
+            'Advanced employee scheduling and time tracking.',
+            'Customizable reports and analytics.',
+            'Priority email and chat support.'
+          ],
+          hint: '*Suitable for: Growing businesses with 10 to 30 employees.'
+        },
+        value: 'extended'
+      },
+      {
+        name: 'HR - Max employees - unlimited',
+        description: {
+          subtitle: 'Comprehensive for Large Enterprises',
+          usage: 'Maximum Employees: Unlimited.',
+          features: [
+            'Full-suite HR management system.',
+            'Automated payroll and benefits administration.',
+            'In-depth analytics and predictive insights.',
+            'Dedicated HR support and consultation.'
+          ],
+          hint: '*Best For: Large enterprises or organizations with a large number of employees.'
+        },
+        value: 'full'
+      }
+    ]
+  }
+]

@@ -8,22 +8,23 @@ import { DynamicService } from '../../../services/dynamic.service';
   styleUrls: ['./service-widget.component.scss']
 })
 export class ServiceWidgetComponent {
-
+  services = [];
   constructor(
     private http: HttpClient,
     public dynamicService: DynamicService
   ) {
-    this.dynamicService.selectedOrganization.valueChanges.subscribe(res => {
-      this.http.request('Yget', `/services?path=${res._id}`).subscribe((res: any) => {
-        res = JSON.parse(res);
-        let services = {};
-        Object.keys(res.services).map((key: any) => {
-          services[res.services[key].settings.service.name] = res.services[key].settings.service.value;
-        });
-        console.log(services)
+    if (this.dynamicService.selectedOrganization.value._id) {
+      this.http.request('Yget', `/services?path=${this.dynamicService.selectedOrganization.value._id}`).subscribe((res: any) => {
+        this.services = JSON.parse(res).services;
+        console.log('services', this.services)
       });
-    });
-    
+    }
   }
 
+  getNavigationLink(service: any) {
+    return `/${service.settings.data}`
+  }
+  onClick(service: any) {
+    this.dynamicService.serviceGuid = service._id;
+  }
 }

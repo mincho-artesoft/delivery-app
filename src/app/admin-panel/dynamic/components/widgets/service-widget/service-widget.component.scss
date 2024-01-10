@@ -1,0 +1,11 @@
+.service-holder {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    .service {
+        width: 100%;
+        text-align: left;
+        cursor: pointer;
+    }
+}

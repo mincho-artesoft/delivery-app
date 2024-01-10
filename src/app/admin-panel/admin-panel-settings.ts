@@ -7,7 +7,7 @@ export const ADMIN_PANEL_SETTINGS = {
       path: 'warehouse',
       title: 'Warehouse',
       className: 'col-2xl-2 col-md-6 col-xs-11',
-      yGet: { path: '/warehouses'},
+      yGet: { interpolate: '/service?path=${serviceGuid}' },
       separator: null,
       showHeaders: true,
       menuView: {
@@ -19,73 +19,60 @@ export const ADMIN_PANEL_SETTINGS = {
       },
       navbar: {
         buttons: [
+          {
+            label: 'Add product',
+            action: 'create',
+            path: 'warehouse.edit',
+            openSidenav: true,
+            color: 'accent',
+            active: true,
+            icon: 'add_box'
+          },
         ],
       },
       columns: [
+      ]
+    },
+    {
+      path: 'warehouse.edit',
+      title: 'Add Product',
+
+      yGet: { interpolate: '/service?path=${serviceGuid}' },
+      navbar: {
+        reversed: true,
+        buttons: [
+          {
+            label: 'Close',
+            action: 'close',
+            icon: 'close',
+            active: true
+          },
+          {
+            label: 'Save',
+            action: 'save',
+            icon: 'check',
+            active: true,
+            yPost: '/services?path=${serviceGuid}',
+            addProduct: true
+          },
+        ]
+      },
+      columns: [
         {
-          data: '_id',
-          title: 'Id',
-          width: 80,
-        },
-        {
-          data: 'name',
-          title: 'Name',
-          renderer: 'objectRenderer',
-          label: '${controls.name.value.${controls.language.value}}',
-          width: 120,
-        },
-        {
-          data: 'brand_name',
-          title: 'Brand Name',
-        },
-        {
-          data: 'description',
-          title: 'Description',
-          renderer: 'objectRenderer',
-          label: '${controls.description.value.${controls.language.value}}',
-          className: 'description',
-        },
-        {
-          data: 'unit',
-          title: 'Unit',
+          data: 'product',
+          title: 'Product',
+          className: 'col-2xl-12 col-md-12 col-xs-12',
         },
         {
           data: 'quantity',
           title: 'Quantity',
+          className: 'col-2xl-2 col-md-6 col-xs-11',
         },
         {
-          data: 'tags',
-          title: 'Tags',
-        },
-        {
-          data: 'price',
-          title: 'Price',
-        },
-        {
-          data: 'currentProducts',
-          title: 'Current Products',
-          renderer: 'objectRenderer',
-          label: '${controls.quantity.value}-${controls.expirationDate.value}',
-        },
-        {
-          data: 'ingredients',
-          title: 'Ingredients',
-          renderer: 'objectRenderer',
-          label: '${controls.quantity.value}-${controls.productId.value}',
-        },
-        {
-          data: 'images',
-          title: 'Images',
-        }
-        ,
-        {
-          data: 'createdAt',
-          title: 'CreatedAt',
-        }
-        ,
-        {
-          data: 'updatedAt',
-          title: 'UpdatedAt',
+          data: 'metrics',
+          title: 'Metrics',
+          className: 'col-2xl-2 col-md-6 col-xs-11',
+          // editor: 'dropdownEditor'
         }
 
       ]
@@ -232,7 +219,7 @@ export const ADMIN_PANEL_SETTINGS = {
             action: 'save',
             icon: 'check',
             active: true,
-            yPost: '${id}.{userID}.organization',
+            yPost: '/organization?path=${lastSelectedRow._id}',
             createServices: true
           },
         ]
@@ -249,41 +236,6 @@ export const ADMIN_PANEL_SETTINGS = {
           readOnly: true,
           className: 'col-2xl-12 col-md-12 col-xs-12',
         },
-        // {
-        //   data: 'services',
-        //   title: 'Services',
-        //   controlType: 'DropdownControl',
-        //   className: 'col-2xl-12 col-md-12 col-xs-12',
-        //   multiple: true,
-        //   group: {
-        //     disabled: true
-        //   },
-        //   selectOptions: [
-        //     {
-        //       name: 'Warehouse',
-        //       options: [
-        //         { name: 'Warehouse - Base version' },
-        //         { name: 'Warehouse - Extended version' },
-        //         { name: 'Warehouse - Full version' }
-        //       ]
-        //     },
-        //     {
-        //       name: 'Human resources',
-        //       options: [
-        //         { name: 'HR - Max employees to 10' },
-        //         { name: 'HR - Max employees from 10 to 30' },
-        //         { name: 'HR - Max employees - unlimited' }
-        //       ]
-        //     }
-
-        //   ],
-        //   baseUrl: '/people/',
-        //   label: '${name}',
-        //   page: 1,
-        //   // size: 50,
-        //   editor: 'dropdownEditor'
-
-        // },
         {
           data: 'languages',
           showTabs: true,
@@ -489,7 +441,7 @@ export const ADMIN_PANEL_SETTINGS = {
             {
               data: 'warehouse',
               title: 'Warehouse',
-              // default: 'base',
+              default: 'base',
               validators: [{ name: 'required' }],
               options: [
                 {
@@ -542,7 +494,7 @@ export const ADMIN_PANEL_SETTINGS = {
             {
               data: 'humanResources',
               title: 'Human Resources',
-              default: 'hr-30',
+              default: 'base',
               validators: [{ name: 'required' }],
               options: [
                 {
@@ -558,7 +510,7 @@ export const ADMIN_PANEL_SETTINGS = {
                     ],
                     hint: '*Ideal for: Small businesses or teams with up to 10 employees.'
                   },
-                  value: 'hr-10'
+                  value: 'base'
                 },
                 {
                   name: 'HR - Max employees from 10 to 30',
@@ -573,7 +525,7 @@ export const ADMIN_PANEL_SETTINGS = {
                     ],
                     hint: '*Suitable for: Growing businesses with 10 to 30 employees.'
                   },
-                  value: 'hr-30'
+                  value: 'extended'
                 },
                 {
                   name: 'HR - Max employees - unlimited',
@@ -588,7 +540,7 @@ export const ADMIN_PANEL_SETTINGS = {
                     ],
                     hint: '*Best For: Large enterprises or organizations with a large number of employees.'
                   },
-                  value: 'hr-unlimited'
+                  value: 'full'
                 }
               ]
             }

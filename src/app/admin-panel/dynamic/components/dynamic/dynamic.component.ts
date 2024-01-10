@@ -37,14 +37,6 @@ export class DynamicComponent implements OnInit, OnDestroy {
     console.log('Dynamic component is destroyed!');
   }
 
-
-  submit() {
-    this.validateAndParseNumbers(this.settings.columns, this.formGroup);
-    this.http.post(this.settings.update.url, this.formGroup.getRawValue()).subscribe((res: any) => {
-      console.log(res)
-    })
-  }
-
   validateAndParseNumbers(columnSettings: any[], formGroup: FormGroup) {
     columnSettings.forEach(setting => {
       if (setting.validators && setting.validators.some((v: any) => v.name === 'number')) {

@@ -14,12 +14,10 @@
                 <span>Teams</span>
             </div>
             <div class="action chats">
-                <img src="https://cdn.pixabay.com/photo/2020/06/29/17/24/chat-5353507_960_720.png">
+                <!-- <img src="https://cdn.pixabay.com/photo/2020/06/29/17/24/chat-5353507_960_720.png"> -->
                 <span>Chats</span>
             </div>
-            <div class="services">
-                <app-service-widget></app-service-widget>
-            </div>
+
 
             <div class="action user">
                 <app-user-panel-widget></app-user-panel-widget>
@@ -29,7 +27,7 @@
 
     </div>
     <div class="right-menu-container">
-        <ng-container *ngFor="let item of menuItems">
+        <!-- <ng-container *ngFor="let item of menuItems">
             <div class="non-expandable-menu" *ngIf="!item.subMenus">
                 <span class="link top-label" [routerLink]="item.path">{{item.label}}</span>
             </div>
@@ -46,7 +44,9 @@
                     </span>
                 </div>
             </div>
-        </ng-container>
-
+        </ng-container> -->
+        <div class="services">
+            <app-service-widget></app-service-widget>
+        </div>
     </div>
 </div>
