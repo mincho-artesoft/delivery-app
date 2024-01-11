@@ -86,7 +86,7 @@ export class AppComponent {
   };
 
   addUser(guid: string) {
-    const email = "test@gmail.com";//"test2@gmail.com" 
+    const email = "test@gmail.com"; //"test2@gmail.com"
 
     this.httpClient.post("http://localhost:80/api/invite-user", { email, guid }).subscribe({
       next: (res) => {
@@ -102,7 +102,7 @@ export class AppComponent {
 
   getServices() {
     //8qP3FS2jgo.jnkqjndkjsbqshjdjhqbsdjhsqjjhqsbjd12311231.organization
-    this.httpClient.request('Yget', `/services?path=ZtlYsEYasf.jnkqjndkjsbqshjdjhqbsdjhsqjjhqsbjd12311231123123.organization`).subscribe((res: string) => {
+    this.httpClient.request('Yget', `/services?path=te8GZkbdMf.1123jnkqjndkjsbqshjdjhqbsdjhsqjjhqsbjd12311231123123.organization`).subscribe((res: string) => {
       console.log(JSON.parse(res));
     });
 
@@ -110,25 +110,37 @@ export class AppComponent {
 
   getTeams() {
     //ZtlYsEYasf.jnkqjndkjsbqshjdjhqbsdjhsqjjhqsbjd12311231123123.organization
-    this.httpClient.request('Yget', `/teams?path=ZtlYsEYasf.jnkqjndkjsbqshjdjhqbsdjhsqjjhqsbjd12311231123123.organization`).subscribe((res: string) => {
+    this.httpClient.request('Yget', `/teams?path=te8GZkbdMf.1123jnkqjndkjsbqshjdjhqbsdjhsqjjhqsbjd12311231123123.organization`).subscribe((res: string) => {
       console.log(JSON.parse(res));
     });
   }
 
   addService() {
     //8qP3FS2jgo.jnkqjndkjsbqshjdjhqbsdjhsqjjhqsbjd12311231.organization
-    this.httpClient.request('Ypost', `/services?path=ZtlYsEYasf.jnkqjndkjsbqshjdjhqbsdjhsqjjhqsbjd12311231123123.organization`, { body: { data: "some data"}}).subscribe((res: string) => {
+    this.httpClient.request('Ypost', `/services?path=te8GZkbdMf.1123jnkqjndkjsbqshjdjhqbsdjhsqjjhqsbjd12311231123123.organization`, { body: { data: { type: "warehouse"}}}).subscribe((res: string) => {
       console.log(JSON.parse(res));
     });
   }
   deleteService() {
-    this.httpClient.request('Ydelete', `/services?path=6581b68a-8618-4181-ad66-25a22e90dcd3.ZtlYsEYasf.service`).subscribe((res: string) => {
+    this.httpClient.request('Ydelete', `/services?path=df023de7-5074-4b06-8145-dc11f7131d4d.te8GZkbdMf.service`).subscribe((res: string) => {
       console.log(JSON.parse(res));
     });
   }
 
   getOneTeam() {
     this.httpClient.request('Yget', `?path=0694679f-7093-43be-a390-22664cbfd05e.ZtlYsEYasf.team`).subscribe((res: string) => {
+      console.log(JSON.parse(res));
+    });
+  }
+
+  createProduct() {
+    this.httpClient.request('Ypost', `/services`, { body: { name: "Cucumber", guid: "606e1426-4e09-4cad-be75-1c49d0cc66c3.te8GZkbdMf.service" } }).subscribe((res: string) => {
+      console.log(JSON.parse(res));
+    });
+  }
+
+  getAllProducts() {
+    this.httpClient.request('Yget', `/service?path=606e1426-4e09-4cad-be75-1c49d0cc66c3.te8GZkbdMf.service`).subscribe((res: string) => {
       console.log(JSON.parse(res));
     });
   }

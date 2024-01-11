@@ -182,7 +182,7 @@ addEventListener('message', (req) => {
             }
           }
           return;
-        } else if (pathParts.find(path => path.includes("services"))) {
+        } else if (pathParts.find(path => path == "services")) {
           const organizationGuid = params.find(param => param.includes("path")).split("=")[1];
           
           if(organizationGuid) {
@@ -204,6 +204,28 @@ addEventListener('message', (req) => {
             })
 
             postMessage({ type: 'yjs', response: JSON.stringify({ services, uuid: data.uuid }) });
+          }
+          return;
+        } else if (pathParts.find(path => path == "service")) {
+          const serviceGuid = params.find(param => param.includes("path")).split("=")[1];
+
+          if(serviceGuid) {
+            const serviceDoc: Y.Doc = Array.from(provider.subdocs.values()).find((doc: Y.Doc) => doc.guid == serviceGuid);
+
+            const dataMap = serviceDoc.getMap("data");
+            const settings = dataMap.get("settings");
+
+            if(settings) {
+              const type = settings.data.type;
+              const structure = dataMap.get(type + "Data");
+              postMessage({ 
+                type: 'yjs', 
+                response: JSON.stringify({ 
+                  structure, 
+                  uuid: data.uuid
+                })
+              });
+            }
           }
           return;
         } else if (pathParts.find(path => path.includes("team"))) {
@@ -355,7 +377,6 @@ addEventListener('message', (req) => {
               response: JSON.stringify({ uuid: data.uuid, action: "Successful added employee to team!" })
             })
           } else {
-            
             const orgID = params[0].split("=")[1];
             const organization: Y.Doc = Array.from(provider.subdocs.values()).find((s: Y.Doc) => s.guid == orgID);
             const organizationCopy: Y.Doc = Array.from(provider.subdocs.values()).find((s: Y.Doc) => s.guid == orgID + "Copy");
@@ -391,7 +412,7 @@ addEventListener('message', (req) => {
             response: JSON.stringify({ uuid: data.uuid, action: "Successful added service!" })
           })
         } else if (part == "services") {
-          const guid = params.find((param) => param.includes("path")).split('=')[1];
+          const guid = params ? params.find((param) => param.includes("path")).split('=')[1] : null;
           
           if(guid) {
             const settings = JSON.parse(data.body);
@@ -411,14 +432,44 @@ addEventListener('message', (req) => {
               const serviceDoc = new Y.Doc({ guid: `${generateGuid()}.${prefix}.service`});
               
               const organization: Y.Doc = Array.from(provider.subdocs.values()).find((doc: Y.Doc) => doc.guid == guid);
-              organization.getMap("subdocs").set(serviceDoc.guid, serviceDoc);
-              setTimeout(() => {
-                serviceDoc.getMap("data").set("settings", settings);
-              }, 200);
-              postMessage({
-                type: 'yjs',
-                response: JSON.stringify({ uuid: data.uuid, action: "Successful added service!" })
-              });
+              if(organization) {
+                organization.getMap("subdocs").set(serviceDoc.guid, serviceDoc);
+                setTimeout(() => {
+                  serviceDoc.getMap("data").set("settings", settings);
+                }, 200);
+                postMessage({
+                  type: 'yjs',
+                  response: JSON.stringify({ uuid: data.uuid, action: "Successful added service!" })
+                });
+              }
+            }
+          } else {
+            const body = JSON.parse(data.body);
+            const guid = body.guid;
+
+            if(guid) {
+              const serviceDoc: Y.Doc = Array.from(provider.subdocs.values()).find((doc: Y.Doc) => doc.guid == guid);
+
+              if(serviceDoc) {
+                const dataMap = serviceDoc.getMap("data");
+                const settings = dataMap.get("settings");
+
+                const type = settings.data.type;
+
+                if(type) {
+                  const values = dataMap.get(type + "Data");
+                  if(!values) {
+                    dataMap.set(type + "Data", [{ ...body, guid: generateGuid() }]);
+                  } else {
+                    values.push({ ...body, guid: generateGuid() });
+                    dataMap.set(type + "Data", values);
+                  }
+                  postMessage({
+                    type: 'yjs',
+                    response: JSON.stringify({ uuid: data.uuid, action: "Successful added!" })
+                  });
+                }
+              }
             }
           }
         } else {
@@ -432,6 +483,10 @@ addEventListener('message', (req) => {
       });
       break;
     } 
+    case 'YPOST': {
+
+      break
+    }
     case 'YDELETE': {
       init(pathParts[0], userID, (ydoc: Y.Doc) => {
         const part = pathParts[pathParts.length - 1];
@@ -537,23 +592,31 @@ function iterateDocument(doc: Y.Doc, docStructure: any, path = []) {
     if (key != "documentStructure") {
       const mapContent = doc.getMap(key).toJSON();
       if (key == 'subdocs') {
-        (Object.entries(mapContent) as Array<[string, Y.Doc]>).forEach(([docGuid, subdoc]) => {
+        (Object.entries(mapContent) as Array<[string, Y.Doc]>).forEach(([docGuid, subdoc], i) => {
 
           // we dont need documents copy in the structure
           if(docGuid.includes("Copy")) return;
 
           const [_, _2, suffix] = docGuid.split(".");
-          // services.includes(suffix) ? key = "services" : key = suffix + "s";
+          // serviceDoc.getMap("data").set("settings", settings);
           key = suffix + "s";
 
           if (!docStructure[key]) {
             docStructure[key] = {};
           }
           if (!docStructure[key][docGuid]) {
-            docStructure[key][docGuid] = { _id: docGuid };
+            console.log(subdoc, subdoc.guid);
+            const data = subdoc.getMap("data").get("settings");
+            
+            if(data) {
+              docStructure[key][data.data.type] = { _id: docGuid };
+              iterateDocument(provider.subdocs.get(docGuid), docStructure[key][data.data.type], [...path]);
+            } else {
+              docStructure[key][docGuid] = { _id: docGuid };
+              iterateDocument(provider.subdocs.get(docGuid), docStructure[key][docGuid], [...path]);
+            }
           }
           
-          iterateDocument(provider.subdocs.get(docGuid), docStructure[key][docGuid], [...path]);
         });
       } else {
         (Object.entries(mapContent) as Array<[string, any]>).forEach(([mapKey, value]) => {
