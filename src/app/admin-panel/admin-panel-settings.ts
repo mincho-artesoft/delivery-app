@@ -52,28 +52,28 @@ export const ADMIN_PANEL_SETTINGS = {
             action: 'save',
             icon: 'check',
             active: true,
-            yPost: '/services?path=${serviceGuid}',
+            yPost: { path: '/services', guid: '${serviceGuid}' },
             addProduct: true
           },
         ]
       },
       columns: [
         {
-          data: 'product',
+          data: 'name',
           title: 'Product',
           className: 'col-2xl-12 col-md-12 col-xs-12',
         },
-        {
-          data: 'quantity',
-          title: 'Quantity',
-          className: 'col-2xl-2 col-md-6 col-xs-11',
-        },
-        {
-          data: 'metrics',
-          title: 'Metrics',
-          className: 'col-2xl-2 col-md-6 col-xs-11',
-          // editor: 'dropdownEditor'
-        }
+        // {
+        //   data: 'quantity',
+        //   title: 'Quantity',
+        //   className: 'col-2xl-2 col-md-6 col-xs-11',
+        // },
+        // {
+        //   data: 'metrics',
+        //   title: 'Metrics',
+        //   className: 'col-2xl-2 col-md-6 col-xs-11',
+        //   // editor: 'dropdownEditor'
+        // }
 
       ]
     },

@@ -7,7 +7,6 @@ import { DynamicService } from "../dynamic/services/dynamic.service";
 import { BaseExtendedFormGroup } from "../dynamic/extends/base-extended-form-group";
 import { HttpClient } from "@angular/common/http";
 import { BaseExtendedFormArray } from "../dynamic/extends/base-extended-form-array";
-import { YjsService } from "src/app/yjs.service";
 import { InterpolateService } from "../dynamic/services/interpolate.service";
 
 @Injectable({
@@ -21,23 +20,21 @@ export class DynamicRouteGuard {
     private router: Router,
     public dynamicService: DynamicService,
     public http: HttpClient,
-    private yjsService: YjsService
   ) { }
 
   async canActivate(route: ActivatedRouteSnapshot): Promise<boolean | UrlTree> {
     let searchPath: string;
-
+    this.dynamicService.interpolateData = {
+      selectedOrganization: this.dynamicService.selectedOrganization.value,
+      lastSelectedRow: this.dynamicService.lastSelectedRow,
+      serviceGuid: this.dynamicService.serviceGuid
+    }
     if (route.params['primary'] && !route.params['id'] && !route.params['secondary']) {
       searchPath = route.params['primary'];
     } else {
       searchPath = `${route.parent?.params['primary']}.${route.params['secondary'] || route.params['id']}`;
     }
     const settings: any = this.getSettingsBasedOnRoute(searchPath);
-    const values = {
-      selectedOrganization: this.dynamicService.selectedOrganization.value,
-      lastSelectedRow: this.dynamicService.lastSelectedRow,
-      serviceGuid: this.dynamicService.serviceGuid
-    };
     if (!this.dynamicService.selectedOrganization.value._id) {
       const selectedOrg = JSON.parse(localStorage.getItem('selectedOrganization'));
       if (selectedOrg) {
@@ -48,10 +45,8 @@ export class DynamicRouteGuard {
       if (route.params['primary'] && !route.params['id'] && !route.params['secondary']) {
         this.dynamicService.formArrayProvider.set(null);
         try {
-          const path = settings.yGet.interpolate ? InterpolateService.suplant(settings.yGet.interpolate, values) : settings.yGet.path;
-          console.log(path)
+          const path = settings.yGet.interpolate ? InterpolateService.suplant(settings.yGet.interpolate, this.dynamicService.interpolateData) : settings.yGet.path;
           const res: any = await firstValueFrom(this.http.request('Yget', path));
-          console.log(JSON.parse(res).structure)
           this.formArray = new BaseExtendedFormArray(settings, this.http, null, JSON.parse(res).structure);
           this.dynamicService.formArrayProvider.set(this.formArray);
 
@@ -71,7 +66,7 @@ export class DynamicRouteGuard {
           if (id) {
             try {
               const collectedData = await this.extractAndManipulateData(settings?.options);
-              const path = settings.yGet.interpolate ? InterpolateService.suplant(settings.yGet.interpolate, values) : settings.yGet.path;
+              const path = settings.yGet.interpolate ? InterpolateService.suplant(settings.yGet.interpolate, this.dynamicService.interpolateData) : settings.yGet.path;
               const res: any = await firstValueFrom(this.http.request('Yget', path))
               this.updateFormGroup(settings, collectedData, JSON.parse(res).structure || null);
               this.dynamicService.formGroupProvider.set(this.formGroup);
@@ -82,7 +77,7 @@ export class DynamicRouteGuard {
           } else {
             const collectedData = await this.extractAndManipulateData(settings?.options);
             this.updateFormGroup(settings, collectedData);
-            this.dynamicService.lastSelectedRow = null;
+            this.dynamicService.interpolateData.lastSelectedRow = null;
           }
 
         }

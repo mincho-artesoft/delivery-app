@@ -28,6 +28,8 @@ export class DynamicService {
   selectedOrganization = new FormControl<any>({});
   serviceGuid: any;
   public view: string = 'table';
+  action: any;
+  interpolateData: any;
   constructor(
     public dialog: MatDialog,
     private snackbar: MatSnackBar,
@@ -139,23 +141,40 @@ export class DynamicService {
         this.toggleSidenav()
       } else if (button.action === 'save') {
         if (button.yPost) {
-          const values = {
-            lastSelectedRow: this.lastSelectedRow,
-            selectedOrganization: this.selectedOrganization.value
-          }
           let path;
-          if(button.createServices) {
+          let guid;
+          if (button.createServices) {
             if (this.lastSelectedRow) {
-              path = InterpolateService.suplant(button.yPost, this);
+              path = InterpolateService.suplant(button.yPost, this.interpolateData);
             } else {
-              path = button.yPost.replace('${lastSelectedRow._id}', `${this.generateRandomId(5)}.${this.generateRandomId(20)}.organization`);
+              const organizationGuid = this.generateOrganizationId();
+              path = button.yPost.replace('${lastSelectedRow._id}', organizationGuid);
             }
           } else {
-            path = InterpolateService.suplant(button.yPost, this);
+            if (button.yPost.guid) {
+              path = button.yPost.path;
+              guid = InterpolateService.suplant(button.yPost.guid, this.interpolateData)
+            } else {
+              path = InterpolateService.suplant(button.yPost, this.interpolateData);
+            }
           }
-          
-          console.log(path)
-          this.http.request('Ypost', `${path}`, { body: { data: control.getRawValue() } }).subscribe((res: any) => {
+          // this.httpClient.request('Ypost', `/services`, { body: { name: "Cucumber", guid: serviceGUID } }).subscribe((res: string) => {
+          //   console.log(JSON.parse(res));
+          // });
+          const body = {
+            body: {
+              data: control.getRawValue()
+            }
+          }
+          if (guid) {
+            body.body = {
+              ...control.getRawValue(),
+              guid: guid
+            }
+
+          }
+          console.log(path, body)
+          this.http.request('Ypost', `${path}`, body).subscribe((res: any) => {
             console.log(JSON.parse(res));
             const generateServices = button.createServices && !control.getRawValue()._id;
             const data = JSON.parse(res);
@@ -192,6 +211,10 @@ export class DynamicService {
     this.router.navigateByUrl('/', { skipLocationChange: true }).then(() => {
       this.router.navigate([currentUrl]);
     });
+  }
+
+  generateOrganizationId() {
+    return `${this.generateRandomId(5)}.${this.generateRandomId(20)}.organization`;
   }
 }
 
