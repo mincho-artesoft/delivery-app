@@ -216,7 +216,7 @@ addEventListener('message', (req) => {
             const settings = dataMap.get("settings");
 
             if(settings) {
-              const type = settings.data.type;
+              const type = settings.settings.data;
               const structure = dataMap.get(type + "Data");
               postMessage({ 
                 type: 'yjs', 
@@ -452,9 +452,9 @@ addEventListener('message', (req) => {
 
               if(serviceDoc) {
                 const dataMap = serviceDoc.getMap("data");
-                const settings = dataMap.get("settings");
+                const settings = dataMap.get("settings").settings;
 
-                const type = settings.data.type;
+                const type = settings.data;
 
                 if(type) {
                   const values = dataMap.get(type + "Data");
@@ -609,8 +609,8 @@ function iterateDocument(doc: Y.Doc, docStructure: any, path = []) {
             const data = subdoc.getMap("data").get("settings");
             
             if(data) {
-              docStructure[key][data.data.type] = { _id: docGuid };
-              iterateDocument(provider.subdocs.get(docGuid), docStructure[key][data.data.type], [...path]);
+              docStructure[key][data.settings.data] = { _id: docGuid };
+              iterateDocument(provider.subdocs.get(docGuid), docStructure[key][data.settings.data], [...path]);
             } else {
               docStructure[key][docGuid] = { _id: docGuid };
               iterateDocument(provider.subdocs.get(docGuid), docStructure[key][docGuid], [...path]);
