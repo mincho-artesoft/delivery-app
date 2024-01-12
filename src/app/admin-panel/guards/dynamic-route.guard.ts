@@ -54,6 +54,7 @@ export class DynamicRouteGuard {
         try {
           const path = settings.yGet.interpolate ? InterpolateService.suplant(settings.yGet.interpolate, this.dynamicService.interpolateData) : settings.yGet.path;
           const res: any = await firstValueFrom(this.http.request('Yget', path));
+          console.log(JSON.parse(res).structure)
           this.formArray = new BaseExtendedFormArray(settings, this.http, null, JSON.parse(res).structure);
           this.dynamicService.formArrayProvider.set(this.formArray);
 
@@ -62,7 +63,6 @@ export class DynamicRouteGuard {
           return false;
         }
       } else {
-        debugger
         const { id, secondary } = route.params;
         const primary = route.parent?.params['primary'];
         this.newView = route.params['primary'] || `${route.parent?.params['primary']}.${route.params['secondary'] || route.params['id']}`;

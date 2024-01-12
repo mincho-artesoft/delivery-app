@@ -173,9 +173,7 @@ export class DynamicService {
             }
 
           }
-          console.log(path, body)
           this.http.request('Ypost', `${path}`, body).subscribe((res: any) => {
-            console.log(JSON.parse(res));
             const generateServices = button.createServices && !control.getRawValue()._id;
             const data = JSON.parse(res);
             control.patchValue(data.data);
@@ -187,7 +185,7 @@ export class DynamicService {
               services.map((service: any) => {
                 if (service.default) {
                   this.http.request('Ypost', `/services?path=${data._id}`, { body: { settings: service, value: service.default } }).subscribe((res: string) => {
-                    console.log(res)
+                    console.log(JSON.parse(res))
                   });
                 }
               });

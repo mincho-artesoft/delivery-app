@@ -31,12 +31,33 @@ export const ADMIN_PANEL_SETTINGS = {
         ],
       },
       columns: [
+        {
+          data: 'guid',
+          title: 'Id',
+          readOnly: true
+        },
+        {
+          data: 'product',
+          title: 'Product',
+        },
+        {
+          data: 'quantity',
+          title: 'Quantity',
+        },
+        {
+          data: 'metrics',
+          title: 'Metrics',
+        },
+        {
+          data: 'validTo',
+          title: 'Valid to',
+        }
+
       ]
     },
     {
       path: 'warehouse.edit',
       title: 'Add Product',
-
       yGet: { interpolate: '/service?path=${serviceGuid}' },
       navbar: {
         reversed: true,
@@ -59,27 +80,32 @@ export const ADMIN_PANEL_SETTINGS = {
       },
       columns: [
         {
-          data: 'name',
+          data: 'guid',
+          title: 'Id',
+          className: 'col-2xl-12 col-md-12 col-xs-12',
+        },
+        {
+          data: 'product',
           title: 'Product',
-          className: 'col-2xl-2 col-md-6 col-xs-11',
+          className: 'col-2xl-6 col-md-6 col-xs-12',
         },
         {
           data: 'quantity',
           title: 'Quantity',
-          className: 'col-2xl-2 col-md-6 col-xs-11',
+          className: 'col-2xl-6 col-md-6 col-xs-12',
         },
         {
           data: 'metrics',
           title: 'Metrics',
-          className: 'col-2xl-2 col-md-6 col-xs-11',
-          // editor: 'dropdownEditor'
+          className: 'col-2xl-6 col-md-6 col-xs-12',
         },
         {
-          data: 'valid',
+          data: 'validTo',
           title: 'Valid to',
-          className: 'col-2xl-2 col-md-6 col-xs-11',
-        }
+          className: 'col-2xl-6 col-md-6 col-xs-12',
+          editor: 'dateEditor'
 
+        }
       ]
     },
 
