@@ -202,6 +202,7 @@ addEventListener('message', (req) => {
                       // services.push({ ...(/*value.data ? value.data :*/ value), _id: key });
                     });
                   })
+                  serviceData["_id"] = key;
                   services.push(serviceData);
                 }
               })
