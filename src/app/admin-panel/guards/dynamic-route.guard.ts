@@ -36,7 +36,14 @@ export class DynamicRouteGuard {
     }
     const settings: any = this.getSettingsBasedOnRoute(searchPath);
     if (!this.dynamicService.selectedOrganization.value._id) {
-      const selectedOrg = JSON.parse(localStorage.getItem('selectedOrganization'));
+      let selectedOrg;
+      try {
+        selectedOrg = JSON.parse(localStorage.getItem('selectedOrganization'));
+      } catch (e) {
+        console.error('Error parsing JSON from localStorage', e);
+        // Handle the error or set a default value
+        selectedOrg = null;
+      }
       if (selectedOrg) {
         this.dynamicService.selectedOrganization.patchValue(selectedOrg, { emitEvent: false })
       }
