@@ -62,7 +62,6 @@ export class AppComponent {
   }
 
   deleteServiceFrom(employeeGuid: string, serviceGuid: string) {
-    debugger
     this.httpClient.request('Ydelete', `/profiles?path=${employeeGuid}&service=${serviceGuid}`).subscribe((res: string) => {
       console.log(res);
     });

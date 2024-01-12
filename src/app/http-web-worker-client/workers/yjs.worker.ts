@@ -187,23 +187,30 @@ addEventListener('message', (req) => {
           
           if(organizationGuid) {
             const organizationDoc: Y.Doc = Array.from(provider.subdocs.values()).find((doc: Y.Doc) => doc.guid == organizationGuid);
-
-            const services = [];
-
-            const subdocsData = organizationDoc.getMap("subdocs").toJSON();
-
-            (Object.entries(subdocsData) as Array<[string, Y.Doc]>).forEach(([key, doc]) => {
-              if(key.includes("service")) {
-                doc.share.forEach((yMap: Y.Map, mapKey: string) => {
-                  const mapContent = subdocsData[key].getMap(mapKey).toJSON();
-                  (Object.entries(mapContent) as Array<[string, any]>).forEach(([k, value]) => {
-                    services.push({ ...(/*value.data ? value.data :*/ value), _id: key });
-                  });
-                })
-              }
-            })
-
-            postMessage({ type: 'yjs', response: JSON.stringify({ services, uuid: data.uuid }) });
+            if(organizationDoc) {
+              const services = [];
+  
+              const subdocsData = organizationDoc.getMap("subdocs").toJSON();
+  
+              (Object.entries(subdocsData) as Array<[string, Y.Doc]>).forEach(([key, doc]) => {
+                if(key.includes("service")) {
+                  let serviceData = {};
+                  doc.share.forEach((yMap: Y.Map, mapKey: string) => {
+                    const mapContent = subdocsData[key].getMap(mapKey).toJSON();
+                    (Object.entries(mapContent) as Array<[string, any]>).forEach(([k, value]) => {
+                      serviceData[k] = value;
+                      // services.push({ ...(/*value.data ? value.data :*/ value), _id: key });
+                    });
+                  })
+                  services.push(serviceData);
+                }
+              })
+  
+              postMessage({ type: 'yjs', response: JSON.stringify({ services, uuid: data.uuid }) });
+              return
+            } else {
+              postMessage({ type: 'yjs', response: JSON.stringify({ services: [], uuid: data.uuid }) });
+            }
           }
           return;
         } else if (pathParts.find(path => path == "service")) {

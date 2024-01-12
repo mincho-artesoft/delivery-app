@@ -2,6 +2,20 @@ import { HttpClient } from '@angular/common/http';
 import { Component, Input, OnInit } from '@angular/core';
 import { DynamicService } from '../../../services/dynamic.service';
 
+interface IService {
+  settings: {
+    settings: {
+      data: string,
+      default: string,
+      options: any[],
+      title: string,
+      validatirs: any[]
+    },
+    value: string,
+    _id: string
+  }
+}
+
 @Component({
   selector: 'app-services-editor',
   templateUrl: './services-editor.component.html',
@@ -17,8 +31,8 @@ export class ServicesEditorComponent implements OnInit {
     this.http.request('Yget', `/services?path=${this.dynamicService.lastSelectedRow._id}`).subscribe((res: any) => {
       res = JSON.parse(res);
       let services = {};
-      Object.keys(res.services).map((key: any) => {
-        services[res.services[key].settings.service.name] = res.services[key].settings.service.value;
+      res.services.map((service: IService) => {
+        services[service.settings.settings.title] = service.settings.value;
       });
       this.column.columns[0].control.root.get('services').patchValue(services)
     });

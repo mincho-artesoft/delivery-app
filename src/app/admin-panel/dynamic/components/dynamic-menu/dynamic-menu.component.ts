@@ -28,7 +28,7 @@ export class DynamicMenuComponent implements OnInit, OnDestroy {
           const prop = page.menuView.group.prop;
           if (prop) {
             const organization = this.yjsService.documentStructure.organizations[this.dynamicService.selectedOrganization?.value._id] || Object.values(this.yjsService.documentStructure.organizations)[0];
-            if (organization[prop]) {
+            if (organization && organization[prop]) {
               const values = Object.values(organization[prop]).map((item: any, index: number) => {
                 if (!item.name) {
                   item.name = `Team ${index}`,
