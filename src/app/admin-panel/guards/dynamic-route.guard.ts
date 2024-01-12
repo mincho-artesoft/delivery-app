@@ -35,7 +35,7 @@ export class DynamicRouteGuard {
       searchPath = `${route.parent?.params['primary']}.${route.params['secondary'] || route.params['id']}`;
     }
     const settings: any = this.getSettingsBasedOnRoute(searchPath);
-    if (!this.dynamicService.selectedOrganization.value._id) {
+    if (!this.dynamicService.selectedOrganization.value?._id) {
       let selectedOrg;
       try {
         selectedOrg = JSON.parse(localStorage.getItem('selectedOrganization'));

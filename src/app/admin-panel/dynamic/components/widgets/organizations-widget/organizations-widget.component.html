@@ -16,7 +16,7 @@
 <div class="static-widget" [ngClass]="{ 'hide': hoverOrganizationsWidget }" (mouseenter)="showPopup()" (mouseleave)="scheduleHidePopup()">
     <div class="organizations-wrapper">
         <div class="organization">
-            <img [src]="currentOrg.img">
+            <img [src]="currentOrg?.img" alt="img">
             <div class="org-short-info">
                 <span class="name"> {{currentOrg?.name[currentOrg?.language]}}</span>
                 <span class="email"> {{currentOrg?.domain}}</span>
