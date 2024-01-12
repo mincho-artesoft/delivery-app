@@ -225,7 +225,21 @@ addEventListener('message', (req) => {
 
             if(settings) {
               const type = settings.settings.data;
-              const structure = dataMap.get(type + "Data");
+              const structure = dataMap.get(type + "Data") || [];
+
+              dataMap.observe(() => {
+                setTimeout(() => {
+                  const structure = dataMap.get(type + "Data") || [];
+                  postMessage({ 
+                    type: 'yjs', 
+                    response: JSON.stringify({ 
+                      structure, 
+                      uuid: data.uuid
+                    })
+                  });
+                }, 200)
+              })
+              
               postMessage({ 
                 type: 'yjs', 
                 response: JSON.stringify({ 
