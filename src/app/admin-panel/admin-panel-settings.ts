@@ -61,19 +61,24 @@ export const ADMIN_PANEL_SETTINGS = {
         {
           data: 'name',
           title: 'Product',
-          className: 'col-2xl-12 col-md-12 col-xs-12',
+          className: 'col-2xl-2 col-md-6 col-xs-11',
         },
-        // {
-        //   data: 'quantity',
-        //   title: 'Quantity',
-        //   className: 'col-2xl-2 col-md-6 col-xs-11',
-        // },
-        // {
-        //   data: 'metrics',
-        //   title: 'Metrics',
-        //   className: 'col-2xl-2 col-md-6 col-xs-11',
-        //   // editor: 'dropdownEditor'
-        // }
+        {
+          data: 'quantity',
+          title: 'Quantity',
+          className: 'col-2xl-2 col-md-6 col-xs-11',
+        },
+        {
+          data: 'metrics',
+          title: 'Metrics',
+          className: 'col-2xl-2 col-md-6 col-xs-11',
+          // editor: 'dropdownEditor'
+        },
+        {
+          data: 'valid',
+          title: 'Valid to',
+          className: 'col-2xl-2 col-md-6 col-xs-11',
+        }
 
       ]
     },

@@ -9,7 +9,7 @@ interface IService {
       default: string,
       options: any[],
       title: string,
-      validatirs: any[]
+      validators: any[]
     },
     value: string,
     _id: string

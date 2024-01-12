@@ -1,4 +1,4 @@
 <div class="service-holder">
     <span *ngFor="let service of services" class="service" [routerLink]="getNavigationLink(service)"
-        (click)="onClick(service)">{{service.settings.title}} </span>
+        (click)="onClick(service)">{{service.settings.settings.title}} </span>
 </div>

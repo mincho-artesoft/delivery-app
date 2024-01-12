@@ -22,9 +22,10 @@ export class ServiceWidgetComponent {
   }
 
   getNavigationLink(service: any) {
-    return `/${service.settings.data}`
+    return `/${service.settings.settings.data}`
   }
   onClick(service: any) {
+    console.log(service)
     this.dynamicService.serviceGuid = service._id;
   }
 }

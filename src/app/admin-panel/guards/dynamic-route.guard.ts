@@ -62,6 +62,7 @@ export class DynamicRouteGuard {
           return false;
         }
       } else {
+        debugger
         const { id, secondary } = route.params;
         const primary = route.parent?.params['primary'];
         this.newView = route.params['primary'] || `${route.parent?.params['primary']}.${route.params['secondary'] || route.params['id']}`;
