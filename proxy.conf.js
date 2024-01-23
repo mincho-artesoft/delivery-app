@@ -14,13 +14,13 @@ const PROXY_CONFIG = [
       "logLevel": "debug"
     }, {
       context: [
-        "/people"
+        "/options"
       ],
       headers: {
         'Access-Control-Allow-Origin': '*'
       },
       autoRewrite: true,
-      "target": "https://swapi.dev/api",
+      "target": "http://localhost:61438",
       // "target": "http://127.0.0.1",
       "secure": false,
       "changeOrigin": true,

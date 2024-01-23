@@ -4,7 +4,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 
 //EXAMPLE FOR SETING URL, PAGE, SIZE AND TYPE IN THE CELL
 
-// baseUrl: 'http://localhost:3000/options',
+// baseUrl: 'http://localhost:61438/options',
 // page: 1,
 // size: 50,
 // controlType: 'DropdownControl',
@@ -20,6 +20,7 @@ export class DropdownControl extends BaseControl {
   constructor(
     cell: any,
     private http: HttpClient,
+    service: any,
     collectedData: any,
     value?: any
   ) {
@@ -68,6 +69,8 @@ export class DropdownControl extends BaseControl {
           console.error('Could not load options:', error);
         }
       );
+    } else {
+      this.options.next(this.cell.selectOptions)
     }
   }
 

@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Component, forwardRef, Input, OnInit, OnDestroy, ChangeDetectorRef, signal, computed } from '@angular/core';
 import { ControlValueAccessor, FormControl, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { MatSelectChange } from '@angular/material/select';
-import { BehaviorSubject, catchError, debounce, map, Observable, of, Subject, tap } from 'rxjs';
+import { BehaviorSubject, catchError, debounce, debounceTime, map, Observable, of, Subject, tap } from 'rxjs';
 import { RendererFactory2 } from '@angular/core';
 import { MatSelect } from '@angular/material/select';
 import { ViewChild } from '@angular/core';
@@ -31,59 +31,35 @@ export class CustomMatSelectSearchComponent implements ControlValueAccessor, OnI
 
   filterCtrl = new FormControl();
   selectedOptions: any[] = [];
-  pageSize = 50;
   data = <any>[];
   renderer;
   isPending = false;
   lastPage = false;
   roleToInt: any;
   notifier = new Subject();
-  firstPage = 1;
 
-  searchInput = signal('');
-  currentPage = signal(this.firstPage);
   searchControl = new FormControl('');
 
-  private readonly loading = signal(true);
-  private readonly query = signal('');
 
-  private readonly results = fromObservable(
-    fromSignal(this.query).pipe(
-      switchMap((query) => {
-        return this.cellControl.search(query);
-      }),
-      tap(() => this.loading.set(false))
-    ),
-    []
-  );
 
-  public readonly viewModel = computed(() => {
-    return {
-      filteredOptions: this.results()
-    };
-  });
 
-  constructor(private http: HttpClient, private rendererFactory: RendererFactory2) {
+  constructor(private rendererFactory: RendererFactory2) {
     this.renderer = this.rendererFactory.createRenderer(null, null);
   }
 
 
 
   public changeQuery(query: string): void {
-    this.currentPage.set(this.firstPage);
     this.cellControl.search(query)
-    this.loading.set(true);
-    this.query.set(query);
   }
 
 
   ngOnInit(): void {
-    this.cellControl.valueChanges.subscribe(res => console.log(res));
-    if (!this.cellControl.cell.selectedOptions) {
-      this.searchControl.valueChanges.subscribe((res: any) => {
-        this.cellControl.search(res);
-      })
-    }
+    this.searchControl.valueChanges.pipe(
+      debounceTime(300)
+    ).subscribe((searchTerm) => {
+      this.cellControl.search(searchTerm);
+    });
 
   }
 
@@ -118,7 +94,6 @@ export class CustomMatSelectSearchComponent implements ControlValueAccessor, OnI
   onSelectionChange(event: MatSelectChange): void {
     this.onChange(this.selectedOptions);
     this.onTouched();
-    console.log(event)
   }
 
 

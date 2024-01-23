@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {FormsModule} from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { MaterialModule } from './angular-material/material.module';
 import { CustomMatSelectSearchComponent } from './components/custom-mat-select-search/custom-mat-select-search.component';
 import { DynamicTableComponent } from './components/dynamic-table/dynamic-table.component';
@@ -20,6 +20,8 @@ import { TeamsEditorComponent } from './components/custom-editors/teams-editor/t
 import { NgxMatSelectSearchModule } from 'ngx-mat-select-search';
 import { ServicesEditorComponent } from './components/custom-editors/services-editor/services-editor.component';
 import { ServiceWidgetComponent } from './components/widgets/service-widget/service-widget.component';
+import { InputEditorComponent } from './components/custom-editors/input-editor/input-editor.component';
+import { FastEditorComponent } from './components/custom-editors/fast-editor/fast-editor.component';
 
 
 
@@ -40,6 +42,8 @@ import { ServiceWidgetComponent } from './components/widgets/service-widget/serv
     TeamsEditorComponent,
     ServicesEditorComponent,
     ServiceWidgetComponent,
+    InputEditorComponent,
+    FastEditorComponent,
   ],
   exports: [
     DynamicComponent,

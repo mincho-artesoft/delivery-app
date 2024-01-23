@@ -50,7 +50,6 @@ export class DynamicTableComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this.settings) {
       const path = this.settings.yGet.interpolate ? InterpolateService.suplant(this.settings.yGet.interpolate, this.dynamicService) : this.settings.yGet.path;
       this.table = this.http.request('Yget', path).pipe(map((res: any) => {
-        console.log('change',JSON.parse(res))
         const data = JSON.parse(res).structure || JSON.parse(res);
 
         this.formArray.fillFormWithResponse(data)

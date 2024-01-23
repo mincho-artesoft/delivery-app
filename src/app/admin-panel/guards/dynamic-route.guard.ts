@@ -25,6 +25,7 @@ export class DynamicRouteGuard {
   async canActivate(route: ActivatedRouteSnapshot): Promise<boolean | UrlTree> {
     let searchPath: string;
     this.dynamicService.interpolateData = {
+      ...this.dynamicService.interpolateData,
       selectedOrganization: this.dynamicService.selectedOrganization.value,
       lastSelectedRow: this.dynamicService.lastSelectedRow,
       serviceGuid: this.dynamicService.serviceGuid
@@ -54,8 +55,7 @@ export class DynamicRouteGuard {
         try {
           const path = settings.yGet.interpolate ? InterpolateService.suplant(settings.yGet.interpolate, this.dynamicService.interpolateData) : settings.yGet.path;
           const res: any = await firstValueFrom(this.http.request('Yget', path));
-          console.log(JSON.parse(res).structure)
-          this.formArray = new BaseExtendedFormArray(settings, this.http, null, JSON.parse(res).structure);
+          this.formArray = new BaseExtendedFormArray(settings, this.http, this.dynamicService, null, JSON.parse(res).structure);
           this.dynamicService.formArrayProvider.set(this.formArray);
 
         } catch (error) {
@@ -190,7 +190,7 @@ export class DynamicRouteGuard {
         }
       }
     });
-    this.formGroup = new BaseExtendedFormGroup(deepCopy, this.http, collectedData, value || null, true);
+    this.formGroup = new BaseExtendedFormGroup(deepCopy, this.http, this.dynamicService, collectedData, value || null, true);
     this.dynamicService.formGroupProvider.set(this.formGroup);
     this.dynamicService.toggleSidenav();
   }

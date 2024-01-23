@@ -1,4 +1,5 @@
-<div class="row flex-container" [ngClass]="{ 'selected': rowControl?.value._id === dynamicService.lastSelectedRow?._id}"
+<div class="row flex-container"
+    [ngClass]="{ 'selected': (rowControl?.value._id || rowControl?.value.uid )=== (dynamicService.lastSelectedRow?._id || dynamicService.lastSelectedRow?.uid)}"
     cdkDropList cdkDropListOrientation="vertical" [cdkDropListConnectedTo]="dynamicService.dropLists"
     [cdkDropListData]="[rowControl]" (cdkDropListDropped)="dropped($event)">
     <div *ngFor="let cell of settings.columns; let i = index" [style.width.px]="cell.width ? cell.width : null" cdkDrag
@@ -9,17 +10,15 @@
             <div *ngSwitchCase="'objectRenderer'">
                 <ng-container *ngIf="cell?.editor && editorVisible" [ngSwitch]="cell?.editor.name || cell.editor">
                     <div *ngSwitchCase="'FastEditor'" class="fast-editor">
-                        <mat-form-field appearance="outline" >
-                            <input matInput [formControl]="rowControl.controls[cell.data]" placeholder="Enter value" />
-                        </mat-form-field>
-                        <button mat-icon-button [color]="cell.editor?.actionColor"
+                        <app-fast-editor [rowControl]="rowControl" [cell]="cell"></app-fast-editor>
+                        <!-- <button mat-icon-button [color]="cell.editor?.actionColor"
                             (click)="submitValue(cell, rowControl)" class="send-button">
                             <mat-icon>{{cell.editor?.actionIcon}}</mat-icon>
-                        </button>
+                        </button> -->
                     </div>
                 </ng-container>
-                <button class="editor-button" mat-icon-button [color]="cell.editor?.editorColor" *ngIf="cell.editor?.name === 'FastEditor'"
-                    (click)="editorVisible = !editorVisible">
+                <button class="editor-button" mat-icon-button [color]="cell.editor?.editorColor"
+                    *ngIf="cell.editor?.name === 'FastEditor'" (click)="editorVisible = !editorVisible">
                     <mat-icon>{{cell.editor?.editorIcon}}</mat-icon>
                 </button>
                 <span>{{processObjectRenderer(cell, rowControl)}}</span>
@@ -27,22 +26,18 @@
             <div *ngSwitchDefault style="display: flex; flex-direction: row;">
                 <ng-container *ngIf="cell?.editor && editorVisible" [ngSwitch]="cell?.editor.name || cell.editor">
                     <div *ngSwitchCase="'FastEditor'" class="fast-editor">
-                        <mat-form-field appearance="outline" >
-                            <input matInput [formControl]="rowControl.controls[cell.data]" placeholder="Enter value" />
-                        </mat-form-field>
-                        <button mat-icon-button [color]="cell.editor?.actionButton.color"
-                            (click)="dynamicService.handleButtonActions(cell.editor?.actionButton, rowControl); editorVisible = !editorVisible" class="send-button">
-                            <mat-icon>{{cell.editor?.actionButton.icon}}</mat-icon>
-                        </button>
+                        <app-fast-editor [rowControl]="rowControl" [cell]="cell"></app-fast-editor>
+                      
                     </div>
                 </ng-container>
                 <ng-container *ngIf="!cell.editor">
                 </ng-container>
-                <button class="editor-button" mat-icon-button [color]="cell.editor?.editorColor" *ngIf="cell.editor?.name === 'FastEditor'"
-                    (click)="editorVisible = !editorVisible">
-                    <mat-icon >{{cell.editor?.editorIcon}}</mat-icon>
+                <button class="editor-button" mat-icon-button [color]="cell.editor?.editorColor"
+                    *ngIf="cell.editor?.name === 'FastEditor'" (click)="editorVisible = !editorVisible">
+                    <mat-icon>{{cell.editor?.editorIcon}}</mat-icon>
                 </button>
-                <span *ngIf="!cell.editor || cell?.editor && !editorVisible">{{ rowControl.controls[cell.data]?.value }} </span>
+                <span *ngIf="!cell.editor || cell?.editor && !editorVisible">{{ rowControl.controls[cell.data]?.value }}
+                </span>
             </div>
         </ng-container>
     </div>

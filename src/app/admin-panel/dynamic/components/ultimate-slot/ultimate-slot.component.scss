@@ -1,20 +1,21 @@
 .row {
     background-color: transparent;
     height: 42px;
-    overflow: hidden;
+    overflow: visible;
     padding: 0;
 
     .cell-row {
         height: 100%;
         text-align: left;
-        overflow: hidden;
+        overflow: visible;
         white-space: nowrap;
         position: relative;
-        padding-top: 10px;
+        padding-top: 5px;
         border-left: 1px solid rgb(204, 204, 204);
         border-right: 1px solid rgb(204, 204, 204);
         border-bottom: 1px solid rgb(204, 204, 204);
         box-sizing: border-box;
+
         .fast-editor {
             width: calc(100% - 40px);
 
@@ -28,7 +29,7 @@
         .editor-button {
             position: absolute;
             top: 0px;
-            right: 2.5px
+            right: 2.5px;
         }
 
         span {
@@ -42,5 +43,4 @@
 
 .row.selected {
     background-color: rgba(75, 137, 255, .5) !important;
-
 }

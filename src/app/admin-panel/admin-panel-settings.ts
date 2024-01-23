@@ -1,5 +1,171 @@
 export const ADMIN_PANEL_SETTINGS = {
   pages: [
+    {
+      path: 'manageCooking',
+      title: 'Manage your recipes',
+      className: 'col-2xl-2 col-md-6 col-xs-11',
+      yGet: { interpolate: '/service?path=${serviceGuid}' },
+      separator: null,
+      showHeaders: true,
+      linked: { interpolate: '/service?path=${warehouse}' },
+      navbar: {
+        buttons: [
+          {
+            label: 'Add recipe',
+            action: 'create',
+            path: 'manageCooking.edit',
+            openSidenav: true,
+            color: 'accent',
+            active: true,
+            icon: 'add_box'
+          },
+        ],
+      },
+      columns: [
+        {
+          data: 'guid',
+          title: 'Id',
+          readOnly: true
+        },
+        {
+          data: 'name',
+          title: 'Recipe Name',
+        },
+        {
+          data: 'expiration',
+          title: 'Expiration',
+          width: 90
+        },
+        {
+          data: 'quantity',
+          title: 'Quantity',
+          editor: {
+            editorIcon: 'edit',
+            editorColor: 'primary',
+            predefinedValues: [
+              {
+                value: 5
+              },
+              {
+                value: 10
+              },
+              {
+                value: 15
+              }
+
+            ],
+            actionButton: {
+              icon: 'send',
+              color: 'primary',
+              action: 'save',
+              yPost: '${id}.{userID}.organization'
+            },
+            name: 'FastEditor',
+            message: 'Item with ${name} was succesfully updated'
+          },
+          validators: [
+            { name: 'productValidator' }
+          ]
+        },
+
+      ]
+    },
+
+    {
+      path: 'manageCooking.edit',
+      title: 'Add Recipe',
+      yGet: { interpolate: '/service?path=${serviceGuid}' },
+      navbar: {
+        reversed: true,
+        buttons: [
+          {
+            label: 'Close',
+            action: 'close',
+            icon: 'close',
+            active: true
+          },
+          {
+            label: 'Save',
+            action: 'save',
+            icon: 'check',
+            active: true,
+            yPost: { path: '/services', guid: '${serviceGuid}' },
+            addProduct: true
+          },
+        ]
+      },
+      columns: [
+        {
+          data: 'guid',
+          title: 'Id',
+          className: 'col-2xl-12 col-md-12 col-xs-12',
+          readOnly: true
+
+        },
+        {
+          data: 'name',
+          title: 'Recipe name',
+          className: 'col-2xl-12 col-md-12 col-xs-12'
+        },
+        {
+          data: 'description',
+          title: 'Description',
+          className: 'col-2xl-12 col-md-12 col-xs-12'
+        },
+        {
+          data: 'schedule',
+          title: "Schedule",
+          className: 'col-2xl-12 col-md-12 col-xs-12'
+        },
+        {
+          data: 'expiration',
+          title: 'Expiration',
+          className: 'col-2xl-6 col-md-6 col-xs-12'
+        },
+        {
+          data: 'products',
+          tile: 'Products',
+          editor: 'inputEditor',
+          controlType: 'BaseExtendedFormArray',
+          className: 'no-side-padding',
+          columns: [
+            {
+              data: 'product',
+              title: 'Product',
+              selectOptions: [
+                { value: 'tomatoes', name: 'Tomatoes' },
+                { value: 'cucumbers', name: 'Cucumbers' },
+                { value: 'cheese', name: 'Cheese' },
+                { value: 'onion', name: 'Onion' },
+                { value: 'oil', name: 'Oil' },
+                { value: 'peppers', name: 'Peppers' }
+              ],
+              controlType: 'DropdownControl',
+              editor: 'dropdownEditor',
+              className: 'col-2xl-8 col-md-8 col-xs-12'
+            },
+            {
+              data: 'quantity',
+              title: 'Quantity',
+              className: 'col-2xl-2 col-md-2 col-xs-12',
+            },
+            {
+              data: 'metrics',
+              title: 'Metrics',
+              className: 'col-2xl-2 col-md-2 col-xs-12',
+              selectOptions: [
+                { value: 'kgs', name: 'Kilograms' },
+                { value: 'litres', name: 'Litres' },
+              ],
+              controlType: 'DropdownControl',
+              editor: 'dropdownEditor',
+            }
+
+          ]
+
+        }
+      ]
+    },
 
     // WAREHOUSE
 
@@ -34,7 +200,6 @@ export const ADMIN_PANEL_SETTINGS = {
         {
           data: 'guid',
           title: 'Id',
-          readOnly: true
         },
         {
           data: 'product',
@@ -83,10 +248,22 @@ export const ADMIN_PANEL_SETTINGS = {
           data: 'guid',
           title: 'Id',
           className: 'col-2xl-12 col-md-12 col-xs-12',
+          readOnly: true
+
         },
         {
           data: 'product',
           title: 'Product',
+          selectOptions: [
+            { value: 'tomatoes', name: 'Tomatoes' },
+            { value: 'cucumbers', name: 'Cucumbers' },
+            { value: 'cheese', name: 'Cheese' },
+            { value: 'onion', name: 'Onion' },
+            { value: 'oil', name: 'Oil' },
+            { value: 'peppers', name: 'Peppers' }
+          ],
+          controlType: 'DropdownControl',
+          editor: 'dropdownEditor',
           className: 'col-2xl-6 col-md-6 col-xs-12',
         },
         {
@@ -98,6 +275,12 @@ export const ADMIN_PANEL_SETTINGS = {
           data: 'metrics',
           title: 'Metrics',
           className: 'col-2xl-6 col-md-6 col-xs-12',
+          selectOptions: [
+            { value: 'kgs', name: 'Kilograms' },
+            { value: 'litres', name: 'Litres' },
+          ],
+          controlType: 'DropdownControl',
+          editor: 'dropdownEditor',
         },
         {
           data: 'validTo',

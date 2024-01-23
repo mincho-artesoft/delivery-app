@@ -21,12 +21,10 @@ export class AuthInterceptor implements HttpInterceptor {
     request: HttpRequest<unknown>,
     next: HttpHandler
   ): Observable<HttpEvent<unknown>> {
-    // Get the token from the AuthService
     const token = this.authService.getToken();
     
     if (token) {
       const userID = this.authService.extractUserIdFromToken(token)
-      console.log(userID);
       
       request = request.clone({
         setHeaders: {
@@ -38,7 +36,7 @@ export class AuthInterceptor implements HttpInterceptor {
       request = request.clone({
         setHeaders: {
           Authorization: `Bearer asdasdasd`,
-          "x-user-id":  "jnkqjndkjsbqshjdjhqbssdhgsgs"
+          "x-user-id":  "jnkqjndkjsbqshjdjhqbshshhhgsgs"
         }
       });
     }
@@ -49,7 +47,6 @@ export class AuthInterceptor implements HttpInterceptor {
           if (event.url?.endsWith('login')/* || event.url?.endsWith('register')*/) {
             const account = this.jwtService.decodeToken((event.body as any).result.token).user as any;
             localStorage.setItem('token', (event.body as any).result.token);
-            console.log(account);
             this.authService.handleLogin(account);
           } else if (event.url?.endsWith('logout')) {
             this.authService.handleLogout();

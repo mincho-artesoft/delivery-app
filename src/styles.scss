@@ -564,7 +564,7 @@ $breakpoints: (
             @media (min-width: $breakpoint-value) {
                 flex: 0 0 calc((100% / #{$flex-columns}) * #{$i} - 10px);
                 max-width: calc((100% / #{$flex-columns}) * #{$i} - 10px);
-                margin-right: 5px;
+                // margin-right: 5px;
             }
 
             &>* {
@@ -871,4 +871,8 @@ input:-internal-autofill-selected::part(value) {
     /* Adjust as needed */
     border-bottom: 2px solid currentColor;
     border-right: 2px solid currentColor;
+}
+
+.cdk-virtual-scroll-content-wrapper {
+    height: 100% !important;
 }

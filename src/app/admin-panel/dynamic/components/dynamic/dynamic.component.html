@@ -1,7 +1,7 @@
 <div *ngIf="!settings.notTable && formGroup">
     <app-dynamic-navbar [formGroup]="formGroup" *ngIf="settings.navbar" [settings]="settings"></app-dynamic-navbar>
     <ng-container [formGroup]="formGroup">
-        <div class="content-holder flex-container" *ngIf="settings">
+        <div class="content-holder flex-container" *ngIf="settings" [ngClass]="settings.className">
             <ng-container *ngFor="let column of settings.columns">
                 <ng-container [ngSwitch]="column?.editor">
                     <div *ngSwitchCase="'toggleButton'"
@@ -145,6 +145,11 @@
                         [ngStyle]="{'flex': '0 0 ' + ((+column.width + 'px') || '100%') }"
                         [className]="column.className">
                         <app-services-editor [column]="column"></app-services-editor>
+                    </div>
+                    <div *ngSwitchCase="'inputEditor'"
+                        [ngStyle]="{'flex': '0 0 ' + ((+column.width + 'px') || '100%') }"
+                        [className]="column.className">
+                        <app-input-editor [formArray]="formGroup" [column]="column"></app-input-editor>
                     </div>
                 </ng-container>
             </ng-container>

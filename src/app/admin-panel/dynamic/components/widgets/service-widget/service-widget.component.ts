@@ -16,7 +16,10 @@ export class ServiceWidgetComponent {
     if (this.dynamicService.selectedOrganization.value._id) {
       this.http.request('Yget', `/services?path=${this.dynamicService.selectedOrganization.value._id}`).subscribe((res: any) => {
         this.services = JSON.parse(res).services;
-        console.log(this.services)
+        this.services.map(service => {
+          console.log(service)
+          this.dynamicService.interpolateData[service.settings.settings.data] = service._id
+        })
       });
     }
   }

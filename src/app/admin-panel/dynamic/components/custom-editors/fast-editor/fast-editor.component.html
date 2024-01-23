@@ -1,0 +1,21 @@
+<div class="wrapper">
+    <div class="predefined-buttons-holder" *ngIf="cell.editor.predefinedValues">
+        <button class="predefined-button" *ngFor="let button of cell.editor.predefinedValues" (click)="rowControl.controls[cell.data].patchValue(button.value)">
+            <span>{{button.value}}</span>
+        </button>
+    </div>
+    <mat-form-field appearance="outline">
+        <input matInput [formControl]="rowControl.controls[cell.data]" placeholder="Enter value" />
+    </mat-form-field>
+
+    <button mat-icon-button [color]="cell.editor?.actionButton.color"
+        (click)="dynamicService.handleButtonActions(cell.editor?.actionButton, rowControl); editorVisible = !editorVisible"
+        class="send-button">
+        <mat-icon>{{cell.editor?.actionButton.icon}}</mat-icon>
+    </button>
+    <div *ngIf="rowControl.controls[cell.data].invalid" class="fast-editor-errors">
+        <span *ngFor="let error of getErrors(rowControl.controls[cell.data].errors)">
+            {{error}}
+        </span>
+    </div>
+</div>

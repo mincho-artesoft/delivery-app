@@ -175,6 +175,7 @@ export class DynamicService {
           }
           this.http.request('Ypost', `${path}`, body).subscribe((res: any) => {
             const generateServices = button.createServices && !control.getRawValue()._id;
+            console.log(generateServices)
             const data = JSON.parse(res);
             control.patchValue(data.data);
             this.snackbar.open(data.message, 'Close', {
@@ -317,6 +318,53 @@ const services = [
             'Automated payroll and benefits administration.',
             'In-depth analytics and predictive insights.',
             'Dedicated HR support and consultation.'
+          ],
+          hint: '*Best For: Large enterprises or organizations with a large number of employees.'
+        },
+        value: 'full'
+      }
+    ]
+  },
+  {
+    data: 'manageCooking',
+    title: 'Manage Cooking',
+    default: 'base',
+    validators: [{ name: 'required' }],
+    options: [
+      {
+        name: 'Create recipes',
+        description: {
+          subtitle: 'Efficient for Small Teams',
+          usage: 'Maximum Recipes: Up to 10.',
+          features: [
+            'Basic recipes tools.',
+          ],
+          hint: '*Ideal for: Small organizations with up to 10 recipes and up to 10 employees.'
+        },
+        value: 'base'
+      },
+      {
+        name: 'Create recipes and plan cooking schedule',
+        description: {
+          subtitle: 'Optimized for Medium-sized Teams',
+          usage: 'Maximum Recipes: 10 to 30.',
+          features: [
+            'Enhanced recipes tools.',
+            'Advanced cooking scheduling and time tracking.',
+            'Schedule you plan cooking up to 10 days ahead'
+          ],
+          hint: '*Suitable for: Growing businesses with 10 to 30 employees.'
+        },
+        value: 'extended'
+      },
+      {
+        name: 'Creates recipes and plan cooking schedule- unlimited',
+        description: {
+          subtitle: 'Comprehensive for Large Enterprises',
+          usage: 'Maximum Recipes: Unlimited.',
+          features: [
+            'Full-suite recipes system.',
+            'Unlimited future days of cooking schedule',
           ],
           hint: '*Best For: Large enterprises or organizations with a large number of employees.'
         },

@@ -4,14 +4,17 @@ import { DropdownControl } from "./dropdown-control";
 import { HttpClient } from '@angular/common/http';
 import { MultilangFormGroup } from "./multilang-formgroup";
 import { LangControl } from "./lang-control";
-import { BehaviorSubject } from "rxjs";
-
+import { BehaviorSubject, map } from "rxjs";
+import { InterpolateService } from '../services/interpolate.service';
+import { BaseExtendedFormArray } from "./base-extended-form-array";
 export class BaseExtendedFormGroup extends FormGroup {
   resources: any = {};
   htmlSettings: any = {};
+  service: any;
+  externalServiceData: any;
   public activeLang: BehaviorSubject<string> | null = null;
   constructor(
-    settings: any, private http: HttpClient, collectedData?: any, values?: any, isRoot?: boolean
+    settings: any, private http: HttpClient, service: any, collectedData?: any, values?: any, isRoot?: boolean
   ) {
     let deepCopiedSettings;
     let rootLevel;
@@ -27,6 +30,7 @@ export class BaseExtendedFormGroup extends FormGroup {
 
     const typeMapping: { [key: string]: any } = {
       'BaseExtendedFormGroup': BaseExtendedFormGroup,
+      'BaseExtendedFormArray': BaseExtendedFormArray,
       'MultilangFormGroup': MultilangFormGroup,
       'FormGroup': FormGroup,
       'FormArray': FormArray,
@@ -38,7 +42,8 @@ export class BaseExtendedFormGroup extends FormGroup {
       let cell = columns[i];
       if (cell.data.indexOf('.') === -1) {
         if (cell.controlType) {
-          controls[cell.data] = new typeMapping[cell.controlType](cell.columns || cell, http, collectedData && Object.keys(collectedData).length > 0 ? collectedData : null);
+          const passSettings = cell.controlType === 'BaseExtendedFormArray' ? cell : (cell.columns || cell);
+          controls[cell.data] = new typeMapping[cell.controlType](passSettings, http, service, collectedData && Object.keys(collectedData).length > 0 ? collectedData : null);
         } else {
           controls[cell.data] = new BaseControl(cell, (cell.default || ''));
         }
@@ -46,21 +51,19 @@ export class BaseExtendedFormGroup extends FormGroup {
         let parent = cell.data.split('.')[0];
         let xColumns = [];
         for (let x = columns.length - 1; x >= 0; x--) {
-          let xCell = JSON.parse(JSON.stringify(columns[x])); // Deep copy
+          let xCell = JSON.parse(JSON.stringify(columns[x]));
           if (parent === xCell.data.split('.')[0]) {
-            xCell.data = xCell.data.split('.').slice(1).join('.'); // Using slice instead of splice
+            xCell.data = xCell.data.split('.').slice(1).join('.');
             xColumns.push(xCell);
           }
         }
-        controls[parent] = new BaseExtendedFormGroup(xColumns, http);
+        controls[parent] = new BaseExtendedFormGroup(xColumns, http, service);
       }
 
     }
 
     super(controls);
-
-
-
+    this.service = service;
     columns.map((cell: any) => {
       if (cell.autopopulate) {
         this.findControlByPath(cell.data)?.setupAutopopulate(cell.autopopulate, this);
@@ -154,5 +157,12 @@ export class BaseExtendedFormGroup extends FormGroup {
     this.activeLang = null;
   }
 
+  linkWithExternalService(data: any) {
+    const path = InterpolateService.suplant(data.interpolate, this.service.interpolateData);
+    this.http.request('Yget', path).pipe(map((res: any) => {
+      const data = JSON.parse(res).structure || JSON.parse(res);
+      this.externalServiceData = data;
+    })).subscribe();
+  }
 }
 

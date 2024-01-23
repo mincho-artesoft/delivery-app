@@ -1,0 +1,74 @@
+.component-holder {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+
+    .inputs-holder {
+        display: flex;
+        flex-direction: row;
+        align-items: baseline;
+
+        .buttons-holder {
+            display: flex;
+            flex-direction: row;
+
+            .add-button {
+                width: 28px;
+                height: 28px;
+                border-radius: 50%;
+                background-color: white;
+                color: black;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: 0;
+                border-color: black;
+                margin-right: 5px;
+
+            }
+        }
+    }
+
+  
+    .list-holder {
+        width: 90%;
+        margin: 0 auto;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    
+        .row {
+            border-bottom: 1px solid #ddd;
+            padding: 5px;
+            display: flex;
+    
+            &:last-child {
+                border-bottom: none;
+            }
+    
+            .cell-row {
+                padding: 5px 10px;
+                text-align: center;
+    
+                &:first-child {
+                    flex: 0 0 60%;
+                }
+    
+                &:not(:first-child) {
+                    flex: 0 0 20%;
+                }
+    
+                &.special-class {
+                    font-weight: bold;
+                }
+            }
+        }
+    
+        span {
+            font-family: 'Arial', sans-serif;
+            color: #333;
+        }
+    }
+    
+
+}

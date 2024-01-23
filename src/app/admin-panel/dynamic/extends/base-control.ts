@@ -1,6 +1,7 @@
 import { AsyncValidatorFn, FormControl, ValidatorFn, Validators } from "@angular/forms";
 import { BaseExtendedFormGroup } from "./base-extended-form-group";
 import { InterpolateValidator } from "./validators/interpolate-validator";
+import { productAvailabilityValidator } from "./validators/product-validator";
 
 const validatorMapping: { [key: string]: any } = {
   'minLength': (arg: any) => Validators.minLength(arg),
@@ -9,6 +10,7 @@ const validatorMapping: { [key: string]: any } = {
   'email': () => Validators.email,
   'number': () => Validators.pattern('^[0-9]*$'),
   'pattern': (arg: any) => Validators.pattern(arg),
+  'productValidator': productAvailabilityValidator
 };
 
 
@@ -22,7 +24,11 @@ export class BaseControl extends FormControl {
     if (cell.validators) {
       cell.validators.forEach((validator: any) => {
         if (validatorMapping[validator.name]) {
-          validators.push(validatorMapping[validator.name](validator.arg));
+          if (validator.arg) {
+            validators.push(validatorMapping[validator.name](validator.arg));
+          } else {
+            validators.push(validatorMapping[validator.name]);
+          }
         }
       });
     }
@@ -51,7 +57,6 @@ export class BaseControl extends FormControl {
       console.error(`Cannot find control with path: ${path}`);
       return;
     }
-    console.log(targetControl.root.getRawValue()[path])
     if (!targetControl.getRawValue()) {
       this.disable({ emitEvent: false })
     } else {

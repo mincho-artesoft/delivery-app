@@ -1,0 +1,48 @@
+.wrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    .predefined-buttons-holder{
+        padding-left: 10px;
+        display: flex;
+        flex-direction: row;
+        gap: 5px;
+        .predefined-button{
+            width: 30px;
+            height: 30px;
+            background-color: white;
+            color: black;
+            cursor: pointer;
+        }
+    }
+
+    mat-form-field {
+        padding-left: 10px;
+        padding-bottom: 10px;
+
+    }
+
+    .send-button {
+        margin-bottom: 20px;
+    }
+
+    .fast-editor-errors {
+        width: fit-content;
+        position: absolute;
+        display: flex;
+        top: 100%;
+        left: 10%;
+        z-index: 100;
+        flex-direction: column;
+
+        span {
+            width: fit-content;
+            color: red;
+            background-color: white;
+            padding: 2px;
+            border: 1px solid red;
+            margin-top: 2px;
+        }
+    }
+}

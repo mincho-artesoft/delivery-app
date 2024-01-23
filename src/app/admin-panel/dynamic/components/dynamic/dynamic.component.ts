@@ -34,7 +34,6 @@ export class DynamicComponent implements OnInit, OnDestroy {
 
 
   ngOnDestroy(): void {
-    console.log('Dynamic component is destroyed!');
   }
 
   validateAndParseNumbers(columnSettings: any[], formGroup: FormGroup) {

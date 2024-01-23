@@ -1,0 +1,14 @@
+<div class="component-holder">
+    <div class="inputs-holder">
+            <app-dynamic [settings]="localFormGroup.htmlSettings" [formGroup]="localFormGroup"></app-dynamic>
+        <div class="buttons-holder">
+            <button class="add-button" (click)="addItem()"><mat-icon>add</mat-icon></button>
+
+        </div>
+    </div>
+    <div class="list-holder">
+        <div *ngFor="let item of formArray.controls" class="row">
+            <span *ngFor="let cell of column.columns" [class]="cell.className + 'cell-row'">{{item.get(cell.data).value}}</span>
+        </div>
+    </div>
+</div>
