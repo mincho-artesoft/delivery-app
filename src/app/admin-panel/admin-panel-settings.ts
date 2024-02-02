@@ -231,7 +231,7 @@ export const ADMIN_PANEL_SETTINGS = {
             label: 'Close',
             action: 'close',
             icon: 'close',
-            active: true
+            active: true,
           },
           {
             label: 'Save',

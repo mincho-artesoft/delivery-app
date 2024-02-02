@@ -9,6 +9,7 @@ import { BaseExtendedFormArray } from "../dynamic/extends/base-extended-form-arr
 import { InterpolateService } from "../dynamic/services/interpolate.service";
 import { YjsService } from "src/app/yjs.service";
 import { MatSnackBar } from "@angular/material/snack-bar";
+import { ADMIN_PANEL_SETTINGS } from "../admin-panel-settings";
 
 @Injectable({
   providedIn: 'root'
@@ -42,7 +43,7 @@ export class DynamicRouteGuard {
       });
     });
     if (redirectToEdit) {
-      if(!searchPath.includes('organizations')) {
+      if (!searchPath.includes('organizations')) {
         setTimeout(() => {
           this.snackbar.open('You must create at least 1 organization', 'Close', {
             duration: 4000, horizontalPosition: 'right', verticalPosition: 'top'
@@ -50,15 +51,15 @@ export class DynamicRouteGuard {
         }, 1500);
         return this.router.parseUrl('/organizations/edit');
       } else {
-        if(!this.dynamicService.redirected) {
+        if (!this.dynamicService.redirected) {
           this.dynamicService.redirected = true;
           setTimeout(() => {
             this.dynamicService.redirected = false;
-          }, 2500);
+          }, 500);
           return this.router.parseUrl('/organizations/edit');
         }
       }
-      
+
     }
     if (settings) {
       if (route.params['primary'] && !route.params['id'] && !route.params['secondary']) {
@@ -132,7 +133,9 @@ export class DynamicRouteGuard {
       const path = settings.yGet.interpolate
         ? InterpolateService.suplant(settings.yGet.interpolate, this.dynamicService.interpolateData)
         : settings.yGet.path;
+      console.log(path)
       const res: any = await firstValueFrom(this.http.request('Yget', path));
+      console.log(JSON.parse(res).structure)
       this.formArray = new BaseExtendedFormArray(settings, this.http, this.dynamicService, null, JSON.parse(res).structure);
       this.dynamicService.formArrayProvider.set(this.formArray);
     } catch (error) {
@@ -144,24 +147,16 @@ export class DynamicRouteGuard {
   private getSettingsBasedOnRoute(searchPath: any, callback: (error: Error | null, settings?: any, shouldRedirectToEdit?: boolean) => void) {
     if (this.dynamicService.interpolateData.selectedOrganization?.settings) {
       if (this.yjsService.connected) {
-        if (Object.keys(this.yjsService.documentStructure.organizations).length === 0) {
-          const settings = this.dynamicService.defaultSettings;
-          const foundSetting = settings.find((page: any) => page.path === searchPath);
-          callback(null, foundSetting);
-        } else {
-          callback(new Error("Organization data present, specific handling not implemented."));
-        }
+        const settings = this.dynamicService.interpolateData.selectedOrganization?.settings;
+        const foundSetting = settings.find((page: any) => page.path === searchPath);
+        callback(null, foundSetting);
       } else {
         this.yjsService.onConnected.pipe(first()).subscribe({
           next: () => {
             try {
-              if (Object.keys(this.yjsService.documentStructure.organizations).length === 0) {
-                const settings = this.dynamicService.defaultSettings;
-                const foundSetting = settings.find((page: any) => page.path === searchPath);
-                callback(null, foundSetting);
-              } else {
-                callback(new Error("Organization data present after connection, specific handling not implemented."));
-              }
+              const settings = this.dynamicService.interpolateData.selectedOrganization?.settings;
+              const foundSetting = settings.find((page: any) => page.path === searchPath);
+              callback(null, foundSetting);
             } catch (error) {
               console.error("Failed to connect:", error);
               callback(error);
@@ -175,7 +170,21 @@ export class DynamicRouteGuard {
       }
     } else {
       const settings = this.dynamicService.defaultSettings;
-      searchPath = 'organizations.edit'
+      if(this.dynamicService.redirected && !this.dynamicService.mainGrid){
+        searchPath = 'organizations.edit'
+      }
+      if(searchPath === 'organizations') {
+        this.dynamicService.mainGrid = true;
+        setTimeout(() => {
+          this.snackbar.open('You must create at least 1 organization', 'Close', {
+            duration: 4000, horizontalPosition: 'right', verticalPosition: 'top'
+          });
+        }, 1500);
+      }
+      if(!searchPath.includes('organizations')){
+        searchPath = 'organizations.edit'
+      }
+      console.log(searchPath, this.dynamicService['counter'])
       const foundSetting = settings?.find((page: any) => page.path === searchPath);
       if (foundSetting) {
         callback(null, foundSetting, true);
