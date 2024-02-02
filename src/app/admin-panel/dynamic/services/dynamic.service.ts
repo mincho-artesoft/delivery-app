@@ -32,6 +32,7 @@ export class DynamicService {
   action: any;
   interpolateData: any;
   defaultSettings = [];
+  redirected: boolean = false;
   constructor(
     public dialog: MatDialog,
     private snackbar: MatSnackBar,

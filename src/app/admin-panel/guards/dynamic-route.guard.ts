@@ -41,13 +41,24 @@ export class DynamicRouteGuard {
         resolve(result);
       });
     });
-    if (redirectToEdit && !searchPath.includes('organizations')) {
-      setTimeout(() => {
-        this.snackbar.open('You must create at least 1 organization', 'Close', {
-          duration: 4000, horizontalPosition: 'right', verticalPosition: 'top'
-        });
-      }, 1500)
-      return this.router.parseUrl('/organizations/edit')
+    if (redirectToEdit) {
+      if(!searchPath.includes('organizations')) {
+        setTimeout(() => {
+          this.snackbar.open('You must create at least 1 organization', 'Close', {
+            duration: 4000, horizontalPosition: 'right', verticalPosition: 'top'
+          });
+        }, 1500);
+        return this.router.parseUrl('/organizations/edit');
+      } else {
+        if(!this.dynamicService.redirected) {
+          this.dynamicService.redirected = true;
+          setTimeout(() => {
+            this.dynamicService.redirected = false;
+          }, 2500);
+          return this.router.parseUrl('/organizations/edit');
+        }
+      }
+      
     }
     if (settings) {
       if (route.params['primary'] && !route.params['id'] && !route.params['secondary']) {
@@ -167,7 +178,6 @@ export class DynamicRouteGuard {
       searchPath = 'organizations.edit'
       const foundSetting = settings?.find((page: any) => page.path === searchPath);
       if (foundSetting) {
-        console.log(foundSetting)
         callback(null, foundSetting, true);
       } else {
         callback(new Error("No settings found in selected organization."));
