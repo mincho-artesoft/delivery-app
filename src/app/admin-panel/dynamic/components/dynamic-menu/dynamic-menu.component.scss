@@ -10,8 +10,7 @@
     -webkit-transition: width 0.3s;
     transition: width 0.3s;
     background-color: rgba(52, 79, 80, 255);
-    // background-color: rgba(27, 29, 33, 255);
-    z-index: 10;
+    z-index: 9999;
     overflow: hidden;
 
     .left-menu-container {

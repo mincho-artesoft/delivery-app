@@ -1,13 +1,15 @@
 import { CdkDropList } from '@angular/cdk/drag-drop';
 import { Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Subject, distinctUntilChanged } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, distinctUntilChanged } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDialogComponent } from '../components/confirm-dialog/confirm-dialog.component';
 import { FormControl } from '@angular/forms';
 import { InterpolateService } from './interpolate.service';
+import { BaseExtendedFormGroup } from '../extends/base-extended-form-group';
+import { ADMIN_PANEL_SETTINGS } from '../../admin-panel-settings';
 
 @Injectable({
   providedIn: 'root'
@@ -18,10 +20,9 @@ export class DynamicService {
   formGroupProvider = signal<any>('');
   formArrayProvider = signal<any>('');
   lastSelectedRow: any;
+  lastSelectedFormGroup: BaseExtendedFormGroup;
   openSidenav = new BehaviorSubject(false);
   isSidenavOpen: boolean = false;
-  private dataSource = new BehaviorSubject<any>({ mainMenu: [] });
-  data = this.dataSource.asObservable();
   public cellWidths: number[] = [];
   public cellWidthsChanged = new Subject<number[]>();
   unsubscribeOnNavigation = new Subject<any>();
@@ -30,12 +31,12 @@ export class DynamicService {
   public view: string = 'table';
   action: any;
   interpolateData: any;
+  defaultSettings = [];
   constructor(
     public dialog: MatDialog,
     private snackbar: MatSnackBar,
     private router: Router,
-    private http: HttpClient,
-    private interpolateService: InterpolateService) {
+    private http: HttpClient) {
     this.selectedOrganization.valueChanges.pipe(
       distinctUntilChanged((prev, curr) => {
         return prev._id === curr._id;
@@ -43,6 +44,11 @@ export class DynamicService {
     ).subscribe((change: any) => {
       this.refreshPage();
     })
+    ADMIN_PANEL_SETTINGS.pages.map(page => {
+      if (page.path.includes('organizations')) {
+        this.defaultSettings.push(page);
+      }
+    });
   }
 
 
@@ -62,14 +68,6 @@ export class DynamicService {
     this.dropLists.push(dropList);
   }
 
-  interpolate(str: any, data: any, separator = ',') {
-    return str.replace(/\$\{(\w+)\}/g, (match: any, key: any) => {
-      if (Array.isArray(data)) {
-        return data.map(item => item[key]).join(separator);
-      }
-      return data[key];
-    });
-  }
 
   generateRandomId(length: number): string {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -97,110 +95,192 @@ export class DynamicService {
     return this.isSidenavOpen;
   }
 
-  handleButtonActions(button: any, control?: any) {
-    if (button.isDialog) {
-      if (button.deletePath) {
-        let message = this.interpolate(button.message, control?.getRawValue() || this.lastSelectedRow);
-        const dialogRef = this.dialog.open(ConfirmDialogComponent, {
-          width: '460px',
-          hasBackdrop: true,
-          data: {
-            title: 'Confirm Delete',
-            message: 'Are you sure you want to delete this item?',
-            confirmButtonText: 'Delete',
-            cancelButtonText: 'Cancel',
-          }
-        });
-        dialogRef.afterClosed().subscribe(result => {
-          if (result) {
-            const url = this.interpolate(button.deletePath, { ...control?.getRawValue() || this.lastSelectedRow });
-            this.http.request('Ydelete', url).subscribe((res: string) => {
-              const data = JSON.parse(res);
-              this.snackbar.open(data.message || "Deleted", 'Close', {
-                duration: 2000, horizontalPosition: 'right', verticalPosition: 'top'
-              })
-            })
-          }
-        });
-      }
-    } else if (button.openSidenav) {
-      if (button.path.indexOf('.') > -1) {
-        let params = button.path.split('.');
-        let id = control ? control.getRawValue()._id : this.lastSelectedRow?._id;
-        let urlSegments = [params[0]];
-        if (id && button.action !== 'create') {
-          const [param, b, c] = id.split(".");
-          urlSegments.push(button.path.split('.')[1], param);
-        } else {
-          urlSegments.push(button.path.split('.')[1]);
+  private openConfirmationDialog(data: any): Observable<boolean> {
+    const { confirmation = {}, snackbarMessage = {} } = data.button;
+    const width = confirmation.width || 400;
+    const title = confirmation.title || 'Confirm Delete';
+    const message = InterpolateService.suplant(confirmation.interpolate, data.control) || 'Are you sure you want to delete this item?';
+    const confirmButtonText = confirmation.confirmText || 'Delete';
+    const cancelButtonText = confirmation.cancelText || 'Cancel';
+
+    const dialogRef = this.dialog.open(ConfirmDialogComponent, {
+      width: `${width}px`,
+      hasBackdrop: true,
+      data: { title, message, confirmButtonText, cancelButtonText }
+    });
+
+    return dialogRef.afterClosed();
+  }
+
+  private deleteItem(data: any) {
+    const button = data.button;
+    const url = InterpolateService.suplant(button.deletePath, data.control);
+    this.http.request('Ydelete', url).subscribe({
+      next: (res: string) => {
+        const response = JSON.parse(res);
+        const message = button.snackbarMessage.interpolate ?
+          InterpolateService.suplant(button.snackbarMessage.interpolate, data.control) :
+          response.message || 'Successfully deleted';
+        this.showSnackbar(message, button.snackbarMessage);
+        const lastSelectedJSON = localStorage.getItem('lastSelectedRow');
+        const selectedOrg = JSON.parse(localStorage.getItem('selectedOrganization'));
+        const stringControl = JSON.stringify(data.control?.getRawValue())
+        if (stringControl === lastSelectedJSON) {
+          localStorage.setItem('lastSelectedRow', '');
         }
-        this.router.navigate(urlSegments);
+        if (data.control.getRawValue()?._id === selectedOrg._id) {
+          localStorage.setItem('selectedOrganization', '');
+          localStorage.setItem('selectedService', '');
+        }
+      },
+      error: (err) => {
+        console.error('Deletion failed:', err);
+        this.showSnackbar('Deletion failed. Please try again.', button.snackbarMessage);
       }
+    });
+  }
+
+  private showSnackbar(message: string, snackbarData: any) {
+    this.snackbar.open(message, 'Close', {
+      duration: snackbarData.duration || 2000,
+      horizontalPosition: snackbarData.horizontal || 'right',
+      verticalPosition: snackbarData.vertical || 'top'
+    });
+  }
+
+  navigateBasedOnConfiguration(data: any): void {
+    const control = data.control;
+    const button = data.button;
+    if (!button.path.includes('.')) return;
+
+    const segments = button.path.split('.');
+    const baseSegment = segments[0];
+    const actionSegment = segments[1];
+    const id = this.determineId(control);
+
+    const urlSegments = [baseSegment];
+    if (id && button.action !== 'create') {
+      const [param] = id.split('.');
+      urlSegments.push(actionSegment, param);
     } else {
-      if (button.action === 'close') {
-        this.toggleSidenav()
-      } else if (button.action === 'save') {
-        if (button.yPost) {
-          let path;
-          let guid;
-          if (button.createServices) {
-            if (this.lastSelectedRow) {
-              path = InterpolateService.suplant(button.yPost, this.interpolateData);
-            } else {
-              const organizationGuid = this.generateOrganizationId();
-              path = button.yPost.replace('${lastSelectedRow._id}', organizationGuid);
-            }
-          } else {
-            if (button.yPost.guid) {
-              path = button.yPost.path;
-              guid = InterpolateService.suplant(button.yPost.guid, this.interpolateData)
-            } else {
-              path = InterpolateService.suplant(button.yPost, this.interpolateData);
-            }
-          }
-          // this.httpClient.request('Ypost', `/services`, { body: { name: "Cucumber", guid: serviceGUID } }).subscribe((res: string) => {
-          //   console.log(JSON.parse(res));
-          // });
-          const body = {
-            body: {
-              data: control.getRawValue()
-            }
-          }
-          if (guid) {
-            body.body = {
-              ...control.getRawValue(),
-              guid: guid
-            }
+      urlSegments.push(actionSegment);
+    }
 
-          }
-          this.http.request('Ypost', `${path}`, body).subscribe((res: any) => {
-            const generateServices = button.createServices && !control.getRawValue()._id;
-            console.log(generateServices)
-            const data = JSON.parse(res);
-            control.patchValue(data.data);
-            this.snackbar.open(data.message, 'Close', {
-              duration: 2000, horizontalPosition: 'right', verticalPosition: 'top'
-            });
-            // This creates services when we create a new organization
-            if (generateServices) {
-              services.map((service: any) => {
-                if (service.default) {
-                  this.http.request('Ypost', `/services?path=${data._id}`, { body: { settings: service, value: service.default } }).subscribe((res: string) => {
-                    console.log(JSON.parse(res))
-                  });
-                }
-              });
-            }
-          })
-        } else if (button.http) {
-          const data = {
-            ...control.getRawValue(),
-            guid: this.selectedOrganization.value._id
-          }
-          this.http.post(button.http.path, data).subscribe(res => {
-          })
+    this.router.navigate(urlSegments);
+  }
+
+  private determineId(control): string | undefined {
+    const rawValue = control?.getRawValue() || this.lastSelectedRow || this.lastSelectedFormGroup?.getRawValue();
+    return rawValue?._id;
+  }
+
+  private handleSaveAction(data: any): void {
+    const button = data.button;
+    const control = data.control;
+    if (!button.yPost) return;
+
+    const path = this.determinePathForSave(button);
+    const body = this.constructRequestBody(button, control);
+    this.http.request('Ypost', path, body).subscribe({
+      next: (res: any) => this.handleSaveResponse(res, button, control, body),
+      error: (err) => console.error('Error on save:', err)
+    });
+  }
+
+  private determinePathForSave(button: any): string {
+    if (button.createServices) {
+      return this.lastSelectedRow ?
+        InterpolateService.suplant(button.yPost, this.interpolateData) :
+        button.yPost.replace('${lastSelectedRow._id}', this.generateOrganizationId());
+    } else if (button.yPost.guid) {
+      return button.yPost.path;
+    } else {
+      return InterpolateService.suplant(button.yPost, this.interpolateData);
+    }
+  }
+
+  private constructRequestBody(button: any, control: any): any {
+    let guid = button.yPost.guid ? InterpolateService.suplant(button.yPost.guid, this.interpolateData) : null;
+    const body: any = {
+      body: {
+        data: control.getRawValue()
+      }
+    }
+    if (guid) {
+      body.body = {
+        ...control.getRawValue(),
+        guid: guid
+      }
+
+    }
+    if (button.createServices && !control.getRawValue()._id) {
+      const settings: any = ADMIN_PANEL_SETTINGS.pages;
+      body.body.data.settings = [];
+      settings.map((page: any) => {
+        if (page.path.includes('organizations')) {
+          body.body.data.settings.push(page);
         }
+      });
+    }
+    return body;
+  }
 
+  private handleSaveResponse(res: any, button: any, control: any, body: any): void {
+    const data = JSON.parse(res);
+    this.snackbar.open(data.message, 'Close', {
+      duration: 2000, horizontalPosition: 'right', verticalPosition: 'top'
+    });
+
+    if (button.createServices && !control.getRawValue()._id) {
+      this.generateServices(data._id, services, body);
+    }
+    control.patchValue(data);
+
+  }
+
+  private generateServices(dataId: string, services: any[], body: any): void {
+    services.forEach(service => {
+      if (service.default) {
+        this.http.request('Ypost', `/services?path=${dataId}`, { body: { settings: service, value: service.default } }).subscribe({
+          next: ((res: string) => {
+            const settings = ADMIN_PANEL_SETTINGS.pages;
+            settings.map(page => {
+              if (page.path.includes(service.data)) {
+                body.body.data.settings.push(page);
+              }
+            });
+            this.http.request('yPost', `/organization?path=${dataId}`, body).subscribe(res => console.log(res))
+          }),
+          error: (err) => console.error('Error generating service:', err)
+        });
+      }
+    });
+  }
+
+
+  handleButtonActions(button: any, control?: any) {
+    const dataContext = {
+      button: button,
+      control: control || this.lastSelectedFormGroup
+    }
+    if (button.action === 'delete') {
+      this.openConfirmationDialog(dataContext).subscribe(result => {
+        if (result) {
+          this.deleteItem(dataContext);
+        }
+      });
+    } else if (button.openSidenav) {
+      this.navigateBasedOnConfiguration(dataContext)
+    } else {
+      switch (button.action) {
+        case 'close':
+          this.toggleSidenav();
+          break;
+        case 'save':
+          this.handleSaveAction(dataContext);
+          break;
+        default:
+          console.warn('Action not recognized:', button.action);
       }
     }
   }

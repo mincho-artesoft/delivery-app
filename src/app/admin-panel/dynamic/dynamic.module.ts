@@ -22,6 +22,7 @@ import { ServicesEditorComponent } from './components/custom-editors/services-ed
 import { ServiceWidgetComponent } from './components/widgets/service-widget/service-widget.component';
 import { InputEditorComponent } from './components/custom-editors/input-editor/input-editor.component';
 import { FastEditorComponent } from './components/custom-editors/fast-editor/fast-editor.component';
+import { DynamicWrapperComponent } from './components/dynamic-wrapper/dynamic-wrapper.component';
 
 
 
@@ -44,6 +45,7 @@ import { FastEditorComponent } from './components/custom-editors/fast-editor/fas
     ServiceWidgetComponent,
     InputEditorComponent,
     FastEditorComponent,
+    DynamicWrapperComponent,
   ],
   exports: [
     DynamicComponent,

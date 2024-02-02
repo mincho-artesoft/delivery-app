@@ -94,7 +94,7 @@ messageHandlers[messageSubDocSync] = (encoder, decoder, provider, emitSynced, me
     guidSuffixesForSubdocsSubscibe.includes(suffix) && provider.subscribeToSubdocs(subDoc);
 
     const subdocs = subDoc.getMap("subdocs");
-    console.log(Array.from(subDoc.subdocs).map(s => s.guid));
+    // console.log(Array.from(subDoc.subdocs).map(s => s.guid));
     subdocs.forEach((s, key) => {
       if(s && !s.isSynced) {
         s.load();
@@ -403,9 +403,9 @@ export class WebsocketProvider extends Observable {
     this.doc.on('update', this._updateHandler);
 
     const subdocsHandler = ({ added, removed, loaded }) => {
-      console.log("added in ", Array.from(added));
-      console.log("removed from ", Array.from(removed));
-      console.log("loaded ", Array.from(loaded));
+      // console.log("added in ", Array.from(added));
+      // console.log("removed from ", Array.from(removed));
+      // console.log("loaded ", Array.from(loaded));
       added.forEach((subdoc) => {
         if(!this.subdocs.has(subdoc.guid)) {
           this.subdocs.set(subdoc.guid, subdoc);
@@ -453,7 +453,7 @@ export class WebsocketProvider extends Observable {
     }
 
     this.subscribeToSubdocs = (doc) => {
-      console.log("subscribeToSubdocs", doc.guid);
+      // console.log("subscribeToSubdocs", doc.guid);
       // we should first 'off' the function reference because of multiple subscribing for subdocs event
       doc.off('subdocs', subdocsHandler);
       doc.on("subdocs", subdocsHandler);

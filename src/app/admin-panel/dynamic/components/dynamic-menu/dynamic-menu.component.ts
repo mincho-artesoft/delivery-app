@@ -21,7 +21,6 @@ export class DynamicMenuComponent implements OnInit, OnDestroy {
 
   }
   ngOnInit(): void {
-
     ADMIN_PANEL_SETTINGS.pages.map((page: any) => {
       if (page.menuView) {
         if (page.menuView.group) {
@@ -62,7 +61,6 @@ export class DynamicMenuComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    console.log('destroyed')
   }
 
   toggleMenu(menu: string) {

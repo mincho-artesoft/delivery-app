@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { DynamicService } from '../../../services/dynamic.service';
 import { YjsService } from 'src/app/yjs.service';
+import { HttpClient } from '@angular/common/http';
+import { Observable, map } from 'rxjs';
 
 @Component({
   selector: 'app-organizations-widget',
@@ -8,46 +10,57 @@ import { YjsService } from 'src/app/yjs.service';
   styleUrls: ['./organizations-widget.component.scss']
 })
 export class OrganizationsWidgetComponent implements OnInit {
-  constructor(private dynamicService: DynamicService, private yjsService: YjsService) {
+  constructor(private dynamicService: DynamicService, private http: HttpClient) {
 
   }
 
   hoverOrganizationsWidget = false;
   currentOrg: any = {};
-  organizations;
+  organizations: Observable<any>;
   language = 'US';
   hidePopupTimeout;
 
 
-  fakeOrg = [
-    { img: 'https://marketplace.canva.com/EAFpeiTrl4c/1/0/1600w/canva-abstract-chef-cooking-restaurant-free-logo-9Gfim1S8fHg.jpg', name: 'Master Chef', email: 'master-chef@mail.com' },
-    { img: 'https://static.vecteezy.com/system/resources/previews/009/361/083/original/restaurant-logo-design-free-file-free-vector.jpg', name: 'Healthy food', email: 'healthyanddelicious@mail.com' },
-    { img: 'https://img.freepik.com/premium-vector/catering-quality-food-design-logo_187482-593.jpg', name: 'Cathering', email: 'catheringforyou@mail.com' },
-    { img: 'https://d1csarkz8obe9u.cloudfront.net/posterpreviews/restaurant-logo%2Ccatering-logo%2Cspoon-logo-icon-design-template-2ce0a2137f418d6b4083ed268b3e2834_screen.jpg?ts=1663417865', name: 'Your place', email: 'itsyourplace@mail.com' }
 
-  ]
 
   ngOnInit(): void {
-    // TODO When we have ids from the backend this logic must be removed. It's only for testing;
-    Object.keys(this.yjsService.documentStructure.organizations).map((key: any, index: any) => {
-      if (!this.yjsService.documentStructure.organizations[key].organizationData._id) {
-        this.yjsService.documentStructure.organizations[key].organizationData._id = key;
-      }
-      if (!this.yjsService.documentStructure.organizations[key].organizationData.img) {
-        this.yjsService.documentStructure.organizations[key].organizationData.img = this.fakeOrg[index].img;
-      }
+    this.organizations = this.http.request('Yget', '/organizations').pipe(map((res: any) => {
+      const data = JSON.parse(res).structure || JSON.parse(res);
+      return {
+        organizations: data
+      };
+    }))
+    this.organizations.subscribe({
+      next: (organizations) => {
+        organizations = organizations.organizations;
+        if (!this.dynamicService.selectedOrganization.value._id) {
+          const returnToOrgJSON = localStorage.getItem('selectedOrganization');
+          if (returnToOrgJSON && returnToOrgJSON !== 'undefined') {
+            try {
+              const returnToOrg = JSON.parse(returnToOrgJSON);
+              this.currentOrg = returnToOrg;
+              this.dynamicService.selectedOrganization.setValue(returnToOrg, { emitEvent: false });
+            } catch (e) {
+              console.error("Error parsing organization from localStorage:", e);
+              this.setFallbackOrganization(organizations);
+            }
+          } else {
+            this.setFallbackOrganization(organizations);
+          }
+        } else {
+          this.currentOrg = this.dynamicService.selectedOrganization.value;
+        }
+      },
+      error: (err) => console.error('Failed to fetch organizations', err)
     });
-    //
 
-    this.organizations = Object.values(this.yjsService.documentStructure.organizations).map(item => {
-      return item.organizationData;
-    });
-    if (!this.dynamicService.selectedOrganization.value._id) {
-      this.currentOrg = this.organizations[0];
-      this.dynamicService.selectedOrganization.setValue(this.organizations[0], { emitEvent: false });
-      localStorage.setItem('selectedOrganization', JSON.stringify(this.organizations[0]));
-    } else {
-      this.currentOrg = this.dynamicService.selectedOrganization.value;
+  }
+
+  setFallbackOrganization(organizations) {
+    if (organizations && organizations.length > 0) {
+      this.currentOrg = organizations[0];
+      this.dynamicService.selectedOrganization.setValue(organizations[0], { emitEvent: false });
+      localStorage.setItem('selectedOrganization', JSON.stringify(organizations[0]));
     }
   }
   showPopup() {
@@ -72,7 +85,7 @@ export class OrganizationsWidgetComponent implements OnInit {
   selectOrganization(org: any) {
     this.currentOrg = org;
     this.dynamicService.selectedOrganization.setValue(org);
-    localStorage.setItem('selectedOrganization', JSON.stringify(this.organizations[0]));
+    localStorage.setItem('selectedOrganization', JSON.stringify(org));
   }
 
 }

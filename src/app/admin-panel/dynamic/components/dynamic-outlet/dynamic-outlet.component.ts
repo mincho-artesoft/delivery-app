@@ -6,14 +6,12 @@ import { DynamicService } from '../../services/dynamic.service';
   templateUrl: './dynamic-outlet.component.html',
   styleUrls: ['./dynamic-outlet.component.scss'],
 })
-export class DynamicOutletComponent implements OnDestroy{
-  
+export class DynamicOutletComponent {
 
-  constructor( public dynamicService: DynamicService){
-     
+
+  constructor(public dynamicService: DynamicService) {
+
   }
 
-  ngOnDestroy(): void {
-    console.log('Outlet is destroyed')
-  }
+
 }

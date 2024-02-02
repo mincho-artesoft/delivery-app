@@ -1,0 +1,9 @@
+.admin-panel-wrapper {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    overflow: hidden;
+    app-dynamic-menu {
+        z-index: 9999;
+    }
+}

@@ -1,8 +1,11 @@
 <div *ngIf="hoverOrganizationsWidget" class="widget-positioner">
-    <div class="organizations-wrapper" [ngClass]="{ 'active': hoverOrganizationsWidget }" (mouseenter)="cancelHidePopup()" (mouseleave)="scheduleHidePopup()">
-        <div *ngFor="let org of organizations">
+    <div class="organizations-wrapper" [ngClass]="{ 'active': hoverOrganizationsWidget }"
+        (mouseenter)="cancelHidePopup()" (mouseleave)="scheduleHidePopup()"
+        *ngIf="(organizations | async) as observable">
+        <div *ngFor="let org of observable.organizations">
             <div class="organization" (click)="selectOrganization(org)">
-                <img [src]="org.img" [ngClass]="{ 'selected': org._id === currentOrg._id }">
+                <img [src]="org?.img ? org.img : 'assets/images/no-image-icon-512x512-lfoanl0w.png'"
+                    [ngClass]="{ 'selected': org._id === currentOrg._id }">
                 <div class="org-short-info">
                     <span class="name"> {{org?.name[org?.language]}}</span>
                     <span class="email"> {{org?.domain}}</span>
@@ -13,12 +16,14 @@
         <span class="link" routerLink="/organizations">My organizations</span>
     </div>
 </div>
-<div class="static-widget" [ngClass]="{ 'hide': hoverOrganizationsWidget }" (mouseenter)="showPopup()" (mouseleave)="scheduleHidePopup()">
+<div class="static-widget" [ngClass]="{ 'hide': hoverOrganizationsWidget }" (mouseenter)="showPopup()"
+    (mouseleave)="scheduleHidePopup()">
     <div class="organizations-wrapper">
         <div class="organization">
-            <img [src]="currentOrg?.img" alt="img">
+            <img [src]="currentOrg?.img ? currentOrg.img : 'assets/images/no-image-icon-512x512-lfoanl0w.png'"
+                alt="Organization Image">
             <div class="org-short-info">
-                <span class="name"> {{currentOrg?.name[currentOrg?.language]}}</span>
+                <span class="name" *ngIf="currentOrg._id"> {{currentOrg?.name[currentOrg?.language]}}</span>
                 <span class="email"> {{currentOrg?.domain}}</span>
             </div>
         </div>

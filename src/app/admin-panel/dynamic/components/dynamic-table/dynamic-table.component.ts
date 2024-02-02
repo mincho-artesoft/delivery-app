@@ -40,7 +40,6 @@ export class DynamicTableComponent implements OnInit, OnDestroy, AfterViewInit {
     public dynamicService: DynamicService,
     private renderer: Renderer2,
     private elementRef: ElementRef,
-    private yjsService: YjsService
   ) {
   }
 
@@ -51,7 +50,6 @@ export class DynamicTableComponent implements OnInit, OnDestroy, AfterViewInit {
       const path = this.settings.yGet.interpolate ? InterpolateService.suplant(this.settings.yGet.interpolate, this.dynamicService) : this.settings.yGet.path;
       this.table = this.http.request('Yget', path).pipe(map((res: any) => {
         const data = JSON.parse(res).structure || JSON.parse(res);
-
         this.formArray.fillFormWithResponse(data)
         this.dataSource = new MatTableDataSource((this.formArray as FormArray).controls);
         this.dataSource.data.map((ctrl: any) => {
@@ -76,6 +74,7 @@ export class DynamicTableComponent implements OnInit, OnDestroy, AfterViewInit {
   ngAfterViewInit(): void {
     setTimeout(() => {
       this.syncContainerWidths();
+      this.selectRow(this.dataSource.data[0]);
     }, 50)
   }
   stretchLastColumnIfNeeded() {
@@ -114,6 +113,8 @@ export class DynamicTableComponent implements OnInit, OnDestroy, AfterViewInit {
 
   selectRow(row: any) {
     this.dynamicService.lastSelectedRow = row?.getRawValue();
+    this.dynamicService.lastSelectedFormGroup = row;
+    localStorage.setItem('lastSelectedRow', JSON.stringify(row?.getRawValue()));
   }
 
   public startResizing(event: MouseEvent, index: number, cell: any) {

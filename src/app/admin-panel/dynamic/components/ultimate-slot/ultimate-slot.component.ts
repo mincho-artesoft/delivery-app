@@ -101,7 +101,7 @@ export class UltimateSlotComponent implements AfterViewInit, OnInit {
 
   submitValue(cell: any, control: any) {
     this.editorVisible = false;
-    let message = this.dynamicService.interpolate(cell.editor.message, control.getRawValue());
+    const message = InterpolateService.suplant(cell.editor.message, control)
     this.snackbar.open(message, 'Close', {
       duration: 2000, horizontalPosition: 'right', verticalPosition: 'top'
     })

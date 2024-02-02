@@ -1,13 +1,14 @@
 import { Injectable } from "@angular/core";
 import { Router, ActivatedRouteSnapshot, UrlTree } from "@angular/router";
 import { Observable, firstValueFrom, forkJoin, of } from "rxjs";
-import { catchError, map } from "rxjs/operators";
-import { ADMIN_PANEL_SETTINGS } from "../admin-panel-settings";
+import { catchError, first } from "rxjs/operators";
 import { DynamicService } from "../dynamic/services/dynamic.service";
 import { BaseExtendedFormGroup } from "../dynamic/extends/base-extended-form-group";
 import { HttpClient } from "@angular/common/http";
 import { BaseExtendedFormArray } from "../dynamic/extends/base-extended-form-array";
 import { InterpolateService } from "../dynamic/services/interpolate.service";
+import { YjsService } from "src/app/yjs.service";
+import { MatSnackBar } from "@angular/material/snack-bar";
 
 @Injectable({
   providedIn: 'root'
@@ -20,47 +21,46 @@ export class DynamicRouteGuard {
     private router: Router,
     public dynamicService: DynamicService,
     public http: HttpClient,
+    private yjsService: YjsService,
+    private snackbar: MatSnackBar
   ) { }
 
   async canActivate(route: ActivatedRouteSnapshot): Promise<boolean | UrlTree> {
     let searchPath: string;
-    this.dynamicService.interpolateData = {
-      ...this.dynamicService.interpolateData,
-      selectedOrganization: this.dynamicService.selectedOrganization.value,
-      lastSelectedRow: this.dynamicService.lastSelectedRow,
-      serviceGuid: this.dynamicService.serviceGuid
-    }
+    let redirectToEdit: boolean = false;
+    this.restoreStateFromLocalStorage();
+
     if (route.params['primary'] && !route.params['id'] && !route.params['secondary']) {
       searchPath = route.params['primary'];
     } else {
       searchPath = `${route.parent?.params['primary']}.${route.params['secondary'] || route.params['id']}`;
     }
-    const settings: any = this.getSettingsBasedOnRoute(searchPath);
-    if (!this.dynamicService.selectedOrganization.value?._id) {
-      let selectedOrg;
-      try {
-        selectedOrg = JSON.parse(localStorage.getItem('selectedOrganization'));
-      } catch (e) {
-        console.error('Error parsing JSON from localStorage', e);
-        // Handle the error or set a default value
-        selectedOrg = null;
-      }
-      if (selectedOrg) {
-        this.dynamicService.selectedOrganization.patchValue(selectedOrg, { emitEvent: false })
-      }
+    const settings = await new Promise<any>((resolve) => {
+      this.getSettingsBasedOnRoute(searchPath, (error, result, shouldRedirectToEdit) => {
+        redirectToEdit = shouldRedirectToEdit;
+        resolve(result);
+      });
+    });
+    if (redirectToEdit && !searchPath.includes('organizations')) {
+      setTimeout(() => {
+        this.snackbar.open('You must create at least 1 organization', 'Close', {
+          duration: 4000, horizontalPosition: 'right', verticalPosition: 'top'
+        });
+      }, 1500)
+      return this.router.parseUrl('/organizations/edit')
     }
     if (settings) {
       if (route.params['primary'] && !route.params['id'] && !route.params['secondary']) {
         this.dynamicService.formArrayProvider.set(null);
-        try {
-          const path = settings.yGet.interpolate ? InterpolateService.suplant(settings.yGet.interpolate, this.dynamicService.interpolateData) : settings.yGet.path;
-          const res: any = await firstValueFrom(this.http.request('Yget', path));
-          this.formArray = new BaseExtendedFormArray(settings, this.http, this.dynamicService, null, JSON.parse(res).structure);
-          this.dynamicService.formArrayProvider.set(this.formArray);
-
-        } catch (error) {
-          console.error("Failed to fetch data:", error);
-          return false;
+        if (this.yjsService.connected) {
+          this.fetchData(settings);
+        } else {
+          this.yjsService.onConnected.pipe(first()).subscribe({
+            next: async () => {
+              this.fetchData(settings);
+            },
+            error: (error) => console.error("Subscription error:", error),
+          });
         }
       } else {
         const { id, secondary } = route.params;
@@ -72,15 +72,35 @@ export class DynamicRouteGuard {
 
         if (id || secondary === 'edit') {
           if (id) {
-            try {
-              const collectedData = await this.extractAndManipulateData(settings?.options);
-              const path = settings.yGet.interpolate ? InterpolateService.suplant(settings.yGet.interpolate, this.dynamicService.interpolateData) : settings.yGet.path;
-              const res: any = await firstValueFrom(this.http.request('Yget', path))
-              this.updateFormGroup(settings, collectedData, JSON.parse(res).structure || null);
-              this.dynamicService.formGroupProvider.set(this.formGroup);
-            } catch (error) {
-              console.error("Failed to fetch data:", error);
-              return false;
+            if (this.yjsService.connected) {
+              try {
+                const collectedData = await this.extractAndManipulateData(settings?.options);
+                const path = settings.yGet.interpolate ? InterpolateService.suplant(settings.yGet.interpolate, this.dynamicService.interpolateData) : settings.yGet.path;
+                const res: any = await firstValueFrom(this.http.request('Yget', path))
+                this.updateFormGroup(settings, collectedData, JSON.parse(res).structure || null);
+                this.dynamicService.formGroupProvider.set(this.formGroup);
+              } catch (error) {
+                console.error("Failed to fetch data:", error);
+                return false;
+              }
+            } else {
+              this.yjsService.onConnected.pipe(first()).subscribe({
+                next: async () => {
+                  try {
+                    const collectedData = await this.extractAndManipulateData(settings?.options);
+                    const path = settings.yGet.interpolate ? InterpolateService.suplant(settings.yGet.interpolate, this.dynamicService.interpolateData) : settings.yGet.path;
+                    console.log(path)
+                    const res: any = await firstValueFrom(this.http.request('Yget', path))
+                    this.updateFormGroup(settings, collectedData, JSON.parse(res).structure || null);
+                    this.dynamicService.formGroupProvider.set(this.formGroup);
+                    return true;
+                  } catch (error) {
+                    console.error("Failed to fetch data:", error);
+                    return false;
+                  }
+                },
+                error: (error) => console.error("Subscription error:", error),
+              });
             }
           } else {
             const collectedData = await this.extractAndManipulateData(settings?.options);
@@ -91,18 +111,71 @@ export class DynamicRouteGuard {
         }
       }
     }
+
+
     return true;
   }
 
-  private getSettingsBasedOnRoute(searchPath: any) {
-    let settings;
-    ADMIN_PANEL_SETTINGS.pages.map((page: any) => {
-      if (page.path === searchPath) {
-        return settings = page;
-      }
-    })
-    return settings;
+  async fetchData(settings) {
+    try {
+      const path = settings.yGet.interpolate
+        ? InterpolateService.suplant(settings.yGet.interpolate, this.dynamicService.interpolateData)
+        : settings.yGet.path;
+      const res: any = await firstValueFrom(this.http.request('Yget', path));
+      this.formArray = new BaseExtendedFormArray(settings, this.http, this.dynamicService, null, JSON.parse(res).structure);
+      this.dynamicService.formArrayProvider.set(this.formArray);
+    } catch (error) {
+      console.error("Failed to fetch data:", error);
+    }
   }
+
+
+  private getSettingsBasedOnRoute(searchPath: any, callback: (error: Error | null, settings?: any, shouldRedirectToEdit?: boolean) => void) {
+    if (this.dynamicService.interpolateData.selectedOrganization?.settings) {
+      if (this.yjsService.connected) {
+        if (Object.keys(this.yjsService.documentStructure.organizations).length === 0) {
+          const settings = this.dynamicService.defaultSettings;
+          const foundSetting = settings.find((page: any) => page.path === searchPath);
+          callback(null, foundSetting);
+        } else {
+          callback(new Error("Organization data present, specific handling not implemented."));
+        }
+      } else {
+        this.yjsService.onConnected.pipe(first()).subscribe({
+          next: () => {
+            try {
+              if (Object.keys(this.yjsService.documentStructure.organizations).length === 0) {
+                const settings = this.dynamicService.defaultSettings;
+                const foundSetting = settings.find((page: any) => page.path === searchPath);
+                callback(null, foundSetting);
+              } else {
+                callback(new Error("Organization data present after connection, specific handling not implemented."));
+              }
+            } catch (error) {
+              console.error("Failed to connect:", error);
+              callback(error);
+            }
+          },
+          error: (error) => {
+            console.error("Subscription error:", error);
+            callback(error);
+          },
+        });
+      }
+    } else {
+      const settings = this.dynamicService.defaultSettings;
+      searchPath = 'organizations.edit'
+      const foundSetting = settings?.find((page: any) => page.path === searchPath);
+      if (foundSetting) {
+        console.log(foundSetting)
+        callback(null, foundSetting, true);
+      } else {
+        callback(new Error("No settings found in selected organization."));
+      }
+    }
+  }
+
+
 
   private async extractAndManipulateData(options: any): Promise<any> {
     let collectedData: any = {};
@@ -194,4 +267,50 @@ export class DynamicRouteGuard {
     this.dynamicService.formGroupProvider.set(this.formGroup);
     this.dynamicService.toggleSidenav();
   }
+
+  restoreStateFromLocalStorage() {
+    if (!this.dynamicService.selectedOrganization.value._id) {
+      const returnToOrgJSON = localStorage.getItem('selectedOrganization');
+      if (returnToOrgJSON && returnToOrgJSON !== 'undefined') {
+        try {
+          const returnToOrg = JSON.parse(returnToOrgJSON);
+          this.dynamicService.selectedOrganization.setValue(returnToOrg, { emitEvent: false });
+        } catch (e) {
+          console.error("Error parsing selected organization from localStorage:", e);
+        }
+      }
+    }
+
+    if (!this.dynamicService.serviceGuid) {
+      const returnToServiceJSON = localStorage.getItem('selectedService');
+      if (returnToServiceJSON && returnToServiceJSON !== 'undefined') {
+        try {
+          const returnToService = JSON.parse(returnToServiceJSON);
+          this.dynamicService.serviceGuid = returnToService;
+        } catch (e) {
+          console.error("Error parsing selected service from localStorage:", e);
+        }
+      }
+    }
+
+    if (!this.dynamicService.lastSelectedRow) {
+      const returnToLastSelectedJSON = localStorage.getItem('lastSelectedRow');
+      if (returnToLastSelectedJSON && returnToLastSelectedJSON !== 'undefined') {
+        try {
+          const returnToLastSelected = JSON.parse(returnToLastSelectedJSON);
+          this.dynamicService.lastSelectedRow = returnToLastSelected;
+        } catch (e) {
+          console.error("Error parsing last selected row from localStorage:", e);
+        }
+      }
+    }
+
+    this.dynamicService.interpolateData = {
+      ...this.dynamicService.interpolateData,
+      selectedOrganization: this.dynamicService.selectedOrganization.value,
+      lastSelectedRow: this.dynamicService.lastSelectedRow,
+      serviceGuid: this.dynamicService.serviceGuid
+    };
+  }
+
 }

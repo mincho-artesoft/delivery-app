@@ -621,7 +621,7 @@ app-ngx-mat-select-search-wrapper>.mat-mdc-form-field {
 }
 
 .mat-drawer-container {
-    z-index: 10000 !important;
+    z-index: 9998 !important;
     overflow: visible !important;
 
     .mat-drawer-backdrop {
@@ -875,4 +875,12 @@ input:-internal-autofill-selected::part(value) {
 
 .cdk-virtual-scroll-content-wrapper {
     height: 100% !important;
+}
+
+app-dynamic-outlet {
+    width: 100%;
+}
+
+.mat-tooltip {
+    pointer-events: none !important;
 }

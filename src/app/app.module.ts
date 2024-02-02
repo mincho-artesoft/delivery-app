@@ -32,7 +32,7 @@ export function tokenGetter() {
         tokenGetter: tokenGetter
       }
     }),
-    HttpWebWorkerClientModule.forRoot({baseUrl:'ws://localhost:9182', ignorePath:'/options'}),
+    HttpWebWorkerClientModule.forRoot({ baseUrl: 'ws://localhost:9182', ignorePath: '/options' }),
     AuthModule
   ],
   providers: [
@@ -45,10 +45,11 @@ export function tokenGetter() {
             yjsService.documentStructure = Object.keys(structure.structure).length ? structure.structure : { organizations: {} };
             console.log("APP MODULE");
             console.log(structure);
-            localStorage.setItem('organizations', JSON.stringify(structure.structure.organizations))
+            localStorage.setItem('organizations', JSON.stringify(structure.structure.organizations));
             setTimeout(() => {
-                  yjsService.stopSpinner();
-                  yjsService.connected = true;
+              yjsService.stopSpinner();
+              yjsService.connected = true;
+              yjsService.connectedSource.next(true)
             }, 500);
           });
         }

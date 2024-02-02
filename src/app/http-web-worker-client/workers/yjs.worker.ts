@@ -627,7 +627,7 @@ function iterateDocument(doc: Y.Doc, docStructure: any, path = []) {
             docStructure[key] = {};
           }
           if (!docStructure[key][docGuid]) {
-            console.log(subdoc, subdoc.guid);
+            // console.log(subdoc, subdoc.guid);
             const data = subdoc.getMap("data").get("settings");
             
             if(data) {

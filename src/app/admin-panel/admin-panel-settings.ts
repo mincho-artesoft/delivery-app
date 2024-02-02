@@ -61,7 +61,7 @@ export const ADMIN_PANEL_SETTINGS = {
               yPost: '${id}.{userID}.organization'
             },
             name: 'FastEditor',
-            message: 'Item with ${name} was succesfully updated'
+            message: 'Item with ${controls.name.value} was succesfully updated'
           },
           validators: [
             { name: 'productValidator' }
@@ -238,7 +238,7 @@ export const ADMIN_PANEL_SETTINGS = {
             action: 'save',
             icon: 'check',
             active: true,
-            yPost: { path: '/services', guid: '${serviceGuid}' },
+            yPost: { path: '/services', guid: { interpolate: '${serviceGuid}' } },
             addProduct: true
           },
         ]
@@ -335,12 +335,23 @@ export const ADMIN_PANEL_SETTINGS = {
           {
             label: 'Delete',
             action: 'delete',
-            isDialog: true,
             active: true,
             icon: 'delete',
             color: 'warn',
-            deletePath: '/organization?path=${_id}',
-            message: 'Restaurant with ${_id} was successfully deleted'
+            deletePath: '/organization?path=${controls._id.value}',
+            confirmation: {
+              title: 'Confirm Delete',
+              interpolate: 'Are you sure you want to delete ${controls.name.value.${controls.language.value}}?',
+              width: 500,
+              cancelText: 'Cancel',
+              confirmText: 'OK',
+            },
+            snackbarMessage: {
+              interpolate: 'Restaurant with ${controls.name.value.${controls.language.value}} was successfully deleted',
+              duration: 2500,
+              horizontal: 'right',
+              vertical: 'bottom'
+            }
           }
         ],
       },
