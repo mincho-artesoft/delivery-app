@@ -184,7 +184,6 @@ export class DynamicRouteGuard {
       if(!searchPath.includes('organizations')){
         searchPath = 'organizations.edit'
       }
-      console.log(searchPath, this.dynamicService['counter'])
       const foundSetting = settings?.find((page: any) => page.path === searchPath);
       if (foundSetting) {
         callback(null, foundSetting, true);

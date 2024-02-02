@@ -44,7 +44,8 @@ export class DynamicService {
         return prev._id === curr._id;
       })
     ).subscribe((change: any) => {
-      this.refreshPage();
+      console.log(change)
+      // this.refreshPage();
     })
     ADMIN_PANEL_SETTINGS.pages.map(page => {
       if (page.path.includes('organizations')) {
@@ -184,7 +185,7 @@ export class DynamicService {
     const path = this.determinePathForSave(button);
     const body = this.constructRequestBody(button, control);
     this.http.request('Ypost', path, body).subscribe({
-      next: (res: any) => this.handleSaveResponse(res, button, control, body),
+      next: (res: any) => { this.handleSaveResponse(res, button, control, body) },
       error: (err) => console.error('Error on save:', err)
     });
   }
@@ -228,16 +229,15 @@ export class DynamicService {
   }
 
   private handleSaveResponse(res: any, button: any, control: any, body: any): void {
+
     const data = JSON.parse(res);
     this.snackbar.open(data.message, 'Close', {
       duration: 2000, horizontalPosition: 'right', verticalPosition: 'top'
     });
-
     if (button.createServices && !control.getRawValue()._id) {
       this.generateServices(data._id, services, body);
     }
     control.patchValue(data);
-
   }
 
   private generateServices(dataId: string, services: any[], body: any): void {
@@ -251,7 +251,7 @@ export class DynamicService {
                 body.body.data.settings.push(page);
               }
             });
-            this.http.request('yPost', `/organization?path=${dataId}`, body).subscribe(res => console.log(res))
+            this.http.request('yPost', `/organization?path=${dataId}`, body).subscribe()
           }),
           error: (err) => console.error('Error generating service:', err)
         });
@@ -279,7 +279,11 @@ export class DynamicService {
           this.toggleSidenav();
           break;
         case 'save':
+          if (button.addProduct) {
+            console.log('product add', dataContext)
+          }
           this.handleSaveAction(dataContext);
+
           break;
         default:
           console.warn('Action not recognized:', button.action);

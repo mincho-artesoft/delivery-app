@@ -9,21 +9,14 @@ import { Observable, map } from 'rxjs';
   templateUrl: './organizations-widget.component.html',
   styleUrls: ['./organizations-widget.component.scss']
 })
-export class OrganizationsWidgetComponent implements OnInit {
-  constructor(private dynamicService: DynamicService, private http: HttpClient) {
-
-  }
+export class OrganizationsWidgetComponent {
 
   hoverOrganizationsWidget = false;
   currentOrg: any = {};
   organizations: Observable<any>;
-  language = 'US';
   hidePopupTimeout;
 
-
-
-
-  ngOnInit(): void {
+  constructor(private dynamicService: DynamicService, private http: HttpClient) {
     this.organizations = this.http.request('Yget', '/organizations').pipe(map((res: any) => {
       const data = JSON.parse(res).structure || JSON.parse(res);
       return {
@@ -53,14 +46,16 @@ export class OrganizationsWidgetComponent implements OnInit {
       },
       error: (err) => console.error('Failed to fetch organizations', err)
     });
-
   }
+
 
   setFallbackOrganization(organizations) {
     if (organizations && organizations.length > 0) {
       this.currentOrg = organizations[0];
-      this.dynamicService.selectedOrganization.setValue(organizations[0], { emitEvent: false });
-      localStorage.setItem('selectedOrganization', JSON.stringify(organizations[0]));
+      setTimeout(() => {
+        this.dynamicService.selectedOrganization.setValue(organizations[0]);
+        localStorage.setItem('selectedOrganization', JSON.stringify(organizations[0]));
+      }, 500)
     }
   }
   showPopup() {

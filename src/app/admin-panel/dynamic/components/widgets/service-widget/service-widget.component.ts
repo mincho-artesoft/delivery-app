@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Component } from '@angular/core';
 import { DynamicService } from '../../../services/dynamic.service';
-import { Observable, map } from 'rxjs';
+import { Observable, catchError, map, of, startWith, switchMap } from 'rxjs';
 
 @Component({
   selector: 'app-service-widget',
@@ -14,18 +14,33 @@ export class ServiceWidgetComponent {
     private http: HttpClient,
     public dynamicService: DynamicService
   ) {
-    if (this.dynamicService.selectedOrganization.value._id) {
-      this.services = this.http.request('Yget', `/services?path=${this.dynamicService.selectedOrganization.value._id}`).pipe(map((res: any) => {
+    this.services = this.dynamicService.selectedOrganization.valueChanges.pipe(
+      startWith(this.dynamicService.selectedOrganization.value), // Start with the current value
+      switchMap(organization => 
+        organization && organization._id ? this.fetchServices(organization._id) : of({services: []}) // Fetch services or return empty if no organization
+      ),
+      catchError(error => {
+        console.error('Error fetching services', error);
+        return of({services: []}); // Return an empty array in case of error
+      })
+    );
+  }
+
+  private fetchServices(orgId: string): Observable<any> {
+    return this.http.request('yGet', `/services?path=${orgId}`).pipe(
+      map((res: any) => {
         const data = JSON.parse(res).structure || JSON.parse(res);
-        data.services.map((service: any, index: number) => {
-          service.settings.settings.img = `assets/images/${service.settings.settings.data}.png`
-          this.dynamicService.interpolateData[service.settings.settings.data] = service._id
-        })
-        return {
-          services: data.services
-        };
-      }))
-    }
+        data.services.forEach((service: any) => {
+          service.settings.settings.img = `assets/images/${service.settings.settings.data}.png`;
+          this.dynamicService.interpolateData[service.settings.settings.data] = service._id;
+        });
+        return { services: data.services };
+      }),
+      catchError(error => {
+        console.error('Error processing services', error);
+        return of({services: []}); // Handle errors gracefully
+      })
+    );
   }
 
   getNavigationLink(service: any) {
