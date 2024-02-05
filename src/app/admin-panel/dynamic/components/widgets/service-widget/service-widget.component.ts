@@ -15,13 +15,13 @@ export class ServiceWidgetComponent {
     public dynamicService: DynamicService
   ) {
     this.services = this.dynamicService.selectedOrganization.valueChanges.pipe(
-      startWith(this.dynamicService.selectedOrganization.value), // Start with the current value
-      switchMap(organization => 
-        organization && organization._id ? this.fetchServices(organization._id) : of({services: []}) // Fetch services or return empty if no organization
+      startWith(this.dynamicService.selectedOrganization.value),
+      switchMap(organization =>
+        organization && organization._id ? this.fetchServices(organization._id) : of({ services: [] })
       ),
       catchError(error => {
         console.error('Error fetching services', error);
-        return of({services: []}); // Return an empty array in case of error
+        return of({ services: [] });
       })
     );
   }
@@ -38,7 +38,7 @@ export class ServiceWidgetComponent {
       }),
       catchError(error => {
         console.error('Error processing services', error);
-        return of({services: []}); // Handle errors gracefully
+        return of({ services: [] });
       })
     );
   }

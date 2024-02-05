@@ -44,7 +44,6 @@ export class DynamicService {
         return prev._id === curr._id;
       })
     ).subscribe((change: any) => {
-      console.log(change)
       // this.refreshPage();
     })
     ADMIN_PANEL_SETTINGS.pages.map(page => {
@@ -192,7 +191,7 @@ export class DynamicService {
 
   private determinePathForSave(button: any): string {
     if (button.createServices) {
-      return this.lastSelectedRow ?
+      return this.interpolateData.lastSelectedRow ?
         InterpolateService.suplant(button.yPost, this.interpolateData) :
         button.yPost.replace('${lastSelectedRow._id}', this.generateOrganizationId());
     } else if (button.yPost.guid) {
@@ -204,19 +203,19 @@ export class DynamicService {
 
   private constructRequestBody(button: any, control: any): any {
     let guid = button.yPost.guid ? InterpolateService.suplant(button.yPost.guid, this.interpolateData) : null;
+    const data = control.getRawValue();
     const body: any = {
       body: {
-        data: control.getRawValue()
+        data: data
       }
     }
     if (guid) {
       body.body = {
-        ...control.getRawValue(),
+        ...data,
         guid: guid
       }
-
     }
-    if (button.createServices && !control.getRawValue()._id) {
+    if (button.createServices && !data._id) {
       const settings: any = ADMIN_PANEL_SETTINGS.pages;
       body.body.data.settings = [];
       settings.map((page: any) => {

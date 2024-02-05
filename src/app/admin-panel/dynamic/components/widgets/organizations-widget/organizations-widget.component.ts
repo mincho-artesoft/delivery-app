@@ -1,20 +1,69 @@
-import { Component, OnInit } from '@angular/core';
+import { AfterViewInit, Component, OnInit } from '@angular/core';
 import { DynamicService } from '../../../services/dynamic.service';
-import { YjsService } from 'src/app/yjs.service';
 import { HttpClient } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, catchError, concatMap, delay, forkJoin, from, map, mergeMap, of, switchMap, tap, toArray } from 'rxjs';
+import { asyncScheduler } from 'rxjs';
+import moment from 'moment';
+function task(state) {
+  const now = moment();
+  let mapper = state.responseMapper;
+  const warehouseMapper = state.warehouseMapper
+  let expirationProducts = [];
+  let expiredProducts = [];
+  let interval = 0;
+
+  Object.keys(mapper).forEach((key) => {
+    const data = mapper[key].data;
+    data.forEach(item => item.warehouseId = key);
+    expirationProducts = expirationProducts.concat(data);
+  });
+
+  expirationProducts.sort((a, b) => moment(a.validTo).valueOf() - moment(b.validTo).valueOf());
+
+  if (expirationProducts.length > 0) {
+    const nearestExpiration = expirationProducts[0];
+    const expirationMoment = moment(nearestExpiration.validTo);
+    const millisecondsToExpiration = expirationMoment.diff(now);
+    console.log(millisecondsToExpiration)
+    if (millisecondsToExpiration < 0) {
+      expiredProducts.push(nearestExpiration);
+      const warehouseKey = nearestExpiration.warehouseId;
+      mapper[warehouseKey].data = mapper[warehouseKey].data.filter(product => product !== nearestExpiration);
+      const organization = warehouseMapper[mapper[expiredProducts[0].warehouseId]._id]
+      console.log(`Expired product from ${organization?.name[organization.language]}`)
+      if (mapper[warehouseKey].data.length === 0) {
+        delete mapper[warehouseKey];
+      }
+    } else {
+      interval = millisecondsToExpiration;
+    }
+
+    console.log(`Milliseconds until the closest product expires: ${millisecondsToExpiration}`);
+  }
+
+  state.warehouseMapper = mapper;
+  this.schedule(state, interval);
+}
+
+
+
 
 @Component({
   selector: 'app-organizations-widget',
   templateUrl: './organizations-widget.component.html',
   styleUrls: ['./organizations-widget.component.scss']
 })
-export class OrganizationsWidgetComponent {
+export class OrganizationsWidgetComponent implements AfterViewInit, OnInit {
 
   hoverOrganizationsWidget = false;
   currentOrg: any = {};
   organizations: Observable<any>;
   hidePopupTimeout;
+  warehouses: Observable<any>;
+  services = new Subject();
+  warehouseResponses = {};
+  warehouseMapper = {};
+  servicesArray = [];
 
   constructor(private dynamicService: DynamicService, private http: HttpClient) {
     this.organizations = this.http.request('Yget', '/organizations').pipe(map((res: any) => {
@@ -22,7 +71,8 @@ export class OrganizationsWidgetComponent {
       return {
         organizations: data
       };
-    }))
+    }));
+
     this.organizations.subscribe({
       next: (organizations) => {
         organizations = organizations.organizations;
@@ -46,6 +96,164 @@ export class OrganizationsWidgetComponent {
       },
       error: (err) => console.error('Failed to fetch organizations', err)
     });
+  }
+
+  ngOnInit(): void {
+    this.organizations.pipe(
+      map((res: any) => {
+        return res.organizations || []
+      }),
+      mergeMap(orgs => from(orgs).pipe(
+        delay(1500),
+        mergeMap((org: any) => this.http.request('Yget', `/services?path=${org._id}`).pipe(
+          map(response => {
+            const parsedResponse = typeof response === 'string' ? JSON.parse(response) : response;
+            return parsedResponse.structure?.services || parsedResponse.services || [];
+          }),
+          map(services => {
+            services = services.filter(service => service.settings.settings.data === 'warehouse');
+            this.warehouseMapper[services[0]._id] = org;
+            return services
+          }),
+          catchError(error => {
+            console.error(`Failed to fetch services for org: ${org._id}`, error);
+            return of([]);
+          })
+        )
+        ),
+        map(res => {
+          this.servicesArray.push(...res);
+          return res
+        })
+      )
+      ),
+      switchMap((warehouses: any) => {
+        if (warehouses.length === 0) {
+          return of([]);
+        }
+        return from(this.servicesArray).pipe(
+          mergeMap((warehouse: any) => {
+            return this.http.request('Yget', `/service?path=${warehouse._id}`).pipe(
+              map((res: any) => {
+                const data = JSON.parse(res).structure || JSON.parse(res);
+                return { warehouseId: warehouse._id, data: data };
+              }),
+              catchError(error => {
+                console.error(`Failed to fetch service details for warehouse: ${warehouse._id}`, error);
+                return of({ warehouseId: warehouse._id, error: true });
+              })
+            )
+          }
+
+          ),
+        );
+      })
+    ).subscribe({
+      next: (responses: any) => {
+        this.servicesArray = [];
+        console.log('Combined Responses:', responses);
+        this.warehouseResponses[Object.keys(this.warehouseResponses).length] = { _id: responses.warehouseId, data: responses.data };
+        asyncScheduler.schedule(task, 0, { responseMapper: this.warehouseResponses, warehouseMapper: this.warehouseMapper });
+      },
+      error: (err) => console.error('Error:', err)
+    });
+
+
+
+
+
+
+
+
+    // this.organizations.pipe(
+    //   switchMap(organizations => {
+    //     const orgs = organizations.organizations || [];
+    //     if (orgs.length === 0) {
+    //       return of([]);
+    //     }
+    //     return from(orgs).pipe(
+    //       mergeMap((org: any) =>
+    //         this.http.request('Yget', `/services?path=${org._id}`).pipe(
+    //           map(response => {
+    //             const parsedResponse = typeof response === 'string' ? JSON.parse(response) : response;
+    //             return parsedResponse.structure?.services || parsedResponse.services || [];
+    //           }),
+    //           map(services => {
+    //             services = services.filter(service => service.settings.settings.data === 'warehouse');
+    //             this.warehouseMapper[services[0]._id] = org;
+    //             return services
+    //           }),
+    //           catchError(error => {
+    //             console.error(`Failed to fetch services for org: ${org._id}`, error);
+    //             return of([]);
+    //           })
+    //         )
+    //       ),
+    //       toArray()
+    //     );
+    //   }),
+    //   switchMap((warehouses: any) => {
+    //     console.log(warehouses)
+    //     if (warehouses.length === 0) {
+    //       return of([]);
+    //     }
+    //     return from(warehouses).pipe(
+    //       mergeMap((warehouse: any) => {
+    //         return this.http.request('Yget', `/service?path=${warehouse._id}`).pipe(
+    //           map((res: any) => {
+    //             const data = JSON.parse(res).structure || JSON.parse(res);
+    //             return { warehouseId: warehouse._id, data: data };
+    //           }),
+    //           catchError(error => {
+    //             console.error(`Failed to fetch service details for warehouse: ${warehouse._id}`, error);
+    //             return of({ warehouseId: warehouse._id, error: true });
+    //           })
+    //         )
+    //       }
+
+    //       ),
+    //     );
+    //   })
+    // ).subscribe({
+    //   next: (response: any) => {
+    //     console.log('Response for warehouse:', response);
+    //     this.warehouseResponses[Object.keys(this.warehouseResponses).length] = { _id: response.warehouseId, data: response.data };
+    //     asyncScheduler.schedule(task, 0, { responseMapper: this.warehouseResponses, warehouseMapper: this.warehouseMapper });
+    //   },
+    //   error: err => console.error('Failed to process organizations and their warehouses', err)
+    // });
+  }
+
+  ngAfterViewInit(): void {
+    // this.services.pipe(
+    //   switchMap((services: any) =>
+    //     from(services).pipe(
+    //       concatMap((warehouse: any) => {
+    //         console.log(warehouse)
+    //         return this.http.request('Yget', `/service?path=${warehouse._id}`).pipe(
+    //           map((res: any) => {
+    //             // Process each response individually
+    //             const data = JSON.parse(res).structure || JSON.parse(res);
+    //             return data;
+    //           }),
+    //           catchError(error => {
+    //             console.error(`Failed to fetch services for warehouse: ${warehouse._id}`, error);
+    //             return of([]);
+    //           })
+    //         )
+    //       }
+
+    //       ),
+    //     )
+    //   )
+    // ).subscribe(res => console.log('Service Data:', res));
+
+    // this.http.request('Yget', `/service?path=acc8e836-e602-4a76-876d-ffc504542e7e.TIxWP.service`).subscribe(res => {
+    //   console.log(res)
+    // });
+    // this.http.request('Yget', `/service?path=4a7fb65a-9cff-45a4-9e90-7708cd89a310.esPYt.service`).subscribe(res => {
+    //   console.log(res)
+    // });
   }
 
 

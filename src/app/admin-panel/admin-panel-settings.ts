@@ -238,7 +238,7 @@ export const ADMIN_PANEL_SETTINGS = {
             action: 'save',
             icon: 'check',
             active: true,
-            yPost: { path: '/services', guid: { interpolate: '${serviceGuid}' } },
+            yPost: { path: '/services', guid: '${serviceGuid}' },
             addProduct: true
           },
         ]
