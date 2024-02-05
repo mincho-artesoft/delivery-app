@@ -3,7 +3,7 @@ import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, Input, OnDestr
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatTableDataSource } from '@angular/material/table';
 import { FormArray, FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { BehaviorSubject, Observable, Observer, Operator, Subject, Subscription, map, takeUntil } from 'rxjs';
+import { BehaviorSubject, Observable, Observer, Operator, Subject, Subscription, map, startWith, switchMap, takeUntil } from 'rxjs';
 import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { DynamicService } from '../../services/dynamic.service';
 import { BaseExtendedFormArray } from '../../extends/base-extended-form-array';
@@ -44,26 +44,39 @@ export class DynamicTableComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
 
-  ngOnInit(): void {
-    this.settings = this.formArray.htmlSettings;
-    if (this.settings) {
-      const path = this.settings.yGet.interpolate ? InterpolateService.suplant(this.settings.yGet.interpolate, this.dynamicService) : this.settings.yGet.path;
-      this.table = this.http.request('Yget', path).pipe(map((res: any) => {
-        const data = JSON.parse(res).structure || JSON.parse(res);
-        this.formArray.fillFormWithResponse(data)
-        this.dataSource = new MatTableDataSource((this.formArray as FormArray).controls);
-        this.dataSource.data.map((ctrl: any) => {
-          ctrl.addControl('uid', new FormControl(this.generateRandomId(10)), { emitEvent: false });
-        });
-        this.syncContainerWidths();
-        this.syncCellWidths();
-        return {
-          displayedColumns: this.settings.columns,
-          dataHolder: [...this.dataSource.data]
-        }
-      }))
-    };
+ngOnInit(): void {
+  this.settings = this.formArray.htmlSettings;
+  if (this.settings) {
+    this.table = this.dynamicService.selectedOrganization.valueChanges.pipe(
+      startWith(this.dynamicService.selectedOrganization.value), 
+      switchMap(selectedOrganization => {
+        const path = this.settings.yGet.interpolate ? 
+          InterpolateService.suplant(this.settings.yGet.interpolate, this.dynamicService) : 
+          this.settings.yGet.path;
+
+        return this.http.request('Yget', path).pipe(
+          map((res: any) => {
+            const data = JSON.parse(res).structure || JSON.parse(res);
+            this.formArray.fillFormWithResponse(data);
+            this.dataSource = new MatTableDataSource((this.formArray as FormArray).controls);
+
+            this.dataSource.data.forEach((ctrl: any) => {
+              ctrl.addControl('uid', new FormControl(this.generateRandomId(10)), { emitEvent: false });
+            });
+
+            this.syncContainerWidths();
+            this.syncCellWidths();
+
+            return {
+              displayedColumns: this.settings.columns,
+              dataHolder: [...this.dataSource.data]
+            };
+          })
+        );
+      })
+    );
   }
+}
 
   sortData(event: any) {
     const sortField = event.active;
@@ -178,8 +191,6 @@ export class DynamicTableComponent implements OnInit, OnDestroy, AfterViewInit {
     if (elementsContainer) {
       this.renderer?.setStyle(elementsContainer, 'width', `${tableWidth}px`);
       this.syncCellWidths();
-    } else {
-      console.warn('Could not find .elements-container');
     }
   }
 

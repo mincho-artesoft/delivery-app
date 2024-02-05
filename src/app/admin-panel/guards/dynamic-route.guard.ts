@@ -133,9 +133,7 @@ export class DynamicRouteGuard {
       const path = settings.yGet.interpolate
         ? InterpolateService.suplant(settings.yGet.interpolate, this.dynamicService.interpolateData)
         : settings.yGet.path;
-      console.log(path)
       const res: any = await firstValueFrom(this.http.request('Yget', path));
-      console.log(JSON.parse(res).structure)
       this.formArray = new BaseExtendedFormArray(settings, this.http, this.dynamicService, null, JSON.parse(res).structure);
       this.dynamicService.formArrayProvider.set(this.formArray);
     } catch (error) {

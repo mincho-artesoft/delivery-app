@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, Subject, catchError, concatMap, delay, forkJoin, from, map, mergeMap, of, switchMap, tap, toArray } from 'rxjs';
 import { asyncScheduler } from 'rxjs';
 import moment from 'moment';
+import { Router } from '@angular/router';
 function task(state) {
   const now = moment();
   let mapper = state.responseMapper;
@@ -53,7 +54,7 @@ function task(state) {
   templateUrl: './organizations-widget.component.html',
   styleUrls: ['./organizations-widget.component.scss']
 })
-export class OrganizationsWidgetComponent implements AfterViewInit, OnInit {
+export class OrganizationsWidgetComponent implements OnInit {
 
   hoverOrganizationsWidget = false;
   currentOrg: any = {};
@@ -64,8 +65,11 @@ export class OrganizationsWidgetComponent implements AfterViewInit, OnInit {
   warehouseResponses = {};
   warehouseMapper = {};
   servicesArray = [];
+  serviceHolder: any = {
 
-  constructor(private dynamicService: DynamicService, private http: HttpClient) {
+  }
+
+  constructor(private dynamicService: DynamicService, private http: HttpClient, private router: Router) {
     this.organizations = this.http.request('Yget', '/organizations').pipe(map((res: any) => {
       const data = JSON.parse(res).structure || JSON.parse(res);
       return {
@@ -111,6 +115,11 @@ export class OrganizationsWidgetComponent implements AfterViewInit, OnInit {
             return parsedResponse.structure?.services || parsedResponse.services || [];
           }),
           map(services => {
+            let newObj = {};
+            services.map(service => {
+              newObj[service.settings.settings.data] = service._id;
+            });
+            this.serviceHolder[org._id] = newObj;
             services = services.filter(service => service.settings.settings.data === 'warehouse');
             this.warehouseMapper[services[0]._id] = org;
             return services
@@ -224,39 +233,6 @@ export class OrganizationsWidgetComponent implements AfterViewInit, OnInit {
     // });
   }
 
-  ngAfterViewInit(): void {
-    // this.services.pipe(
-    //   switchMap((services: any) =>
-    //     from(services).pipe(
-    //       concatMap((warehouse: any) => {
-    //         console.log(warehouse)
-    //         return this.http.request('Yget', `/service?path=${warehouse._id}`).pipe(
-    //           map((res: any) => {
-    //             // Process each response individually
-    //             const data = JSON.parse(res).structure || JSON.parse(res);
-    //             return data;
-    //           }),
-    //           catchError(error => {
-    //             console.error(`Failed to fetch services for warehouse: ${warehouse._id}`, error);
-    //             return of([]);
-    //           })
-    //         )
-    //       }
-
-    //       ),
-    //     )
-    //   )
-    // ).subscribe(res => console.log('Service Data:', res));
-
-    // this.http.request('Yget', `/service?path=acc8e836-e602-4a76-876d-ffc504542e7e.TIxWP.service`).subscribe(res => {
-    //   console.log(res)
-    // });
-    // this.http.request('Yget', `/service?path=4a7fb65a-9cff-45a4-9e90-7708cd89a310.esPYt.service`).subscribe(res => {
-    //   console.log(res)
-    // });
-  }
-
-
   setFallbackOrganization(organizations) {
     if (organizations && organizations.length > 0) {
       this.currentOrg = organizations[0];
@@ -287,8 +263,13 @@ export class OrganizationsWidgetComponent implements AfterViewInit, OnInit {
 
   selectOrganization(org: any) {
     this.currentOrg = org;
-    this.dynamicService.selectedOrganization.setValue(org);
-    localStorage.setItem('selectedOrganization', JSON.stringify(org));
+    if (this.dynamicService.selectedOrganization.value._id !== org._id) {
+      const currentUrl = this.router.url.split('/')[1];
+      if (this.serviceHolder[org._id][currentUrl]) {
+        this.dynamicService.serviceGuid = this.serviceHolder[org._id][currentUrl];
+      }
+      this.dynamicService.selectedOrganization.setValue(org);
+      localStorage.setItem('selectedOrganization', JSON.stringify(org));
+    }
   }
-
 }
