@@ -82,7 +82,6 @@ export class InterpolateService {
             }
         });`;
     var code = workerStart + exp + workerRest;
-
     // prepare the string into an executable blob
     var bb = new Blob([code], {
       type: 'text/javascript'

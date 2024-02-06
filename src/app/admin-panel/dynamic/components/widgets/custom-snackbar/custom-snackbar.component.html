@@ -1,0 +1,10 @@
+<div class="custom-snackbar">
+    <div *ngIf="data.showCloseButton" class="toolbar">
+        <button (click)="close()" class="snack-bar-action">Close</button>
+    </div>
+    <div *ngFor="let message of data.messages" class="message-line">
+        <div [innerHTML]="message.text"></div>
+        <button *ngIf="message.additionalData" class="navigation-button"
+            (click)="navigate(message.additionalData.service)"><mat-icon>{{message.additionalData.service.icon}}</mat-icon></button>
+    </div>
+</div>

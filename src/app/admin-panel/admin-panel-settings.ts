@@ -19,6 +19,16 @@ export const ADMIN_PANEL_SETTINGS = {
             active: true,
             icon: 'add_box'
           },
+          {
+            label: 'Edit',
+            action: 'edit',
+            path: 'manageCooking.edit',
+            color: 'primary',
+            openSidenav: true,
+            icon: 'create',
+            active: true,
+            default: true
+          },
         ],
       },
       columns: [
@@ -120,7 +130,8 @@ export const ADMIN_PANEL_SETTINGS = {
         {
           data: 'expiration',
           title: 'Expiration',
-          className: 'col-2xl-6 col-md-6 col-xs-12'
+          className: 'col-2xl-6 col-md-6 col-xs-12',
+          editor: 'dateEditor'
         },
         {
           data: 'products',
@@ -194,6 +205,37 @@ export const ADMIN_PANEL_SETTINGS = {
             active: true,
             icon: 'add_box'
           },
+          {
+            label: 'Edit',
+            action: 'edit',
+            path: 'warehouse.edit',
+            color: 'primary',
+            openSidenav: true,
+            icon: 'create',
+            active: true,
+            default: true
+          },
+          {
+            label: 'Delete',
+            action: 'delete',
+            active: true,
+            icon: 'delete',
+            color: 'warn',
+            deletePath: { path: '/services?path=${serviceGuid}', body: { interpolate: '${controls.guid.value}', prop: '_id' } },
+            confirmation: {
+              title: 'Confirm Delete',
+              interpolate: 'Are you sure you want to delete ${controls.product.value}?',
+              width: 500,
+              cancelText: 'Cancel',
+              confirmText: 'OK',
+            },
+            snackbarMessage: {
+              interpolate: 'Product with ${controls.name.value} was successfully deleted',
+              duration: 2500,
+              horizontal: 'right',
+              vertical: 'bottom'
+            }
+          }
         ],
       },
       columns: [
@@ -216,6 +258,15 @@ export const ADMIN_PANEL_SETTINGS = {
         {
           data: 'validTo',
           title: 'Valid to',
+          validators: [
+            {
+              name: 'asyncVal',
+              arg: {
+                interpolate: '"${parent.controls.validTo.value}" >= "${parent.today.value}" ',
+                props: ['parent.controls.validTo', 'parent.today']
+              }
+            }
+          ],
         }
 
       ]
@@ -453,6 +504,7 @@ export const ADMIN_PANEL_SETTINGS = {
       columns: [
         {
           data: 'language',
+          default: 'IN',
           editor: 'hidden'
         },
         {

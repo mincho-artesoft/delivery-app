@@ -88,7 +88,7 @@ export class DynamicRouteGuard {
               try {
                 const collectedData = await this.extractAndManipulateData(settings?.options);
                 const path = settings.yGet.interpolate ? InterpolateService.suplant(settings.yGet.interpolate, this.dynamicService.interpolateData) : settings.yGet.path;
-                const res: any = await firstValueFrom(this.http.request('Yget', path))
+                const res: any = await firstValueFrom(this.http.request('Yget', path));
                 this.updateFormGroup(settings, collectedData, JSON.parse(res).structure || null);
                 this.dynamicService.formGroupProvider.set(this.formGroup);
               } catch (error) {
@@ -285,7 +285,7 @@ export class DynamicRouteGuard {
   }
 
   restoreStateFromLocalStorage() {
-    if (!this.dynamicService.selectedOrganization.value._id) {
+    if (!this.dynamicService.selectedOrganization.value?._id) {
       const returnToOrgJSON = localStorage.getItem('selectedOrganization');
       if (returnToOrgJSON && returnToOrgJSON !== 'undefined') {
         try {

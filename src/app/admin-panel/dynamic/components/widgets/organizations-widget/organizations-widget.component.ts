@@ -5,45 +5,60 @@ import { BehaviorSubject, Observable, Subject, catchError, concatMap, delay, for
 import { asyncScheduler } from 'rxjs';
 import moment from 'moment';
 import { Router } from '@angular/router';
+import { SnackbarService } from '../../../services/snackbar-service.service';
 function task(state) {
   const now = moment();
   let mapper = state.responseMapper;
-  const warehouseMapper = state.warehouseMapper
-  let expirationProducts = [];
-  let expiredProducts = [];
-  let interval = 0;
+  const servicesMapper = state.servicesMapper;
 
+  let expirationItems = [];
+  let expiredItems = [];
+  let interval = 0;
   Object.keys(mapper).forEach((key) => {
     const data = mapper[key].data;
-    data.forEach(item => item.warehouseId = key);
-    expirationProducts = expirationProducts.concat(data);
+    if (data?.length > 0) {
+      data?.forEach(item => item.serviceId = key);
+      expirationItems = expirationItems.concat(data);
+    }
+
   });
+  if (expirationItems.length > 0) {
+    expirationItems?.sort((a, b) => moment(a.validTo).valueOf() - moment(b.validTo).valueOf());
 
-  expirationProducts.sort((a, b) => moment(a.validTo).valueOf() - moment(b.validTo).valueOf());
-
-  if (expirationProducts.length > 0) {
-    const nearestExpiration = expirationProducts[0];
-    const expirationMoment = moment(nearestExpiration.validTo);
+    const nearestExpiration = expirationItems[0];
+    const serviceSettings = servicesMapper[mapper[expirationItems[0].serviceId]._id].settings;
+    const prop = serviceSettings.schedule.target;
+    const expirationMoment = moment(nearestExpiration[prop]);
     const millisecondsToExpiration = expirationMoment.diff(now);
-    console.log(millisecondsToExpiration)
     if (millisecondsToExpiration < 0) {
-      expiredProducts.push(nearestExpiration);
-      const warehouseKey = nearestExpiration.warehouseId;
+      expiredItems.push(nearestExpiration);
+      const warehouseKey = nearestExpiration.serviceId;
       mapper[warehouseKey].data = mapper[warehouseKey].data.filter(product => product !== nearestExpiration);
-      const organization = warehouseMapper[mapper[expiredProducts[0].warehouseId]._id]
-      console.log(`Expired product from ${organization?.name[organization.language]}`)
+      const organization = servicesMapper[mapper[expiredItems[0].serviceId]._id].org;
+      const label = serviceSettings.schedule.label;
+      const item = expiredItems[0][serviceSettings.schedule.prop];
+      state.snackbar.showSnack({
+        text: `Expired ${label} ${item} from ${organization?.name[organization.language]}`, service: {
+          icon: 'input',
+          url: `/${serviceSettings.data}`,
+          _id: mapper[expirationItems[0].serviceId]._id,
+          org: organization
+        }
+      }, {
+        duration: 0,
+        horizontalPosition: 'right',
+        verticalPosition: 'top',
+        showCloseButton: true,
+      });
       if (mapper[warehouseKey].data.length === 0) {
         delete mapper[warehouseKey];
       }
     } else {
       interval = millisecondsToExpiration;
     }
-
-    console.log(`Milliseconds until the closest product expires: ${millisecondsToExpiration}`);
+    state.responseMapper = mapper;
+    this.schedule(state, interval);
   }
-
-  state.warehouseMapper = mapper;
-  this.schedule(state, interval);
 }
 
 
@@ -62,14 +77,14 @@ export class OrganizationsWidgetComponent implements OnInit {
   hidePopupTimeout;
   warehouses: Observable<any>;
   services = new Subject();
-  warehouseResponses = {};
-  warehouseMapper = {};
+  scheduledResponses = {};
+  scheduledServiceMapper = {};
   servicesArray = [];
   serviceHolder: any = {
 
   }
 
-  constructor(private dynamicService: DynamicService, private http: HttpClient, private router: Router) {
+  constructor(private dynamicService: DynamicService, private http: HttpClient, private router: Router, public snackbarService: SnackbarService) {
     this.organizations = this.http.request('Yget', '/organizations').pipe(map((res: any) => {
       const data = JSON.parse(res).structure || JSON.parse(res);
       return {
@@ -80,7 +95,7 @@ export class OrganizationsWidgetComponent implements OnInit {
     this.organizations.subscribe({
       next: (organizations) => {
         organizations = organizations.organizations;
-        if (!this.dynamicService.selectedOrganization.value._id) {
+        if (!this.dynamicService.selectedOrganization.value?._id) {
           const returnToOrgJSON = localStorage.getItem('selectedOrganization');
           if (returnToOrgJSON && returnToOrgJSON !== 'undefined') {
             try {
@@ -100,6 +115,10 @@ export class OrganizationsWidgetComponent implements OnInit {
       },
       error: (err) => console.error('Failed to fetch organizations', err)
     });
+
+    this.dynamicService.selectedOrganization.valueChanges.subscribe((org) => {
+      this.currentOrg = org;
+    })
   }
 
   ngOnInit(): void {
@@ -115,13 +134,16 @@ export class OrganizationsWidgetComponent implements OnInit {
             return parsedResponse.structure?.services || parsedResponse.services || [];
           }),
           map(services => {
+            // TODO if settings has prop schedule: 'validTo'
             let newObj = {};
             services.map(service => {
               newObj[service.settings.settings.data] = service._id;
             });
             this.serviceHolder[org._id] = newObj;
-            services = services.filter(service => service.settings.settings.data === 'warehouse');
-            this.warehouseMapper[services[0]._id] = org;
+            services = services.filter(service => service.settings.settings.schedule);
+            services.map(service => {
+              this.scheduledServiceMapper[service._id] = { org, settings: service.settings.settings };
+            })
             return services
           }),
           catchError(error => {
@@ -160,77 +182,11 @@ export class OrganizationsWidgetComponent implements OnInit {
     ).subscribe({
       next: (responses: any) => {
         this.servicesArray = [];
-        console.log('Combined Responses:', responses);
-        this.warehouseResponses[Object.keys(this.warehouseResponses).length] = { _id: responses.warehouseId, data: responses.data };
-        asyncScheduler.schedule(task, 0, { responseMapper: this.warehouseResponses, warehouseMapper: this.warehouseMapper });
+        this.scheduledResponses[Object.keys(this.scheduledResponses).length] = { _id: responses.warehouseId, data: responses.data };
+        asyncScheduler.schedule(task, 0, { responseMapper: this.scheduledResponses, servicesMapper: this.scheduledServiceMapper, snackbar: this.snackbarService });
       },
       error: (err) => console.error('Error:', err)
     });
-
-
-
-
-
-
-
-
-    // this.organizations.pipe(
-    //   switchMap(organizations => {
-    //     const orgs = organizations.organizations || [];
-    //     if (orgs.length === 0) {
-    //       return of([]);
-    //     }
-    //     return from(orgs).pipe(
-    //       mergeMap((org: any) =>
-    //         this.http.request('Yget', `/services?path=${org._id}`).pipe(
-    //           map(response => {
-    //             const parsedResponse = typeof response === 'string' ? JSON.parse(response) : response;
-    //             return parsedResponse.structure?.services || parsedResponse.services || [];
-    //           }),
-    //           map(services => {
-    //             services = services.filter(service => service.settings.settings.data === 'warehouse');
-    //             this.warehouseMapper[services[0]._id] = org;
-    //             return services
-    //           }),
-    //           catchError(error => {
-    //             console.error(`Failed to fetch services for org: ${org._id}`, error);
-    //             return of([]);
-    //           })
-    //         )
-    //       ),
-    //       toArray()
-    //     );
-    //   }),
-    //   switchMap((warehouses: any) => {
-    //     console.log(warehouses)
-    //     if (warehouses.length === 0) {
-    //       return of([]);
-    //     }
-    //     return from(warehouses).pipe(
-    //       mergeMap((warehouse: any) => {
-    //         return this.http.request('Yget', `/service?path=${warehouse._id}`).pipe(
-    //           map((res: any) => {
-    //             const data = JSON.parse(res).structure || JSON.parse(res);
-    //             return { warehouseId: warehouse._id, data: data };
-    //           }),
-    //           catchError(error => {
-    //             console.error(`Failed to fetch service details for warehouse: ${warehouse._id}`, error);
-    //             return of({ warehouseId: warehouse._id, error: true });
-    //           })
-    //         )
-    //       }
-
-    //       ),
-    //     );
-    //   })
-    // ).subscribe({
-    //   next: (response: any) => {
-    //     console.log('Response for warehouse:', response);
-    //     this.warehouseResponses[Object.keys(this.warehouseResponses).length] = { _id: response.warehouseId, data: response.data };
-    //     asyncScheduler.schedule(task, 0, { responseMapper: this.warehouseResponses, warehouseMapper: this.warehouseMapper });
-    //   },
-    //   error: err => console.error('Failed to process organizations and their warehouses', err)
-    // });
   }
 
   setFallbackOrganization(organizations) {

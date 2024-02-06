@@ -8,7 +8,6 @@ import { CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { DynamicService } from '../../services/dynamic.service';
 import { BaseExtendedFormArray } from '../../extends/base-extended-form-array';
 import { MatSort } from '@angular/material/sort';
-import { YjsService } from 'src/app/yjs.service';
 import { InterpolateService } from '../../services/interpolate.service';
 
 interface TableData {

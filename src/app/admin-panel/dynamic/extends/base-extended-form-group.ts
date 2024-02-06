@@ -7,11 +7,13 @@ import { LangControl } from "./lang-control";
 import { BehaviorSubject, map } from "rxjs";
 import { InterpolateService } from '../services/interpolate.service';
 import { BaseExtendedFormArray } from "./base-extended-form-array";
+import moment from "moment";
 export class BaseExtendedFormGroup extends FormGroup {
   resources: any = {};
   htmlSettings: any = {};
   service: any;
   externalServiceData: any;
+  today: FormControl = new FormControl(moment().toISOString());
   public activeLang: BehaviorSubject<string> | null = null;
   constructor(
     settings: any, private http: HttpClient, service: any, collectedData?: any, values?: any, isRoot?: boolean
@@ -158,11 +160,14 @@ export class BaseExtendedFormGroup extends FormGroup {
   }
 
   linkWithExternalService(data: any) {
-    const path = InterpolateService.suplant(data.interpolate, this.service.interpolateData);
-    this.http.request('Yget', path).pipe(map((res: any) => {
-      const data = JSON.parse(res).structure || JSON.parse(res);
-      this.externalServiceData = data;
-    })).subscribe();
+    setTimeout(() => {
+      const path = InterpolateService.suplant(data.interpolate, this.service.interpolateData);
+      console.log(path)
+      this.http.request('Yget', path).pipe(map((res: any) => {
+        const data = JSON.parse(res).structure || JSON.parse(res);
+        this.externalServiceData = data;
+      })).subscribe();
+    })
   }
 }
 
