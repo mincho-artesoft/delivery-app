@@ -118,6 +118,7 @@ export class DynamicService {
     const button = data.button;
     let url;
     const body = {};
+    
     if (button.deletePath.body) {
       url = InterpolateService.suplant(button.deletePath.path, {...data.control, ...this});
       console.log(data.control)
@@ -126,7 +127,7 @@ export class DynamicService {
       url = InterpolateService.suplant(button.deletePath, data.control);
     }
     console.log(body, url)
-    this.http.request('Ydelete', url, body).subscribe({
+    this.http.request('Ydelete', url, { body }).subscribe({
       next: (res: string) => {
         const response = JSON.parse(res);
         const message = button.snackbarMessage.interpolate ?
