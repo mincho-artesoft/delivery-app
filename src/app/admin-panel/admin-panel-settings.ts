@@ -221,7 +221,7 @@ export const ADMIN_PANEL_SETTINGS = {
             active: true,
             icon: 'delete',
             color: 'warn',
-            deletePath: { path: '/services?path=${serviceGuid}', body: { interpolate: '${controls.guid.value}', prop: '_id' } },
+            deletePath: { path: '/service?path=${serviceGuid}', body: { interpolate: '${controls.guid.value}', prop: '_id' } },
             confirmation: {
               title: 'Confirm Delete',
               interpolate: 'Are you sure you want to delete ${controls.product.value}?',
@@ -230,7 +230,7 @@ export const ADMIN_PANEL_SETTINGS = {
               confirmText: 'OK',
             },
             snackbarMessage: {
-              interpolate: 'Product with ${controls.name.value} was successfully deleted',
+              interpolate: 'Product with ${controls.product.value} was successfully deleted',
               duration: 2500,
               horizontal: 'right',
               vertical: 'bottom'

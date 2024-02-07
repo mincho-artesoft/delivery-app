@@ -117,15 +117,16 @@ export class DynamicService {
   private deleteItem(data: any) {
     const button = data.button;
     let url;
-    const body = {};
+    const body = {
+      body: {
+      }
+    };
     if (button.deletePath.body) {
       url = InterpolateService.suplant(button.deletePath.path, {...data.control, ...this});
-      console.log(data.control)
-      body[button.deletePath.body.prop] = InterpolateService.suplant(button.deletePath.body.interpolate, data.control)
+      body.body[button.deletePath.body.prop] = InterpolateService.suplant(button.deletePath.body.interpolate, data.control)
     } else {
       url = InterpolateService.suplant(button.deletePath, data.control);
     }
-    console.log(body, url)
     this.http.request('Ydelete', url, body).subscribe({
       next: (res: string) => {
         const response = JSON.parse(res);
