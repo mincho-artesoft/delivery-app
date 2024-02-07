@@ -227,7 +227,7 @@ addEventListener('message', (req) => {
             if(body) {
               if(type) {
                 const data = dataMap.get(type + "Data") || [];
-                const item = data.find(i => i.guid == body.guid);
+                const item = data.find(i => i.guid == body._id);
 
                 postMessage({ 
                   type: 'yjs', 
