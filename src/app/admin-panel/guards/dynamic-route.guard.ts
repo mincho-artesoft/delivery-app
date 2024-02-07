@@ -84,11 +84,19 @@ export class DynamicRouteGuard {
 
         if (id || secondary === 'edit') {
           if (id) {
+            const body = {
+              body: {}
+            }
+            if (settings.yGet.body) {
+              body.body[settings.yGet.body.prop] = id;
+            }
             if (this.yjsService.connected) {
               try {
                 const collectedData = await this.extractAndManipulateData(settings?.options);
                 const path = settings.yGet.interpolate ? InterpolateService.suplant(settings.yGet.interpolate, this.dynamicService.interpolateData) : settings.yGet.path;
-                const res: any = await firstValueFrom(this.http.request('Yget', path));
+                console.log(path, body)
+                const res: any = await firstValueFrom(this.http.request('Yget', path, body));
+                console.log(JSON.parse(res))
                 this.updateFormGroup(settings, collectedData, JSON.parse(res).structure || null);
                 this.dynamicService.formGroupProvider.set(this.formGroup);
               } catch (error) {
@@ -101,8 +109,7 @@ export class DynamicRouteGuard {
                   try {
                     const collectedData = await this.extractAndManipulateData(settings?.options);
                     const path = settings.yGet.interpolate ? InterpolateService.suplant(settings.yGet.interpolate, this.dynamicService.interpolateData) : settings.yGet.path;
-                    console.log(path)
-                    const res: any = await firstValueFrom(this.http.request('Yget', path))
+                    const res: any = await firstValueFrom(this.http.request('Yget', path, body));
                     this.updateFormGroup(settings, collectedData, JSON.parse(res).structure || null);
                     this.dynamicService.formGroupProvider.set(this.formGroup);
                     return true;
@@ -168,10 +175,10 @@ export class DynamicRouteGuard {
       }
     } else {
       const settings = this.dynamicService.defaultSettings;
-      if(this.dynamicService.redirected && !this.dynamicService.mainGrid){
+      if (this.dynamicService.redirected && !this.dynamicService.mainGrid) {
         searchPath = 'organizations.edit'
       }
-      if(searchPath === 'organizations') {
+      if (searchPath === 'organizations') {
         this.dynamicService.mainGrid = true;
         setTimeout(() => {
           this.snackbar.open('You must create at least 1 organization', 'Close', {
@@ -179,7 +186,7 @@ export class DynamicRouteGuard {
           });
         }, 1500);
       }
-      if(!searchPath.includes('organizations')){
+      if (!searchPath.includes('organizations')) {
         searchPath = 'organizations.edit'
       }
       const foundSetting = settings?.find((page: any) => page.path === searchPath);

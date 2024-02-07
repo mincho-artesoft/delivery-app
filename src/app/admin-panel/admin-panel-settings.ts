@@ -221,7 +221,7 @@ export const ADMIN_PANEL_SETTINGS = {
             active: true,
             icon: 'delete',
             color: 'warn',
-            deletePath: { path: '/service?path=${serviceGuid}', body: { interpolate: '${controls.guid.value}', prop: '_id' } },
+            deletePath: { path: '/services?path=${serviceGuid}', body: { interpolate: '${controls.guid.value}', prop: '_id' } },
             confirmation: {
               title: 'Confirm Delete',
               interpolate: 'Are you sure you want to delete ${controls.product.value}?',
@@ -274,7 +274,7 @@ export const ADMIN_PANEL_SETTINGS = {
     {
       path: 'warehouse.edit',
       title: 'Add Product',
-      yGet: { interpolate: '/service?path=${serviceGuid}' },
+      yGet: { interpolate: '/service?path=${serviceGuid}', body: { prop: '_id' } },
       navbar: {
         reversed: true,
         buttons: [
