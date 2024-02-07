@@ -220,7 +220,6 @@ addEventListener('message', (req) => {
           if(serviceGuid) {
             const serviceDoc: Y.Doc = Array.from(provider.subdocs.values()).find((doc: Y.Doc) => doc.guid == serviceGuid);
             const body = JSON.parse(data.body);
-            
             const dataMap = serviceDoc.getMap("data");
             const settings = dataMap.get("settings");
             const type = settings?.settings?.data;
