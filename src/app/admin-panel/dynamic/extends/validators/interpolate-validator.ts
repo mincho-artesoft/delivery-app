@@ -7,6 +7,7 @@ import {
   of, startWith,
   switchMap,
 } from "rxjs";
+import moment from "moment";
 
 @Injectable({
   providedIn: 'root',
@@ -47,7 +48,7 @@ export class InterpolateValidator {
           debounceTime(1), distinctUntilChanged(),
         ).subscribe(() => {
           if (control) {
-            control.updateValueAndValidity({ emitEvent: true, onlySelf: true });
+            control.updateValueAndValidity({ emitEvent: false, onlySelf: true });
           }
         });
       }

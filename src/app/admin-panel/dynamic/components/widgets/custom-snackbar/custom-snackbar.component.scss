@@ -1,0 +1,49 @@
+.custom-snackbar {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    color: #fff;
+    width: 100%;
+}
+
+.message-line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.message-line:last-child {
+    margin-bottom: 0;
+}
+
+.snack-bar-action,
+.navigation-button {
+    border: none;
+    background-color: transparent;
+    color: inherit;
+    cursor: pointer;
+    margin-left: 12px;
+}
+
+.snack-bar-action:hover,
+.navigation-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.snack-bar-action:active,
+.navigation-button:active {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+mat-icon {
+    vertical-align: bottom;
+    color: inherit;
+}
+
+.toolbar {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 8px;
+}

@@ -3,10 +3,10 @@
         (click)="onClick(service)">
         <div class="image-holder">
             <img
-            [src]="service.settings.settings?.img ? service.settings.settings.img : 'assets/images/no-image-icon-512x512-lfoanl0w.png'"
+            [src]="service.settings?.settings?.img ? service.settings?.settings.img : 'assets/images/no-image-icon-512x512-lfoanl0w.png'"
             alt="Organization Image">
         </div>
         
-        <span class="title">{{service.settings.settings.title}}</span>
+        <span class="title">{{service.settings?.settings.title}}</span>
     </div>
 </div>

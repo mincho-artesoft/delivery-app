@@ -116,8 +116,17 @@ export class DynamicService {
 
   private deleteItem(data: any) {
     const button = data.button;
-    const url = InterpolateService.suplant(button.deletePath, data.control);
-    this.http.request('Ydelete', url).subscribe({
+    let url;
+    const body = {};
+    if (button.deletePath.body) {
+      url = InterpolateService.suplant(button.deletePath.path, {...data.control, ...this});
+      console.log(data.control)
+      body[button.deletePath.body.prop] = InterpolateService.suplant(button.deletePath.body.interpolate, data.control)
+    } else {
+      url = InterpolateService.suplant(button.deletePath, data.control);
+    }
+    console.log(body, url)
+    this.http.request('Ydelete', url, body).subscribe({
       next: (res: string) => {
         const response = JSON.parse(res);
         const message = button.snackbarMessage.interpolate ?
@@ -125,7 +134,7 @@ export class DynamicService {
           response.message || 'Successfully deleted';
         this.showSnackbar(message, button.snackbarMessage);
         const lastSelectedJSON = localStorage.getItem('lastSelectedRow');
-        const selectedOrg = JSON.parse(localStorage.getItem('selectedOrganization'));
+        const selectedOrg = JSON.parse(localStorage.getItem('selectedOrganization') || '');
         const stringControl = JSON.stringify(data.control?.getRawValue())
         if (stringControl === lastSelectedJSON) {
           localStorage.setItem('lastSelectedRow', '');
@@ -133,6 +142,13 @@ export class DynamicService {
         if (data.control.getRawValue()?._id === selectedOrg._id) {
           localStorage.setItem('selectedOrganization', '');
           localStorage.setItem('selectedService', '');
+          this.serviceGuid = null;
+          this.selectedOrganization.setValue(null, { emitEvent: false })
+        }
+        if (this.formArrayProvider().value.length === 1) {
+          setTimeout(() => {
+            this.refreshPage();
+          })
         }
       },
       error: (err) => {
@@ -173,7 +189,7 @@ export class DynamicService {
 
   private determineId(control): string | undefined {
     const rawValue = control?.getRawValue() || this.lastSelectedRow || this.lastSelectedFormGroup?.getRawValue();
-    return rawValue?._id;
+    return rawValue?._id || rawValue?.guid;
   }
 
   private handleSaveAction(data: any): void {
@@ -308,6 +324,11 @@ const services = [
     data: 'warehouse',
     title: 'Warehouse',
     default: 'base',
+    schedule: {
+      prop: 'product',
+      label: 'product',
+      target: 'validTo'
+    },
     validators: [{ name: 'required' }],
     options: [
       {
@@ -413,6 +434,11 @@ const services = [
   {
     data: 'manageCooking',
     title: 'Manage Cooking',
+    schedule: {
+      prop: 'name',
+      label: 'dish',
+      target: 'expiration'
+    },
     default: 'base',
     validators: [{ name: 'required' }],
     options: [

@@ -1,11 +1,18 @@
 import { ValidationErrors } from '@angular/forms';
 import { BaseControl } from '../base-control';
+import moment from 'moment';
+
+interface WarehouseProduct {
+  product: string;
+  quantity: number;
+  validTo: string;
+}
 
 export function productAvailabilityValidator(control: BaseControl): ValidationErrors | null {
-  const warehouseData = control.parent && control.parent['externalServiceData'];
+  const rawWarehouseData = control.parent && control.parent['externalServiceData'];
   const recipeProducts = control.parent?.get('products')?.value;
   const quantityOrdered = parseInt(control.value, 10);
-
+  const warehouseData: any = collectValidProducts(rawWarehouseData || []);
   if (!warehouseData || !recipeProducts || isNaN(quantityOrdered)) {
     return { 'productUnavailable': 'Invalid or missing data for validation' };
   }
@@ -27,4 +34,21 @@ export function productAvailabilityValidator(control: BaseControl): ValidationEr
   }
 
   return Object.keys(errors).length > 0 ? errors : null;
+}
+
+
+function collectValidProducts(warehouseData: WarehouseProduct[]): any {
+  const validProducts: any = [];
+
+  warehouseData.forEach(product => {
+    const isValidExpiration = moment().isBefore(moment(product.validTo));
+    if (isValidExpiration) {
+      if (validProducts[product.product]) {
+        validProducts[product.product].quantity += product.quantity;
+      } else {
+        validProducts[product.product] = product;
+      }
+    }
+  });
+  return Object.values(validProducts);
 }

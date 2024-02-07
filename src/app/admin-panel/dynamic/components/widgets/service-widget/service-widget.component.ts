@@ -29,10 +29,12 @@ export class ServiceWidgetComponent {
   private fetchServices(orgId: string): Observable<any> {
     return this.http.request('yGet', `/services?path=${orgId}`).pipe(
       map((res: any) => {
-        const data = JSON.parse(res).structure || JSON.parse(res);
+        const data = (JSON.parse(res).structure || JSON.parse(res)) || [];
         data.services.forEach((service: any) => {
-          service.settings.settings.img = `assets/images/${service.settings.settings.data}.png`;
-          this.dynamicService.interpolateData[service.settings.settings.data] = service._id;
+          if (service.settings) {
+            service.settings.settings.img = `assets/images/${service.settings.settings.data}.png`;
+            this.dynamicService.interpolateData[service.settings.settings.data] = service._id;
+          }
         });
         return { services: data.services };
       }),
@@ -44,7 +46,11 @@ export class ServiceWidgetComponent {
   }
 
   getNavigationLink(service: any) {
-    return `/${service.settings.settings.data}`
+    if (service.settings) {
+      return `/${service.settings.settings.data}`
+    } else {
+      return null
+    }
   }
   onClick(service: any) {
     this.dynamicService.serviceGuid = service._id;

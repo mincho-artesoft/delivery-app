@@ -20,13 +20,21 @@
     height: 42px;
 }
 
+.row:nth-child(2n) {
+    background-color: #e4e6f1;
+}
+
 .header-container,
 .row {
     display: flex;
     flex-direction: row;
     margin: 0;
     padding: 0;
-    min-width: min-content; // Add this
+    min-width: min-content;
+
+    &.invalid {
+        background-color: rgb(255, 99, 71);
+    }
 }
 
 .cell-header,
@@ -72,9 +80,7 @@
     border-right: 0;
 }
 
-.row:nth-child(2n) {
-    background-color: #e4e6f1;
-}
+
 
 cdk-virtual-scroll-viewport {
     height: 100%;
@@ -135,4 +141,3 @@ cdk-virtual-scroll-viewport {
 .fixed-columns-overlay {
     transition: top 0.2s ease-out;
 }
-

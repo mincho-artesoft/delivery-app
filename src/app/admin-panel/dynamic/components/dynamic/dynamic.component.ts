@@ -30,6 +30,7 @@ export class DynamicComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit(): void {
+    console.log(this.formGroup)
   }
 
 
