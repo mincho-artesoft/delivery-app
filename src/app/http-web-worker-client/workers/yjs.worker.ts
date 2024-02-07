@@ -219,35 +219,51 @@ addEventListener('message', (req) => {
 
           if(serviceGuid) {
             const serviceDoc: Y.Doc = Array.from(provider.subdocs.values()).find((doc: Y.Doc) => doc.guid == serviceGuid);
-
+            const body = JSON.parse(data.body);
+            
             const dataMap = serviceDoc.getMap("data");
             const settings = dataMap.get("settings");
+            const type = settings?.settings?.data;
+            if(body) {
+              if(type) {
+                const data = dataMap.get(type + "Data") || [];
+                const item = data.find(i => i.guid == body.guid);
 
-            if(settings) {
-              const type = settings.settings.data;
-              const structure = dataMap.get(type + "Data") || [];
-
-              dataMap.observe(() => {
-                setTimeout(() => {
-                  const structure = dataMap.get(type + "Data") || [];
-                  postMessage({ 
-                    type: 'yjs', 
-                    response: JSON.stringify({ 
-                      structure, 
-                      uuid: data.uuid
-                    })
-                  });
-                }, 200)
-              })
-              
-              postMessage({ 
-                type: 'yjs', 
-                response: JSON.stringify({ 
-                  structure, 
-                  uuid: data.uuid
+                postMessage({ 
+                  type: 'yjs', 
+                  response: JSON.stringify({ 
+                    item, 
+                    uuid: data.uuid
+                  })
+                });
+              }
+            } else {
+              if(type) {
+                const structure = dataMap.get(type + "Data") || [];
+  
+                dataMap.observe(() => {
+                  setTimeout(() => {
+                    const structure = dataMap.get(type + "Data") || [];
+                    postMessage({ 
+                      type: 'yjs', 
+                      response: JSON.stringify({ 
+                        structure, 
+                        uuid: data.uuid
+                      })
+                    });
+                  }, 200)
                 })
-              });
+                
+                postMessage({ 
+                  type: 'yjs', 
+                  response: JSON.stringify({ 
+                    structure, 
+                    uuid: data.uuid
+                  })
+                });
+              }
             }
+
           }
           return;
         } else if (pathParts.find(path => path.includes("team"))) {
@@ -483,8 +499,14 @@ addEventListener('message', (req) => {
                   if(!values) {
                     dataMap.set(type + "Data", [{ ...body, guid: generateGuid() }]);
                   } else {
-                    values.push({ ...body, guid: generateGuid() });
-                    dataMap.set(type + "Data", values);
+                    if(body._id) {
+                      const res = (values as any[]).filter((e: any) => e.guid != body._id);
+                      res.push(body);
+                      dataMap.set(type + "Data", res);
+                    } else {
+                      values.push({ ...body, guid: generateGuid() });
+                      dataMap.set(type + "Data", values);
+                    }
                   }
                   postMessage({
                     type: 'yjs',
@@ -504,10 +526,6 @@ addEventListener('message', (req) => {
         }
       });
       break;
-    } 
-    case 'YPOST': {
-
-      break
     }
     case 'YDELETE': {
       init(pathParts[0], userID, (ydoc: Y.Doc) => {
@@ -545,16 +563,38 @@ addEventListener('message', (req) => {
           const serviceGuid = params.find((param) => param.includes("path")).split('=')[1];
 
           if(serviceGuid) {
-            const [prefix, orgGuid, _] = serviceGuid.split(".");
+            const body = JSON.parse(data.body);
 
-            const organizationDoc: Y.Doc = Array.from(provider.subdocs.values()).find((doc: Y.Doc) => doc.guid.includes(orgGuid) && doc.guid.includes("organization"));
+            if(body._id) {
+              const serviceDoc: Y.Doc = Array.from(provider.subdocs.values()).find((doc: Y.Doc) => doc.guid == serviceGuid);
+              const dataMap = serviceDoc.getMap("data");
+              const settings = dataMap.get("settings").settings;
 
-            organizationDoc.getMap("subdocs").delete(serviceGuid);
+              const type = settings.data;
 
-            postMessage({
-              type: 'yjs',
-              response: JSON.stringify({ uuid: data.uuid, action: "Successful removed service!" })
-            });
+              if(type) {
+                const values = dataMap.get(type + "Data");
+
+                const res = (values as any[]).filter((e: any) => e.guid != body._id);
+                dataMap.set(type + "Data", res);
+
+                postMessage({
+                  type: 'yjs',
+                  response: JSON.stringify({ uuid: data.uuid, action: "Successful deletion!" })
+                });
+              }
+            } else {
+              const [prefix, orgGuid, _] = serviceGuid.split(".");
+  
+              const organizationDoc: Y.Doc = Array.from(provider.subdocs.values()).find((doc: Y.Doc) => doc.guid.includes(orgGuid) && doc.guid.includes("organization"));
+  
+              organizationDoc.getMap("subdocs").delete(serviceGuid);
+  
+              postMessage({
+                type: 'yjs',
+                response: JSON.stringify({ uuid: data.uuid, action: "Successful removed service!" })
+              });
+            }
           }
         } else {
           const [docGuidPart, id, suffix] = params.find((param) => param.includes("path")).split('=')[1].split('.');
