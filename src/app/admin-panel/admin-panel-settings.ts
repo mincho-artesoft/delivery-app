@@ -29,6 +29,27 @@ export const ADMIN_PANEL_SETTINGS = {
             active: true,
             default: true
           },
+          {
+            label: 'Delete',
+            action: 'delete',
+            active: true,
+            icon: 'delete',
+            color: 'warn',
+            deletePath: { path: '/services?path=${serviceGuid}', body: { interpolate: '${controls.guid.value}', prop: '_id' } },
+            confirmation: {
+              title: 'Confirm Delete',
+              interpolate: 'Are you sure you want to delete ${controls.name.value}?',
+              width: 500,
+              cancelText: 'Cancel',
+              confirmText: 'OK',
+            },
+            snackbarMessage: {
+              interpolate: 'Product with ${controls.name.value} was successfully deleted',
+              duration: 2500,
+              horizontal: 'right',
+              vertical: 'bottom'
+            }
+          }
         ],
       },
       columns: [
@@ -99,7 +120,7 @@ export const ADMIN_PANEL_SETTINGS = {
             action: 'save',
             icon: 'check',
             active: true,
-            yPost: { path: '/services', guid: '${serviceGuid}' },
+            yPost: { interpolate: '/service?path=${serviceGuid}', body: true },
             addProduct: true
           },
         ]
