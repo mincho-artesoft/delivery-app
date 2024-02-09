@@ -94,10 +94,8 @@ export class DynamicRouteGuard {
               try {
                 const collectedData = await this.extractAndManipulateData(settings?.options);
                 const path = settings.yGet.interpolate ? InterpolateService.suplant(settings.yGet.interpolate, this.dynamicService.interpolateData) : settings.yGet.path;
-                console.log(path, body)
                 const res: any = await firstValueFrom(this.http.request('Yget', path, body));
-                console.log(JSON.parse(res))
-                this.updateFormGroup(settings, collectedData, JSON.parse(res).structure || null);
+                this.updateFormGroup(settings, collectedData, JSON.parse(res).structure || JSON.parse(res).item || null);
                 this.dynamicService.formGroupProvider.set(this.formGroup);
               } catch (error) {
                 console.error("Failed to fetch data:", error);
@@ -110,7 +108,7 @@ export class DynamicRouteGuard {
                     const collectedData = await this.extractAndManipulateData(settings?.options);
                     const path = settings.yGet.interpolate ? InterpolateService.suplant(settings.yGet.interpolate, this.dynamicService.interpolateData) : settings.yGet.path;
                     const res: any = await firstValueFrom(this.http.request('Yget', path, body));
-                    this.updateFormGroup(settings, collectedData, JSON.parse(res).structure || null);
+                    this.updateFormGroup(settings, collectedData, JSON.parse(res).structure || JSON.parse(res).item || null);
                     this.dynamicService.formGroupProvider.set(this.formGroup);
                     return true;
                   } catch (error) {
