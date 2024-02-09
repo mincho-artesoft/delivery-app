@@ -214,7 +214,7 @@ export class DynamicService {
     } else if (button.yPost.guid) {
       return button.yPost.path;
     } else {
-      return InterpolateService.suplant(button.yPost, this.interpolateData);
+      return InterpolateService.suplant(button.yPost.interpolate || button.yPost, this.interpolateData);
     }
   }
 
