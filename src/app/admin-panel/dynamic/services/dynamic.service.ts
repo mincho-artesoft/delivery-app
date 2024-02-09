@@ -122,7 +122,7 @@ export class DynamicService {
       }
     };
     if (button.deletePath.body) {
-      url = InterpolateService.suplant(button.deletePath.path, {...data.control, ...this});
+      url = InterpolateService.suplant(button.deletePath.path, { ...data.control, ...this });
       body.body[button.deletePath.body.prop] = InterpolateService.suplant(button.deletePath.body.interpolate, data.control)
     } else {
       url = InterpolateService.suplant(button.deletePath, data.control);
@@ -226,11 +226,18 @@ export class DynamicService {
         data: data
       }
     }
-    if (guid) {
-      body.body = {
-        ...data,
-        guid: guid
+    if (button.yPost.body) {
+      if (guid) {
+        body.body = {
+          ...data,
+          guid: guid
+        }
+      } else {
+        body.body = {
+          ...data
+        }
       }
+
     }
     if (button.createServices && !data._id) {
       const settings: any = ADMIN_PANEL_SETTINGS.pages;
