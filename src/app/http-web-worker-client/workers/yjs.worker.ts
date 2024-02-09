@@ -494,14 +494,14 @@ addEventListener('message', (req) => {
                 const type = settings.data;
 
                 if(type) {
-                  const values = dataMap.get(type + "Data");
+                  const values = dataMap.get(type + "Data") as any[];
                   if(!values) {
                     dataMap.set(type + "Data", [{ ...body, guid: generateGuid() }]);
                   } else {
-                    if(body._id) {
-                      const res = (values as any[]).filter((e: any) => e.guid != body._id);
-                      res.push(body);
-                      dataMap.set(type + "Data", res);
+                    if(body.guid) {
+                      const index = values.findIndex((e: any) => e.guid != body.guid);
+                      values.splice(index, 1, body);
+                      dataMap.set(type + "Data", values);
                     } else {
                       values.push({ ...body, guid: generateGuid() });
                       dataMap.set(type + "Data", values);
