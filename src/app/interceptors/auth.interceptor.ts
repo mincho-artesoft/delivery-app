@@ -22,24 +22,19 @@ export class AuthInterceptor implements HttpInterceptor {
     next: HttpHandler
   ): Observable<HttpEvent<unknown>> {
     const token = this.authService.getToken();
-    
+    let userID: string;
+
     if (token) {
-      const userID = this.authService.extractUserIdFromToken(token)
-      
-      request = request.clone({
-        setHeaders: {
-          Authorization: `Bearer ${userID}`,
-          "x-user-id": userID || "jnkqjndkjsbqshjdjhqbssqjjhqsbjd12311231"
-        }
-      });
-    } else {
-      request = request.clone({
-        setHeaders: {
-          Authorization: `Bearer asdasdasd`,
-          "x-user-id":  "jnkqjndkjsbqshjdjhqbasgsgs"
-        }
-      });
+      userID = this.authService.extractUserIdFromToken(token);
     }
+      
+    request = request.clone({
+      setHeaders: {
+        Authorization: `Bearer ${userID || this.uuid}`,
+        "x-user-id": userID || this.uuid
+      }
+    });
+   
 
     return next.handle(request).pipe(
       tap((event) => {

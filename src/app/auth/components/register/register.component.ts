@@ -1,11 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
-import { tap } from 'rxjs/operators';
-import { UserService } from '../../services/user.service';
-import { CustomValidators } from '../../_helpers/custom-validators';
+import { ActivatedRoute, Router } from '@angular/router';
+import { catchError, mergeMap, tap } from 'rxjs/operators';
 import { MatDialog } from '@angular/material/dialog';
 import { LoginComponent } from '../login/login.component';
+import { JwtHelperService } from '@auth0/angular-jwt';
+import { AuthService } from '../../services/auth.service';
+import { YjsService } from 'src/app/yjs.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { EMPTY } from 'rxjs';
 
 @Component({
   selector: 'app-register',
@@ -18,21 +21,32 @@ export class RegisterComponent implements OnInit {
 
   isLoading = false;
 
+  invitationToken = null;  
+
   constructor(
-    private userService: UserService,
+    private yjsService: YjsService,
+    private authService: AuthService,
     private router: Router,
+    private activatedRoute: ActivatedRoute,
+    private jwtService: JwtHelperService,
+    public formBuilder: FormBuilder,
     public dialog: MatDialog,
-    public formBuilder: FormBuilder
+    private snackbar: MatSnackBar
   ) { }
 
   ngOnInit() {
-    this.buildForm();
+    this.activatedRoute.queryParamMap.subscribe((res) => {
+      const token = res['params'].token;
+      this.invitationToken = this.jwtService.decodeToken(token);
+
+      this.buildForm();
+    });
   }
 
   private buildForm() {
     this.formRegister = this.formBuilder.group({
       id: new Date().valueOf().toString(),
-      email: new FormControl(''),
+      email: new FormControl(this.invitationToken?.email || ""),
       name: new FormControl(''),
       surName: new FormControl(''),
       lastName: new FormControl(''),
@@ -52,11 +66,13 @@ export class RegisterComponent implements OnInit {
   get addresses() {
     return this.addressForm.controls
   }
+
   setRole(){
     return this.formBuilder.group({
       role: ['']
     })
   }
+
   createAddressGrop() {
     return this.formBuilder.group({
       street: [''],
@@ -66,6 +82,7 @@ export class RegisterComponent implements OnInit {
       country: [''],
     })
   }
+
   addAddress() {
     const newAddress = this.formBuilder.group({
       street: [''],
@@ -76,20 +93,42 @@ export class RegisterComponent implements OnInit {
     })
     this.addressForm.push(newAddress)
   }
+
   register() {
     if(this.formRegister.valid) {
       this.isLoading = true;
-      this.userService.create(this.formRegister.value).pipe(
-        tap(() => this.router.navigate(['auth/login']))
-      ).subscribe({
-        next: (res: any) => {
+
+      const documentRequest = this.invitationToken ? mergeMap((res: any) => {
+        const user = this.jwtService.decodeToken(res.result.token);
+        this.invitationToken = null;
+        return this.authService.createYjsBackendDocument({ ...this.invitationToken, _id: user.user._id});
+      }) : tap((res) => res);
+
+      this.authService.register({...this.formRegister.value, roles: ["admin"]}).pipe(
+        mergeMap((res) => {
+          return this.authService.login(this.formRegister.value);
+        }),
+        documentRequest,
+        mergeMap(() => {
+          return this.yjsService.reconnect();
+        }),
+        catchError(e => {
+          console.log(e);
           this.isLoading = false;
-          this.router.navigate(['/'])
+          this.snackbar.open(`User could not be created, due to: ${e.error.response.message}`, 'Close', {
+            duration: 5000, horizontalPosition: 'right', verticalPosition: 'top'
+          })
+          return EMPTY;
+        })
+      ).subscribe({
+        next: (res) => {
+          this.isLoading = false;
+          this.router.navigate(['/']);
           console.log(res)
         },
-        error: (err: any) => {
-          this.isLoading = false;
+        error: (err) => {
           console.log(err);
+          this.isLoading = false;
         }
       });
     }

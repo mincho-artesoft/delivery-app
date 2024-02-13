@@ -1,8 +1,7 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, signal } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { Injectable } from '@angular/core';
 import { JwtHelperService } from '@auth0/angular-jwt';
-import { BehaviorSubject, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
 // import { ILoginResponce } from 'src/app/shared/interfaces/login-response.interface';
@@ -18,31 +17,29 @@ export class AuthService {
   currentUserId: any;
   constructor(
     private http: HttpClient,
-    private snackbar: MatSnackBar,
-    public jwtService: JwtHelperService
+    public jwtService: JwtHelperService,
   ) {}
+
+  register(user: any): Observable<any> {
+    // http://localhost:3000/api/user/register
+     return this.http.post<any>(`${environment.basePath}/register`, user);
+  }
 
   login(user: any): Observable<any> {
     console.log(environment.basePath, 'asdajnd lqihjwd');
 
     // return this.http.post<any>(`http://localhost:3000/api/user/login`, user).pipe(
-    return this.http
-      .post<any>(`${environment.basePath}/user/login`, user)
-      .pipe(
+    return this.http.post<any>(`${environment.basePath}/login`, user).pipe(
         tap((res: any) => {
           this.currentUserId = this.jwtService.decodeToken(res.result.token);
           console.log('this.currentUserId', this.currentUserId);
 
           // this.currentUser.set(this.jwtService.decodeToken(res.token).user as IUser);
-        }),
-        tap(() =>
-          this.snackbar.open('Login Successfull', 'Close', {
-            duration: 2000,
-            horizontalPosition: 'right',
-            verticalPosition: 'top',
-          })
-        )
-      );
+        }))
+  }
+
+  createYjsBackendDocument({ email, orgID, _id}) {
+    return this.http.post<any>("http://localhost:80/api/create-document", { email, orgID, _id });
   }
 
   handleLogin(account: any) {

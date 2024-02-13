@@ -23,9 +23,9 @@
         <mat-form-field appearance="outline" class="w100">
           <input type="password" matInput placeholder="password" formControlName="password">
         </mat-form-field>
-        <mat-form-field appearance="outline" class="w100">
+        <!-- <mat-form-field appearance="outline" class="w100">
           <input type="text" matInput placeholder="roles" formControlName="roles">
-        </mat-form-field>  
+        </mat-form-field>   -->
         <ng-container formArrayName="addresses" *ngFor="let address of addressForm.controls; let i = index">
           <ng-container [formGroupName]="i">
             <div class="w100">

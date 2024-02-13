@@ -1,6 +1,6 @@
 export const environment = {
     production: false,
-    basePath: 'https://p3ww1pxq5b.execute-api.eu-central-1.amazonaws.com/api/auth',
+    basePath: 'https://p3ww1pxq5b.execute-api.eu-central-1.amazonaws.com/api/auth/user',
     wsPath: 'wss://7at4z4syrf.execute-api.eu-central-1.amazonaws.com/dev',
     DBBaseUrl: '',
     build: 'prod',

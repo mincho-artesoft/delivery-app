@@ -13,10 +13,10 @@ interface IData {
   uuid: string;
 }
 
-let ydoc: Y.Doc;
+let ydoc: Y.Doc | null;
 let subdocsMap: Y.Map;
 let documentStructureMap: Y.Map;
-let provider: WebsocketProvider;
+let provider: WebsocketProvider | null;
 let providerIndexedDb: any;
 let isPending = false;
 let isDisconnected = false;
@@ -137,6 +137,38 @@ addEventListener('message', (req) => {
     initialUUID = data.uuid;
   }
   switch (data.method) {
+    case 'YRECONNECT': {
+      if(provider) {
+        provider.destroy();
+        provider = null;
+      }
+
+      if(ydoc) {
+        ydoc.destroy();
+        ydoc = null;
+      }
+
+      isPending = false;
+      init(pathParts[0], userID, (ydoc: Y.Doc) => {
+        let structure: any = {};
+
+        iterateDocument(ydoc, structure);
+        wholeStructure = structure;
+        let timeout;
+        docUpdateObserver(ydoc, () => {    
+          clearTimeout(timeout);
+          timeout = setTimeout(() => {
+            structure = {};
+            iterateDocument(ydoc, structure);
+            wholeStructure = structure;
+            postMessage({ type: 'yjs', response: JSON.stringify({ structure, uuid: initialUUID }) });
+          }, 200);
+        });
+
+        postMessage({ type: 'yjs', response: JSON.stringify({ structure, uuid: data.uuid }) });
+      });
+      break
+    }
     case 'YGET': {
       init(pathParts[0], userID, (ydoc: Y.Doc) => {
         let structure: any = {};
@@ -226,7 +258,7 @@ addEventListener('message', (req) => {
             if(body) {
               if(type) {
                 const mapData = dataMap.get(type + "Data") || [];
-                const item = mapData.find(i => i.guid == body._id);
+                const item = mapData.find(i => i._id == body._id);
 
                 postMessage({ 
                   type: 'yjs', 
@@ -309,14 +341,13 @@ addEventListener('message', (req) => {
           if(shouldBuildArray) {
             const [orgID, userID, _] = params.find((param) => param.includes("path")).split('=')[1].split(".");
             const profiles = Array.from((provider.subdocs as Map<any, any>).values()).filter((doc) => doc.guid.includes(orgID) && doc.guid.includes("profile"));
-            // teamSubdoc.getMap("data").set("profileData", data.body);
 
             let structure = [];
 
             const structureFunc = () => {
               const structure = [];
               profiles.forEach(profileDoc => {
-                const data = profileDoc.getMap("data").get("profileData");
+                const data = profileDoc.getMap("data").get("employeeData");
                 if(data) {
                   structure.push({ _id: profileDoc.guid, ...data});
                 }
@@ -448,70 +479,76 @@ addEventListener('message', (req) => {
             type: 'yjs',
             response: JSON.stringify({ uuid: data.uuid, action: "Successful added service!" })
           })
-        } else if (part == "services") {
+        } else if (part && part.includes("service")) {// create guid service in body 
           const guid = params ? params.find((param) => param.includes("path")).split('=')[1] : null;
-          
-          if(guid) {
-            const settings = JSON.parse(data.body);
-            if(guid.includes("service")) {
-              const service: Y.Doc = Array.from(provider.subdocs.values()).find((doc: Y.Doc) => doc.guid == guid);
+          const body = JSON.parse(data.body);
 
-              if(service) {
-                service.getMap("data").set("settings", settings);
+          if(guid) {
+            if(body.hasOwnProperty("guid")) {
+              const body = JSON.parse(data.body);
+              // const guid = body.guid;
+  
+              // if(guid) {
+                const serviceDoc: Y.Doc = Array.from(provider.subdocs.values()).find((doc: Y.Doc) => doc.guid == guid);
+  
+                if(serviceDoc) {
+                  const dataMap = serviceDoc.getMap("data");
+                  const settings = dataMap.get("settings").settings;
+  
+                  const type = settings.data;
+  
+                  if(type) {
+                    const values = dataMap.get(type + "Data") as any[];
+                    if(!values) {
+                      dataMap.set(type + "Data", [{ ...body, _id: generateGuid() }]);
+                    } else {
+                      if(body._id) {
+                        const index = values.findIndex((e: any) => e._id != body._id);
+                        values.splice(index, 1, body);
+                        dataMap.set(type + "Data", values);
+                      } else {
+                        values.push({ ...body, _id: generateGuid() });
+                        dataMap.set(type + "Data", values);
+                      }
+                    }
+                    postMessage({
+                      type: 'yjs',
+                      response: JSON.stringify({ uuid: data.uuid, action: "Successful added!" })
+                    });
+                  }
+                // }
+              } else {
                 
-                postMessage({
-                  type: 'yjs',
-                  response: JSON.stringify({ uuid: data.uuid, action: "Successful edited service!" })
-                });
               }
             } else {
-              const prefix = guid.split(".")[0];
-              const serviceDoc = new Y.Doc({ guid: `${generateGuid()}.${prefix}.service`});
-              
-              const organization: Y.Doc = Array.from(provider.subdocs.values()).find((doc: Y.Doc) => doc.guid == guid);
-              if(organization) {
-                organization.getMap("subdocs").set(serviceDoc.guid, serviceDoc);
-                setTimeout(() => {
-                  serviceDoc.getMap("data").set("settings", settings);
-                }, 200);
-                postMessage({
-                  type: 'yjs',
-                  response: JSON.stringify({ uuid: data.uuid, action: "Successful added service!" })
-                });
-              }
-            }
-          } else {
-            const body = JSON.parse(data.body);
-            const guid = body.guid;
+              const settings = JSON.parse(data.body);
 
-            if(guid) {
-              const serviceDoc: Y.Doc = Array.from(provider.subdocs.values()).find((doc: Y.Doc) => doc.guid == guid);
-
-              if(serviceDoc) {
-                const dataMap = serviceDoc.getMap("data");
-                const settings = dataMap.get("settings").settings;
-
-                const type = settings.data;
-
-                if(type) {
-                  const values = dataMap.get(type + "Data") as any[];
-                  if(!values) {
-                    dataMap.set(type + "Data", [{ ...body, guid: generateGuid() }]);
-                  } else {
-                    if(body.guid) {
-                      const index = values.findIndex((e: any) => e.guid != body.guid);
-                      values.splice(index, 1, body);
-                      dataMap.set(type + "Data", values);
-                    } else {
-                      values.push({ ...body, guid: generateGuid() });
-                      dataMap.set(type + "Data", values);
-                    }
-                  }
+              if(guid.endsWith("organization")) {
+                const prefix = guid.split(".")[0];
+                const serviceDoc = new Y.Doc({ guid: `${generateGuid()}.${prefix}.service`});
+                
+                const organization: Y.Doc = Array.from(provider.subdocs.values()).find((doc: Y.Doc) => doc.guid == guid);
+                if(organization) {
+                  organization.getMap("subdocs").set(serviceDoc.guid, serviceDoc);
+                  setTimeout(() => {
+                    serviceDoc.getMap("data").set("settings", settings);
+                  }, 200);
                   postMessage({
                     type: 'yjs',
-                    response: JSON.stringify({ uuid: data.uuid, action: "Successful added!" })
+                    response: JSON.stringify({ uuid: data.uuid, action: "Successful added service!" })
                   });
-                }
+              } else {
+                const service: Y.Doc = Array.from(provider.subdocs.values()).find((doc: Y.Doc) => doc.guid == guid);
+  
+                // if(service) {
+                  service.getMap("data").set("settings", settings);
+                  
+                  postMessage({
+                    type: 'yjs',
+                    response: JSON.stringify({ uuid: data.uuid, action: "Successful edited service!" })
+                  });
+                // }
+              }
               }
             }
           }

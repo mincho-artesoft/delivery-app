@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 import { tap } from 'rxjs/operators';
 import { AuthService } from '../../services/auth.service';
 import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 
 @Component({
@@ -25,18 +26,24 @@ export class LoginComponent {
   constructor(
     private authService: AuthService, 
     private router: Router,
-    public dialog: MatDialog
+    public dialog: MatDialog,
+    private snackbar: MatSnackBar
   ) { }
 
   togglePasswordVisibility() {
     this.isPasswordVisible = !this.isPasswordVisible;
   }
+  
   login() {
     if (this.form.valid) {
       this.isLoading = true;
       this.authService.login(this.form.value).subscribe({
-        next: (res: any) => {
-          console.log('res', res);
+        next: () => {
+          this.snackbar.open('Login Successfull', 'Close', {
+            duration: 2000,
+            horizontalPosition: 'right',
+            verticalPosition: 'top',
+          })
           this.isLoading = false;
           this.dialog.closeAll()
           this.router.navigate(['/']);
@@ -64,7 +71,6 @@ export class LoginComponent {
     //   console.log();
     //   localStorage.setItem("role", this.authService.authToken.user.role);
     // }, 1000)
-
   }
 
 }
