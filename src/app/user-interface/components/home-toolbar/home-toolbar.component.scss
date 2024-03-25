@@ -1,0 +1,73 @@
+/* Variables for colors, fonts, etc. */
+$background-color: rgba(255, 255, 255, 0.85); // white background
+$primary-color: #ff7900; // orange color for buttons and header
+$text-color: #333; // dark grey for text
+$toolbar-height: 60px; // Toolbar height
+
+/* ... other existing styles ... */
+
+/* Toolbar styles */
+.home-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: calc(100% - 4rem);
+    height: $toolbar-height;
+    padding: 0 2rem;
+    position: absolute;
+    top: 0;
+    z-index: 10; // Ensure the toolbar is above other elements
+    background-color: $background-color; // Semi-transparent background
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); // Soft shadow for depth
+
+    .logo {
+        font-size: 1.5rem;
+        color: $primary-color;
+        font-weight: bold;
+        text-transform: uppercase;
+        cursor: pointer;
+        // Add actual logo image styles if you have a logo
+    }
+
+    .navigation {
+        display: flex;
+        list-style: none; // Remove default list styling
+
+        li {
+            margin-left: 1rem; // Space out navigation items
+
+            a {
+                color: $text-color;
+                text-decoration: none; // No underline
+                padding: 0.5rem 1rem;
+                transition: color 0.3s;
+
+                &:hover {
+                    color: $primary-color;
+                }
+            }
+        }
+    }
+
+    .lang-container {
+        display: flex;
+        margin-left: auto;
+    }
+
+    .user-actions {
+        display: flex;
+
+        .action {
+            margin-left: 1rem;
+            cursor: pointer;
+            color: $text-color;
+            transition: color 0.3s;
+
+            &:hover {
+                color: $primary-color;
+            }
+
+            // Icon or text styles for user action buttons
+        }
+    }
+}

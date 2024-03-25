@@ -1,0 +1,70 @@
+.menu-toolbar {
+  padding: 10px;
+  background-color: rgba(255, 255, 255, 0.85); // Adjust the background color as needed
+
+  .categories,
+  .additional-tags {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px; // Adds space between the categories and tags for visual separation
+  }
+
+  .categories {
+    button {
+      width: 120px; // Fixed width for all buttons
+      margin: 0 5px;
+      padding: 10px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      text-align: center; // Ensure text is centered
+      overflow: hidden; // Prevents text from overflowing
+      text-overflow: ellipsis; // Adds an ellipsis for text that can't fit
+      white-space: nowrap; // Keeps text on a single line
+
+      &:hover,
+      &.active {
+        background-color: darken(#007bff, 10%);
+      }
+
+      &.active {
+        background-color: #28a745; // Active state color
+      }
+    }
+  }
+
+  .additional-tags button {
+    flex: 1;
+    margin: 0 5px;
+    padding: 10px;
+    background-color: #6c757d; // Secondary color for additional filters (tags)
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+
+    &:hover,
+    &.active {
+      background-color: darken(#6c757d, 10%);
+    }
+
+    &.active {
+      background-color: #28a745; // A different shade for active tags
+    }
+  }
+
+  .search-bar {
+    padding: 2.5px 10px;
+    width: 50%;
+    margin: auto;
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px; // Creates space between tags and the search bar
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+  }
+}

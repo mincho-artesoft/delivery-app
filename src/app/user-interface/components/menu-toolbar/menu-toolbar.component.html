@@ -1,0 +1,17 @@
+<div class="menu-toolbar">
+    <div class="categories">
+        <button *ngFor="let category of categories" (click)="onCategorySelect(category.tag)"
+            [class.active]="sharedService.isCategoryActive(category.tag)">
+            {{ category.label[sharedService.languageControl.value] }}
+        </button>
+    </div>
+    <div class="additional-tags">
+        <button *ngFor="let tag of additionalTags" (click)="onTagSelect(tag.tag)"
+            [class.active]="sharedService.isTagActive(tag.tag)">
+            {{ tag.label[sharedService.languageControl.value] }}
+        </button>
+    </div>
+    <div class="search-bar">
+        <input type="text" placeholder="Search..." [formControl]="searchControl">
+    </div>
+</div>

@@ -1,0 +1,26 @@
+<app-home-toolbar></app-home-toolbar>
+<div class="home-page">
+    <div class="header">
+        <div class="search-bar">
+            <mat-form-field appearance="outline" class="w100">
+                <mat-label>Choose your restaurant</mat-label>
+                <mat-select #matSelectElement [value]="sharedService.organizationControl.value" [multiple]="false"
+                    [formControl]="sharedService.organizationControl">
+                    <mat-option>
+                        <ngx-mat-select-search [formControl]="searchControl" placeholderLabel="Search..."
+                            noEntriesFoundLabel="Not found" [clearSearchInput]="true">
+                        </ngx-mat-select-search>
+                    </mat-option>
+
+                    <mat-option *ngFor="let option of (filteredOrganizations | async)" [value]="option.value || option">
+                        {{ option.name[sharedService.languageControl.value] }}
+                    </mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+        <app-menu-toolbar></app-menu-toolbar>
+    </div>
+    <div class="container">
+        <app-menu></app-menu>
+    </div>
+</div>

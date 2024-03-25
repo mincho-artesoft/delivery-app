@@ -1,0 +1,20 @@
+<div class="dish-cards">
+    <div class="card" *ngFor="let dish of filteredDishes | async">
+        <img src="{{ dish.imageUrl }}" alt="{{ dish.name[sharedService.languageControl.value] }}" class="card-image">
+        <div class="card-body">
+            <h5 class="card-title">{{ dish.name[sharedService.languageControl.value] }}</h5>
+            <p class="card-text">{{ dish.description }}</p>
+            <div class="quantity-controls">
+                <button class="quantity-btn" (click)="decreaseQuantity(dish)">
+                    <mat-icon>remove</mat-icon>
+                </button>
+                <span class="quantity">{{ dish.quantity || 0 }}</span>
+                <button class="quantity-btn" (click)="increaseQuantity(dish)">
+                    <mat-icon>add</mat-icon>
+                </button>
+            </div>
+            <button class="btn options-btn" (click)="openOptions(dish)">Options</button>
+            <button class="btn add-to-cart-btn" (click)="addToCart(dish)">Add to Cart</button>
+        </div>
+    </div>
+</div>

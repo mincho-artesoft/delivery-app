@@ -1,0 +1,26 @@
+<!-- Language Menu Container -->
+<div class="language-menu-container"  (click)="toggleLanguageMenu()">
+    <div class="language-toggle">
+        {{sharedService.languageControl.value}}
+    </div>
+</div>
+<div class="language-menu" [ngClass]="{'active': languageMenuVisible}" *ngIf="languageMenuVisible">
+    <div class="language-list">
+        <!-- Column 1 -->
+        <div class="language-column">
+            <div *ngFor="let lang of languages | slice:0:halfLength"
+                (click)="selectLanguage(lang.code); $event.stopPropagation()">
+                <!-- <img [src]="lang.flag" [alt]="lang.name" class="flag-icon">  -->
+                <span>{{ lang.name }}</span>
+            </div>
+        </div>
+        <!-- Column 2 -->
+        <div class="language-column">
+            <div *ngFor="let lang of languages | slice:halfLength"
+                (click)="selectLanguage(lang.code); $event.stopPropagation()">
+                <!-- <img [src]="lang.flag" [alt]="lang.name" class="flag-icon">  -->
+                <span>{{ lang.name }}</span>
+            </div>
+        </div>
+    </div>
+</div>

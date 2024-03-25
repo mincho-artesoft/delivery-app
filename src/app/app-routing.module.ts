@@ -4,8 +4,14 @@ import { CustomReuseStrategy } from './custom-reuse-strategy';
 import { UserProfileComponent } from './auth/components/user-profile/user-profile.component';
 import { RegisterComponent } from './auth/components/register/register.component';
 import { LoginComponent } from './auth/components/login/login.component';
+import { HomeComponent } from './user-interface/components/home/home.component';
 
 const routes: Routes = [
+  {
+    path: 'home',
+    pathMatch: 'full',
+    component: HomeComponent,
+  },
   {
     path: 'login',
     component: LoginComponent,
@@ -20,10 +26,10 @@ const routes: Routes = [
   },
   {
     path: '',
-    pathMatch: 'full',
-    loadChildren: () => import('./admin-panel/admin-panel-routing.module').then((m) => m.AdminPanelRoutingModule)
+    loadChildren: () => import('./admin-panel/admin-panel-routing.module').then(m => m.AdminPanelRoutingModule)
   },
 ];
+
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],

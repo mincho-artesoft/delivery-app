@@ -57,12 +57,17 @@
                     <div *ngSwitchCase="'dateEditor'" [ngStyle]="{'flex': '0 0 ' + ((+column.width + 'px') || '100%') }"
                         [className]="column.className">
                         <mat-form-field appearance="outline">
-                            <mat-label>Choose a date</mat-label>
+                            <mat-label>{{column.title}}</mat-label>
                             <input matInput [matDatepicker]="picker" [formControlName]="column.data">
                             <mat-hint>MM/DD/YYYY</mat-hint>
                             <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
                             <mat-datepicker #picker></mat-datepicker>
                         </mat-form-field>
+                    </div>
+
+                    <div *ngSwitchCase="'ScheduleEditor'" [ngStyle]="{'flex': '0 0 ' + ((+column.width + 'px') || '100%') }"
+                        [className]="column.className">
+                       <app-schedule-editor [cell]="column" [control]="column.control" [formGroup]="formGroup"></app-schedule-editor>
                     </div>
 
                     <div *ngSwitchCase="'hidden'" [ngStyle]="{'flex': '0 0 ' + ((+column.width + 'px') || '100%') }"

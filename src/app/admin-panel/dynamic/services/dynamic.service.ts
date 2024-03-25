@@ -200,10 +200,25 @@ export class DynamicService {
 
     const path = this.determinePathForSave(button);
     const body = this.constructRequestBody(button, control);
-    this.http.request('Ypost', path, body).subscribe({
-      next: (res: any) => { this.handleSaveResponse(res, button, control, body) },
-      error: (err) => console.error('Error on save:', err)
-    });
+    console.log(path, body)
+    if(path.startsWith('http')) {
+      this.http.post("http://localhost:80/api/invite-user", body.body).subscribe({
+        next: (res) => {
+          console.log(res);
+          
+        },
+        error: (err) => {
+          console.log(err);
+          
+        }
+      }) 
+    } else {
+      this.http.request('Ypost', path, body).subscribe({
+        next: (res: any) => { this.handleSaveResponse(res, button, control, body) },
+        error: (err) => console.error('Error on save:', err)
+      });
+    }
+   
   }
 
   private determinePathForSave(button: any): string {
@@ -219,14 +234,14 @@ export class DynamicService {
   }
 
   private constructRequestBody(button: any, control: any): any {
-    let guid = button.yPost.guid ? InterpolateService.suplant(button.yPost.guid, this.interpolateData) : null;
+    const guid = button.yPost.guid ? InterpolateService.suplant(button.yPost.guid, this) : null;
     const data = control.getRawValue();
     const body: any = {
       body: {
         data: data
       }
     }
-    if (button.yPost.body) {
+    if (button.yPost.body || guid) {
       if (guid) {
         body.body = {
           ...data,
@@ -302,11 +317,7 @@ export class DynamicService {
           this.toggleSidenav();
           break;
         case 'save':
-          if (button.addProduct) {
-            console.log('product add', dataContext)
-          }
           this.handleSaveAction(dataContext);
-
           break;
         default:
           console.warn('Action not recognized:', button.action);

@@ -1,0 +1,71 @@
+/* Variables */
+$primary-color: #ff7900; // example primary color
+$text-color: #333; // example text color
+$menu-background-color: #f8f8f8; // light grey background for the menu
+
+.language-menu-container {
+    position: relative;
+    display: inline-block;
+    width: 120px;
+    .language-toggle {
+        padding: 10px 20px;
+        cursor: pointer;
+        user-select: none;
+        background-color: transparent;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+
+}
+
+.language-menu {
+    display: none;
+    position: absolute;
+    top: 110%;
+    right: 1.5%;
+    background-color: $menu-background-color;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    width: 350px;
+    border-radius: 2.5px;
+
+    &.active {
+        display: block;
+    }
+
+    .language-list {
+        display: flex;
+        flex-wrap: wrap;
+        max-height: 400px;
+        overflow: auto;
+        .language-column {
+            flex: 50%;
+
+            div {
+                font-family: 'Arial', sans-serif;
+                padding: 10px;
+                display: flex;
+                align-items: center;
+                cursor: pointer;
+                transition: background-color 0.3s;
+
+                &:hover {
+                    background-color: darken($menu-background-color, 5%);
+                }
+
+                .flag-icon {
+                    width: 24px; // flag icon size
+                    height: 24px; // flag icon size
+                    margin-right: 10px;
+                }
+            }
+        }
+    }
+}
+
+// Style for when the language menu is visible
+.language-menu-container.active {
+    display: block;
+}

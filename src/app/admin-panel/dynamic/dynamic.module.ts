@@ -24,6 +24,7 @@ import { InputEditorComponent } from './components/custom-editors/input-editor/i
 import { FastEditorComponent } from './components/custom-editors/fast-editor/fast-editor.component';
 import { DynamicWrapperComponent } from './components/dynamic-wrapper/dynamic-wrapper.component';
 import { CustomSnackbarComponent } from './components/widgets/custom-snackbar/custom-snackbar.component';
+import { ScheduleEditorComponent } from './components/custom-editors/schedule-editor/schedule-editor.component';
 
 
 
@@ -48,6 +49,7 @@ import { CustomSnackbarComponent } from './components/widgets/custom-snackbar/cu
     FastEditorComponent,
     DynamicWrapperComponent,
     CustomSnackbarComponent,
+    ScheduleEditorComponent,
   ],
   exports: [
     DynamicComponent,

@@ -43,39 +43,41 @@ export class DynamicTableComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
 
-ngOnInit(): void {
-  this.settings = this.formArray.htmlSettings;
-  if (this.settings) {
-    this.table = this.dynamicService.selectedOrganization.valueChanges.pipe(
-      startWith(this.dynamicService.selectedOrganization.value), 
-      switchMap(selectedOrganization => {
-        const path = this.settings.yGet.interpolate ? 
-          InterpolateService.suplant(this.settings.yGet.interpolate, this.dynamicService) : 
-          this.settings.yGet.path;
+  ngOnInit(): void {
+    this.settings = this.formArray.htmlSettings;
+    if (this.settings) {
+      this.table = this.dynamicService.selectedOrganization.valueChanges.pipe(
+        startWith(this.dynamicService.selectedOrganization.value),
+        switchMap(selectedOrganization => {
+          this.dynamicService.interpolateData.selectedOrganization = selectedOrganization;
+          const path = this.settings.yGet.interpolate ?
+            InterpolateService.suplant(this.settings.yGet.interpolate, this.dynamicService.interpolateData) :
+            this.settings.yGet.path;
+            console.log(path)
+          return this.http.request('Yget', path).pipe(
+            map((res: any) => {
+              const data = JSON.parse(res).structure || JSON.parse(res);
+              console.log(data)
+              this.formArray.fillFormWithResponse(data);
+              this.dataSource = new MatTableDataSource((this.formArray as FormArray).controls);
 
-        return this.http.request('Yget', path).pipe(
-          map((res: any) => {
-            const data = JSON.parse(res).structure || JSON.parse(res);
-            this.formArray.fillFormWithResponse(data);
-            this.dataSource = new MatTableDataSource((this.formArray as FormArray).controls);
+              this.dataSource.data.forEach((ctrl: any) => {
+                ctrl.addControl('uid', new FormControl(this.generateRandomId(10)), { emitEvent: false });
+              });
 
-            this.dataSource.data.forEach((ctrl: any) => {
-              ctrl.addControl('uid', new FormControl(this.generateRandomId(10)), { emitEvent: false });
-            });
+              this.syncContainerWidths();
+              this.syncCellWidths();
 
-            this.syncContainerWidths();
-            this.syncCellWidths();
-
-            return {
-              displayedColumns: this.settings.columns,
-              dataHolder: [...this.dataSource.data]
-            };
-          })
-        );
-      })
-    );
+              return {
+                displayedColumns: this.settings.columns,
+                dataHolder: [...this.dataSource.data]
+              };
+            })
+          );
+        })
+      );
+    }
   }
-}
 
   sortData(event: any) {
     const sortField = event.active;

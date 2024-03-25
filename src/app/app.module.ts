@@ -13,6 +13,7 @@ import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { AuthModule } from './auth/auth.module';
 import { YjsService } from './yjs.service';
 import { TokenIInterceptor } from './interceptors/token.interceptor';
+import { BaseUiModule } from './user-interface/base-ui.module';
 
 export function tokenGetter() {
   return localStorage.getItem("jwt_token");
@@ -33,7 +34,8 @@ export function tokenGetter() {
       }
     }),
     HttpWebWorkerClientModule.forRoot({ baseUrl: 'ws://localhost:9182', ignorePath: '/options' }),
-    AuthModule
+    AuthModule,
+    BaseUiModule
   ],
   providers: [
     {

@@ -9,7 +9,6 @@ import { BaseExtendedFormArray } from "../dynamic/extends/base-extended-form-arr
 import { InterpolateService } from "../dynamic/services/interpolate.service";
 import { YjsService } from "src/app/yjs.service";
 import { MatSnackBar } from "@angular/material/snack-bar";
-import { ADMIN_PANEL_SETTINGS } from "../admin-panel-settings";
 
 @Injectable({
   providedIn: 'root'
@@ -46,9 +45,9 @@ export class DynamicRouteGuard {
       if (!searchPath.includes('organizations')) {
         setTimeout(() => {
           this.snackbar.open('You must create at least 1 organization', 'Close', {
-            duration: 4000, horizontalPosition: 'right', verticalPosition: 'top'
+            duration: 3000, horizontalPosition: 'right', verticalPosition: 'top'
           });
-        }, 1500);
+        });
         return this.router.parseUrl('/organizations/edit');
       } else {
         if (!this.dynamicService.redirected) {
@@ -82,7 +81,7 @@ export class DynamicRouteGuard {
           return this.router.parseUrl(primary ?? '');
         }
 
-        if (id || secondary === 'edit') {
+        if (id || secondary) {
           if (id) {
             const body = {
               body: {}
@@ -250,10 +249,10 @@ export class DynamicRouteGuard {
 
   private getDefaultLanguages() {
     return [
-      { code: 'IN', name: 'India', flag: '../../../assets/images/IN.svg' },
-      { code: 'US', name: 'United States', flag: '../../../assets/images/US.svg' },
-      { code: 'GB-ENG', name: 'England', flag: '../../../assets/images/US.svg' },
-      { code: 'NL', name: 'Netherlands', flag: '../../../assets/images/NL.svg' },
+      { code: 'BG', name: 'Bulgarian', flag: '../../../assets/images/BG.svg' },
+      { code: 'EN', name: 'English', flag: '../../../assets/images/EN.svg' },
+      { code: 'FR', name: 'French', flag: '../../../assets/images/FR.svg' },
+      { code: 'IT', name: 'Italian', flag: '../../../assets/images/IT.svg' },
     ];
   }
 

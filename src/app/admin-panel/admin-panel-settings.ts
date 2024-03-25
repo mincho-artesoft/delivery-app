@@ -1,5 +1,103 @@
 export const ADMIN_PANEL_SETTINGS = {
   pages: [
+    // HUMAN RESOURCES
+    {
+      path: 'humanResources',
+      title: 'Human Resources',
+      className: 'col-2xl-2 col-md-6 col-xs-11',
+      yGet: { interpolate: '/profiles?path=${selectedOrganization._id}' },
+      separator: null,
+      showHeaders: true,
+      navbar: {
+        buttons: [
+          {
+            label: 'Add user',
+            action: 'create',
+            path: 'humanResources.addUser',
+            openSidenav: true,
+            color: 'accent',
+            active: true,
+            icon: 'add_box'
+          },
+          {
+            label: 'Delete',
+            action: 'delete',
+            active: true,
+            icon: 'delete',
+            color: 'warn',
+            deletePath: { path: '/services?path=${serviceGuid}', body: { interpolate: '${controls.guid.value}', prop: '_id' } },
+            confirmation: {
+              title: 'Confirm Delete',
+              interpolate: 'Are you sure you want to delete ${controls.name.value}?',
+              width: 500,
+              cancelText: 'Cancel',
+              confirmText: 'OK',
+            },
+            snackbarMessage: {
+              interpolate: 'Product with ${controls.name.value} was successfully deleted',
+              duration: 2500,
+              horizontal: 'right',
+              vertical: 'bottom'
+            }
+          }
+        ],
+      },
+      columns: [
+        {
+          data: 'email',
+          title: 'Email',
+          readOnly: true
+        },
+        {
+          data: 'name',
+          title: 'Name'
+        },
+        {
+          data: 'surName',
+          title: 'Surname'
+        },
+        {
+          data: 'lastName',
+          title: 'Last name'
+        },
+
+      ]
+    },
+    {
+      path: 'humanResources.addUser',
+      title: 'Human Resources',
+      className: 'col-2xl-2 col-md-6 col-xs-11',
+      yGet: { interpolate: '/service?path=${serviceGuid}' },
+      separator: null,
+      showHeaders: true,
+      navbar: {
+        reversed: true,
+        buttons: [
+          {
+            label: 'Close',
+            action: 'close',
+            icon: 'close',
+            active: true
+          },
+          {
+            label: 'Save',
+            action: 'save',
+            icon: 'check',
+            active: true,
+            yPost: { path: 'http://localhost:80/api/invite-user', guid: '${selectedOrganization.value._id}' },
+            addUser: true
+          },
+        ]
+      },
+      columns: [
+        {
+          data: 'email',
+          title: 'Email',
+        },
+      ]
+    },
+
+    // MANAGE COOKING
     {
       path: 'manageCooking',
       title: 'Manage your recipes',
@@ -127,6 +225,11 @@ export const ADMIN_PANEL_SETTINGS = {
       },
       columns: [
         {
+          data: 'language',
+          default: 'BG',
+          editor: 'hidden'
+        },
+        {
           data: 'guid',
           title: 'Id',
           className: 'col-2xl-12 col-md-12 col-xs-12',
@@ -134,9 +237,19 @@ export const ADMIN_PANEL_SETTINGS = {
 
         },
         {
+          data: 'languages',
+          showTabs: true,
+          editor: 'multiLang',
+        },
+        {
           data: 'name',
-          title: 'Recipe name',
-          className: 'col-2xl-12 col-md-12 col-xs-12'
+          title: 'Name',
+          controlType: 'BaseExtendedFormGroup',
+          className: 'col-2xl-6 col-md-6 col-xs-12',
+          validators: [
+            { name: 'required' },
+          ],
+          editor: 'langLinked'
         },
         {
           data: 'description',
@@ -144,15 +257,186 @@ export const ADMIN_PANEL_SETTINGS = {
           className: 'col-2xl-12 col-md-12 col-xs-12'
         },
         {
-          data: 'schedule',
-          title: "Schedule",
-          className: 'col-2xl-12 col-md-12 col-xs-12'
-        },
-        {
           data: 'expiration',
           title: 'Expiration',
           className: 'col-2xl-6 col-md-6 col-xs-12',
           editor: 'dateEditor'
+        },
+        {
+          data: 'tags',
+          className: 'col-2xl-6 col-md-6 col-xs-12',
+          title: 'Tags',
+          default: [],
+          editor: 'chipListEditor'
+        },
+        {
+          data: 'active',
+          className: 'col-2xl-6 col-md-6 col-xs-12',
+          title: 'Is active',
+          default: true,
+          editor: 'toggleButton'
+        },
+        {
+          data: 'schedule',
+          className: 'col-2xl-12 col-md-12 col-xs-12 no-side-pading',
+          editor: 'ScheduleEditor',
+          controlType: 'BaseExtendedFormGroup',
+          columns: [
+            {
+              data: 'days',
+              title: 'Days',
+              selectOptions: [
+                { value: 'Monday', name: 'Monday' },
+                { value: 'Tuesday', name: 'Tuesday' },
+                { value: 'Wednesday', name: 'Wednesday' },
+                { value: 'Thursday', name: 'Thursday' },
+                { value: 'Friday', name: 'Friday' },
+                { value: 'Saturday', name: 'Saturday' },
+                { value: 'Sunday', name: 'Sunday' }
+              ],
+              controlType: 'DropdownControl',
+              editor: 'dropdownEditor',
+              className: 'col-2xl-8 col-md-8 col-xs-12'
+            },
+            {
+              data: 'startTime',
+              title: 'From',
+              className: 'col-2xl-8 col-md-8 col-xs-12'
+            },
+            {
+              data: 'endTime',
+              title: 'To',
+              className: 'col-2xl-8 col-md-8 col-xs-12'
+            }
+          ]
+        },
+        {
+          data: 'categories',
+          title: 'Categories',
+          langLinked: true,
+          multiple: true,
+          selectOptions: [
+            {
+              "label": {
+                "BG": "Предястия",
+                "FR": "Entrées",
+                "EN": "Appetizers",
+                "IT": "Antipasti"
+              },
+              "value": "appetizers",
+            },
+            {
+              "label": {
+                "BG": "Салати",
+                "FR": "Salades",
+                "EN": "Salads",
+                "IT": "Insalate"
+              },
+              "value": "salads",
+            },
+            {
+              "label": {
+                "BG": "Супи",
+                "FR": "Soupes",
+                "EN": "Soups",
+                "IT": "Zuppe"
+              },
+              "value": "soups",
+            },
+            {
+              "label": {
+                "BG": "Основни ястия",
+                "FR": "Plats principaux",
+                "EN": "Main Courses",
+                "IT": "Piatti principali"
+              },
+              "value": "main_courses",
+            },
+            {
+              "label": {
+                "BG": "Вегетариански",
+                "FR": "Végétarien",
+                "EN": "Vegetarian",
+                "IT": "Vegetariano"
+              },
+              "value": "vegetarian",
+            },
+            {
+              "label": {
+                "BG": "Веган",
+                "FR": "Végétalien",
+                "EN": "Vegan",
+                "IT": "Vegano"
+              },
+              "value": "vegan",
+            },
+            {
+              "label": {
+                "BG": "Морски дарове",
+                "FR": "Fruits de mer",
+                "EN": "Seafood",
+                "IT": "Frutti di mare"
+              },
+              "value": "seafood",
+            },
+            {
+              "label": {
+                "BG": "Стекове",
+                "FR": "Steaks",
+                "EN": "Steaks",
+                "IT": "Bistecche"
+              },
+              "value": "steaks",
+            },
+            {
+              "label": {
+                "BG": "Паста",
+                "FR": "Pâtes",
+                "EN": "Pasta",
+                "IT": "Pasta"
+              },
+              "value": "pasta",
+            },
+            {
+              "label": {
+                "BG": "Десерти",
+                "FR": "Desserts",
+                "EN": "Desserts",
+                "IT": "Dolci"
+              },
+              "value": "desserts",
+            },
+            {
+              "label": {
+                "BG": "Специалитети",
+                "FR": "Spécialités",
+                "EN": "Specials",
+                "IT": "Specialità"
+              },
+              "value": "specials",
+            },
+            {
+              "label": {
+                "BG": "Детско меню",
+                "FR": "Menu enfant",
+                "EN": "Kids Menu",
+                "IT": "Menu bambini"
+              },
+              "value": "kids_menu",
+            },
+            {
+              "label": {
+                "BG": "Без глутен",
+                "FR": "Sans gluten",
+                "EN": "Gluten-Free",
+                "IT": "Senza glutine"
+              },
+              "value": "gluten_free",
+            }
+          ],
+          controlType: 'DropdownControl',
+          editor: 'dropdownEditor',
+          className: 'col-2xl-8 col-md-8 col-xs-12'
         },
         {
           data: 'products',
@@ -525,7 +809,7 @@ export const ADMIN_PANEL_SETTINGS = {
       columns: [
         {
           data: 'language',
-          default: 'IN',
+          default: 'BG',
           editor: 'hidden'
         },
         {

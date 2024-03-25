@@ -2,21 +2,19 @@
   <mat-form-field appearance="outline" class="w100">
     <mat-label>{{cellControl.cell.title}}</mat-label>
     <mat-select #matSelectElement (openedChange)="onOpenedChange($event)" (selectionChange)="onSelectionChange($event)"
-                [(value)]="selectedOptions" [multiple]="cellControl.cell.multiple"
-                [formControl]="cellControl">
+      [(value)]="selectedOptions" [multiple]="cellControl.cell.multiple" [formControl]="cellControl">
 
       <mat-option>
-        <ngx-mat-select-search [formControl]="searchControl"
-                               placeholderLabel="Search..." noEntriesFoundLabel="Not found">
+        <ngx-mat-select-search [formControl]="searchControl" placeholderLabel="Search..."
+          noEntriesFoundLabel="Not found">
         </ngx-mat-select-search>
       </mat-option>
 
       <ng-container *ngIf="cellControl.cell.group">
         <mat-optgroup *ngFor="let group of (cellControl.options | async)" [label]="group.name"
-                      [disabled]="group.disabled" class="group-label">
+          [disabled]="group.disabled" class="group-label">
           <mat-radio-group class="radio-group">
-            <mat-radio-button *ngFor="let option of group.options" [value]="option"
-                              class="custom-checkbox">
+            <mat-radio-button *ngFor="let option of group.options" [value]="option" class="custom-checkbox">
               {{ option.name }}
             </mat-radio-button>
           </mat-radio-group>
@@ -25,7 +23,12 @@
 
       <ng-container *ngIf="!cellControl.cell.group">
         <mat-option *ngFor="let option of (cellControl.options | async)" [value]="option.value || option">
-          {{ option.name }}
+          <span *ngIf="cellControl.cell.langLinked; else notLangLinked">
+            {{ (option.label || option.name)[cellControl.root.get('language').value] }}
+          </span>
+          <ng-template #notLangLinked>
+            <span>{{ option.label || option.name }}</span>
+          </ng-template>
         </mat-option>
       </ng-container>
     </mat-select>
